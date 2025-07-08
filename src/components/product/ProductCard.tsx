@@ -1,4 +1,3 @@
-// components/ProductCard.tsx
 "use client";
 
 import React, { useState } from 'react';
@@ -36,7 +35,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, addToCart, bu
 
   return (
     <Card className="overflow-hidden shadow-md transition-shadow hover:shadow-lg flex flex-col">
-      <Link href={`/products/${product.slug}`} aria-label={`Lihat detail untuk ${product.name}`}>
+      <Link href={`/product/${product.slug}`} aria-label={`Lihat detail untuk ${product.name}`}>
         <div className="relative w-full h-48">
           <Image 
             src={product.image} 
@@ -50,7 +49,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, addToCart, bu
       
       <CardHeader>
         <CardTitle className="truncate">
-          <Link href={`/products/${product.slug}`} className="hover:underline">
+          <Link href={`/product/${product.slug}`} className="hover:underline">
             {product.name}
           </Link>
         </CardTitle>

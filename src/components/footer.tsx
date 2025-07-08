@@ -174,24 +174,24 @@ const Footer = () => {
           © {new Date().getFullYear()} RUIND EDU-COMMERCE. All rights reserved.
         </p>
         <div className="flex space-x-6 text-sm">
-          <a 
+          <Link 
             href="/privacy" 
             className="text-gray-600 hover:text-orange-950 hover:underline hover:underline-offset-4 transition-all duration-200 ease-in-out"
           >
             Privacy Policy
-          </a>
-          <a 
+          </Link>
+          <Link 
             href="/terms" 
             className="text-gray-600 hover:text-orange-950 hover:underline hover:underline-offset-4 transition-all duration-200 ease-in-out"
           >
             Terms of Service
-          </a>
-          <a 
+          </Link>
+          <Link 
             href="/cookies" 
             className="text-gray-600 hover:text-orange-950 hover:underline hover:underline-offset-4 transition-all duration-200 ease-in-out"
           >
             Cookies Settings
-          </a>
+          </Link>
         </div>
       </div>
     </footer>

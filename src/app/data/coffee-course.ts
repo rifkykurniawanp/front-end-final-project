@@ -3,6 +3,7 @@ import { Coffee } from "lucide-react";
 
 export const coffeeCourse: Course = {
   id: "coffee-expert",
+  slug: "coffee-expert",
   title: "Coffee Expert: Bean to Barista",
   description: "Master coffee brewing, understand bean origins, and learn professional barista techniques.",
   instructor: "Marco Rodriguez",
@@ -44,6 +45,7 @@ export const coffeeCourse: Course = {
   modules: [
     {
       id: "coffee-origins",
+      slug: "coffee-origins",
       title: "Coffee Origins & Processing",
       description: "Understand coffee bean varieties and how they're processed from plant to green bean.",
       duration: "140 min",
@@ -51,6 +53,7 @@ export const coffeeCourse: Course = {
       lessons: [
         {
           id: "coffee-1",
+          slug: "coffee-plant-biology",
           title: "Coffee Plant Biology",
           description: "Explore the anatomy and botany of coffee plants and how they impact flavor.",
           duration: "25 min",
@@ -64,6 +67,7 @@ export const coffeeCourse: Course = {
         },
         {
           id: "coffee-2",
+          slug: "arabica-vs-robusta",
           title: "Arabica vs Robusta",
           description: "Learn the differences in flavor, caffeine, and cultivation between Arabica and Robusta beans.",
           duration: "20 min",
@@ -74,6 +78,7 @@ export const coffeeCourse: Course = {
         },
         {
           id: "coffee-3",
+          slug: "coffee-growing-regions",
           title: "Coffee Growing Regions",
           description: "Explore key coffee-producing regions and how terroir influences flavor.",
           duration: "35 min",
@@ -85,6 +90,7 @@ export const coffeeCourse: Course = {
         },
         {
           id: "coffee-4",
+          slug: "processing-methods",
           title: "Processing Methods",
           description: "Understand wet, dry, and honey processes and their impact on bean quality.",
           duration: "30 min",
@@ -96,6 +102,7 @@ export const coffeeCourse: Course = {
         },
         {
           id: "coffee-5",
+          slug: "cupping-and-tasting",
           title: "Cupping and Tasting",
           description: "Learn the standardized cupping protocol to evaluate coffee quality.",
           duration: "30 min",
@@ -108,6 +115,7 @@ export const coffeeCourse: Course = {
     },
     {
       id: "coffee-roasting",
+      slug: "coffee-roasting",
       title: "Roasting Fundamentals",
       description: "Learn how roasting transforms green beans into flavorful brews.",
       duration: "180 min",
@@ -116,6 +124,7 @@ export const coffeeCourse: Course = {
       lessons: [
         {
           id: "coffee-6",
+          slug: "roasting-basics",
           title: "Roasting Basics",
           description: "Get introduced to the roasting process and essential chemistry.",
           duration: "30 min",
@@ -127,6 +136,7 @@ export const coffeeCourse: Course = {
         },
         {
           id: "coffee-7",
+          slug: "roast-levels-explained",
           title: "Roast Levels Explained",
           description: "Understand the spectrum from light to dark roasts and their flavor implications.",
           duration: "25 min",
@@ -137,6 +147,7 @@ export const coffeeCourse: Course = {
         },
         {
           id: "coffee-8",
+          slug: "home-roasting-techniques",
           title: "Home Roasting Techniques",
           description: "Try roasting at home using simple equipment.",
           duration: "40 min",
@@ -147,6 +158,7 @@ export const coffeeCourse: Course = {
         },
         {
           id: "coffee-9",
+          slug: "professional-roasting",
           title: "Professional Roasting",
           description: "Explore roasting on commercial machines with profiling.",
           duration: "45 min",
@@ -158,12 +170,13 @@ export const coffeeCourse: Course = {
         },
         {
           id: "coffee-10",
+          slug: "roasting-profile-quiz",
           title: "Roasting Profile Quiz",
           description: "Test your knowledge of roasting concepts and terminology.",
           duration: "40 min",
           completed: false,
           type: "quiz",
-          questions: [
+          quiz: [
             {
               id: "q1",
               question: "What chemical process contributes to flavor development during roasting?",

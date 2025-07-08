@@ -1,9 +1,17 @@
 // data/products.ts
 import { Product } from '@/types/product';
+function generateSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+}
 
 export const teaIngredients: Product[] = [
   {
-    id: 'tea-001',
+   id: 'tea-001',
+    slug: generateSlug('Earl Grey Premium'),
     name: 'Earl Grey Premium',
     description: 'Teh hitam klasik dengan aroma bergamot yang menyegarkan',
     price: 125000,
@@ -20,7 +28,8 @@ export const teaIngredients: Product[] = [
     brewingMethod: ['hot', 'cold']
   },
   {
-    id: 'tea-002',
+   id: 'tea-002',
+    slug: generateSlug('Jasmine Green Tea'),
     name: 'Jasmine Green Tea',
     description: 'Teh hijau dengan bunga melati yang harum dan menenangkan',
     price: 98000,
@@ -37,7 +46,8 @@ export const teaIngredients: Product[] = [
     brewingMethod: ['hot', 'cold']
   },
   {
-    id: 'tea-003',
+     id: 'tea-003',
+    slug: generateSlug('Chamomile Tea'),
     name: 'Chamomile Tea',
     description: 'Teh herbal chamomile untuk relaksasi dan tidur yang nyenyak',
     price: 85000,
@@ -58,6 +68,7 @@ export const teaIngredients: Product[] = [
 export const teaTools: Product[] = [
   {
     id: 'tea-tool-001',
+    slug: generateSlug('Glass Teapot with Infuser'),
     name: 'Glass Teapot with Infuser',
     description: 'Teko kaca premium dengan saringan stainless steel',
     price: 280000,
@@ -72,6 +83,7 @@ export const teaTools: Product[] = [
   },
   {
     id: 'tea-tool-002',
+    slug: generateSlug('Bamboo Tea Strainer'),
     name: 'Bamboo Tea Strainer',
     description: 'Saringan teh dari bambu natural untuk pengalaman tradisional',
     price: 45000,
@@ -88,6 +100,7 @@ export const teaTools: Product[] = [
 export const coffeeIngredients: Product[] = [
   {
     id: 'coffee-001',
+    slug: generateSlug('Ethiopian Yirgacheffe'),
     name: 'Ethiopian Yirgacheffe',
     description: 'Kopi single origin dengan rasa fruity dan floral yang kompleks',
     price: 165000,
@@ -106,6 +119,7 @@ export const coffeeIngredients: Product[] = [
   },
   {
     id: 'coffee-002',
+    slug: generateSlug('Colombian Supremo'),
     name: 'Colombian Supremo',
     description: 'Kopi Colombia dengan body yang seimbang dan rasa cokelat',
     price: 145000,
@@ -123,7 +137,8 @@ export const coffeeIngredients: Product[] = [
     brewingMethod: ['espresso', 'drip', 'french-press']
   },
   {
-    id: 'coffee-003',
+     id: 'coffee-003',
+    slug: generateSlug('Java Robusta'),
     name: 'Java Robusta',
     description: 'Kopi robusta dari Jawa dengan rasa yang kuat dan bold',
     price: 95000,
@@ -145,6 +160,7 @@ export const coffeeIngredients: Product[] = [
 export const coffeeTools: Product[] = [
   {
     id: 'coffee-tool-001',
+    slug: generateSlug('V60 Dripper Set'),
     name: 'V60 Dripper Set',
     description: 'Set lengkap V60 dengan server dan filter untuk pour over',
     price: 320000,
@@ -159,6 +175,7 @@ export const coffeeTools: Product[] = [
   },
   {
     id: 'coffee-tool-002',
+    slug: generateSlug('French Press 350ml'),
     name: 'French Press 350ml',
     description: 'French press dengan konstruksi stainless steel yang tahan lama',
     price: 185000,
@@ -173,6 +190,7 @@ export const coffeeTools: Product[] = [
   },
   {
     id: 'coffee-tool-003',
+    slug: generateSlug('Manual Coffee Grinder'),
     name: 'Manual Coffee Grinder',
     description: 'Grinder manual dengan burr ceramic untuk hasil yang konsisten',
     price: 275000,
@@ -189,6 +207,7 @@ export const coffeeTools: Product[] = [
 export const herbalIngredients: Product[] = [
   {
     id: 'herbal-001',
+    slug: generateSlug('Lemon Balm'),
     name: 'Lemon Balm',
     description: 'Daun lemon balm kering untuk teh herbal yang menenangkan',
     price: 75000,
@@ -206,6 +225,7 @@ export const herbalIngredients: Product[] = [
   },
   {
     id: 'herbal-002',
+    slug: generateSlug('Peppermint Leaves'),
     name: 'Peppermint Leaves',
     description: 'Daun peppermint segar untuk minuman herbal yang menyegarkan',
     price: 65000,
@@ -223,6 +243,7 @@ export const herbalIngredients: Product[] = [
   },
   {
     id: 'herbal-003',
+    slug: generateSlug('Ginger Root'),
     name: 'Ginger Root',
     description: 'Jahe kering berkualitas tinggi untuk minuman hangat yang menyehatkan',
     price: 55000,
@@ -243,6 +264,7 @@ export const herbalIngredients: Product[] = [
 export const herbalTools: Product[] = [
   {
     id: 'herbal-tool-001',
+    slug: generateSlug('Herbal Tea Infuser Ball'),
     name: 'Herbal Tea Infuser Ball',
     description: 'Bola infuser stainless steel untuk menyeduh teh herbal',
     price: 35000,
@@ -256,6 +278,7 @@ export const herbalTools: Product[] = [
   },
   {
     id: 'herbal-tool-002',
+    slug: generateSlug('Mortar and Pestle Set'),
     name: 'Mortar and Pestle Set',
     description: 'Set lumpang dan alu dari batu granit untuk menggiling herbal',
     price: 125000,
@@ -271,7 +294,8 @@ export const herbalTools: Product[] = [
 
 export const supportTools: Product[] = [
   {
-    id: 'support-001',
+     id: 'support-001',
+    slug: generateSlug('Digital Scale'),
     name: 'Digital Scale',
     description: 'Timbangan digital presisi untuk mengukur bahan dengan akurat',
     price: 195000,
@@ -285,6 +309,7 @@ export const supportTools: Product[] = [
   },
   {
     id: 'support-002',
+    slug: generateSlug('Gooseneck Kettle'),
     name: 'Gooseneck Kettle',
     description: 'Ketel leher angsa untuk kontrol tuang yang presisi',
     price: 285000,
@@ -298,6 +323,7 @@ export const supportTools: Product[] = [
   },
   {
     id: 'support-003',
+    slug: generateSlug('Temperature Thermometer'),
     name: 'Temperature Thermometer',
     description: 'Termometer digital untuk mengukur suhu air dengan akurat',
     price: 85000,
@@ -314,6 +340,7 @@ export const supportTools: Product[] = [
 export const supportIngredients: Product[] = [
   {
     id: 'support-ing-001',
+    slug: generateSlug('Organic Honey'),
     name: 'Organic Honey',
     description: 'Madu organik murni sebagai pemanis alami untuk teh dan herbal',
     price: 95000,
@@ -328,6 +355,7 @@ export const supportIngredients: Product[] = [
   },
   {
     id: 'support-ing-002',
+    slug: generateSlug('Coconut Sugar'),
     name: 'Coconut Sugar',
     description: 'Gula kelapa organik sebagai alternatif pemanis yang sehat',
     price: 45000,
@@ -342,6 +370,7 @@ export const supportIngredients: Product[] = [
   },
   {
     id: 'support-ing-003',
+    slug: generateSlug('Cinnamon Sticks'),
     name: 'Cinnamon Sticks',
     description: 'Batang kayu manis berkualitas tinggi untuk menambah aroma',
     price: 65000,

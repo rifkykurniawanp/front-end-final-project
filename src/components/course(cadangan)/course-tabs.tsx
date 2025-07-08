@@ -152,75 +152,88 @@ export function CourseTabs({
         </div>
 
         {/* Main Content */}
-        <div className="lg:col-span-3">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-xl">
-                    {
-                      selectedCourse.modules.find((m) => m.id === selectedModule)?.title
-                    }
-                  </CardTitle>
-                  <CardDescription>
-                    {
-                      selectedCourse.modules.find((m) => m.id === selectedModule)?.description
-                    }
-                  </CardDescription>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm text-slate-600">Instructor</div>
-                  <div className="font-medium">{selectedCourse.instructor}</div>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {selectedCourse.modules
-                  .find((m) => m.id === selectedModule)
-                  ?.lessons.map((lesson) => (
-                    <div
-                      key={lesson.id}
-                      className={`p-4 rounded-lg border transition-all hover:shadow-sm ${
-                        lesson.completed
-                          ? "bg-green-50 border-green-200"
-                          : "bg-white border-slate-200 hover:border-slate-300"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="text-2xl">{getLessonIcon(lesson.type)}</div>
-                          <div>
-                            <h4 className="font-medium">{lesson.title}</h4>
-                            <div className="flex items-center gap-2 text-sm text-slate-600">
-                              <Clock className="w-4 h-4" />
-                              <span>{lesson.duration}</span>
-                              <Badge variant="outline" className="text-xs">
-                                {lesson.type}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {lesson.completed && (
-                            <Badge variant="default" className="bg-green-500">
-                              Completed
-                            </Badge>
-                          )}
-                          <Button
-                            variant={lesson.completed ? "outline" : "default"}
-                            size="sm"
-                          >
-                            {lesson.completed ? "Review" : "Start"}
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </CardContent>
-          </Card>
+<div className="lg:col-span-3 space-y-6">
+  {/* Card Module Content */}
+  <Card>
+    <CardHeader>
+      <div className="flex items-center justify-between">
+        <div>
+          <CardTitle className="text-xl">
+            {selectedCourse.modules.find((m) => m.id === selectedModule)?.title}
+          </CardTitle>
+          <CardDescription>
+            {selectedCourse.modules.find((m) => m.id === selectedModule)?.description}
+          </CardDescription>
         </div>
+        <div className="text-right">
+          <div className="text-sm text-slate-600">Instructor</div>
+          <div className="font-medium">{selectedCourse.instructor}</div>
+        </div>
+      </div>
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-3">
+        {selectedCourse.modules
+          .find((m) => m.id === selectedModule)
+          ?.lessons.map((lesson) => (
+            <div
+              key={lesson.id}
+              className={`p-4 rounded-lg border transition-all hover:shadow-sm ${
+                lesson.completed
+                  ? "bg-green-50 border-green-200"
+                  : "bg-white border-slate-200 hover:border-slate-300"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="text-2xl">{getLessonIcon(lesson.type)}</div>
+                  <div>
+                    <h4 className="font-medium">{lesson.title}</h4>
+                    <div className="flex items-center gap-2 text-sm text-slate-600">
+                      <Clock className="w-4 h-4" />
+                      <span>{lesson.duration}</span>
+                      <Badge variant="outline" className="text-xs">
+                        {lesson.type}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-slate-500 mt-1">
+                      {lesson.content || "No description available for this session."}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {lesson.completed && (
+                    <Badge variant="default" className="bg-green-500">
+                      Completed
+                    </Badge>
+                  )}
+                  <Button
+                    variant={lesson.completed ? "outline" : "default"}
+                    size="sm"
+                  >
+                    {lesson.completed ? "Review" : "Start"}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
+      </div>
+    </CardContent>
+  </Card>
+
+  {/* Instructor Section */}
+  <Card>
+    <CardHeader>
+      <CardTitle>About the Instructor</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <p className="text-sm text-slate-700 whitespace-pre-line">
+        {selectedCourse.instructorBio || "No bio available for this instructor."}
+      </p>
+    </CardContent>
+  </Card>
+</div>
+
       </div>
     </>
   );

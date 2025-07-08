@@ -1,5 +1,5 @@
 import React from 'react';
-import { legalLinks } from './data'; // Impor data link legal
+import { legalLinks } from './data';
 
 export const FooterLegal = () => (
   <div className="mt-12 pt-8 border-t border-gray-200 flex flex-col sm:flex-row sm:justify-between items-center space-y-4 sm:space-y-0">

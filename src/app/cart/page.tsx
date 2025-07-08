@@ -1,10 +1,9 @@
-
 "use client";
 
 import React from "react";
 import { useCart } from "@/hooks/useCart";
 import Image from "next/image";
-import Link from "next/link"; // Pastikan Link sudah diimpor
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
@@ -23,7 +22,7 @@ const CartPage = () => {
     return (
       <div className="p-8 text-center">
         <h1 className="text-2xl font-bold mb-4">Keranjang Anda Kosong</h1>
-        <Link href="/product">
+        <Link href="/products">
           <Button variant="outline">Kembali ke Produk</Button>
         </Link>
       </div>
@@ -43,16 +42,12 @@ const CartPage = () => {
             className="rounded-md object-cover"
           />
           <CardContent className="flex-1 p-4 space-y-2">
-            
-            {/* --- PERUBAHAN DI SINI --- */}
-            <Link href={`/products/${product.slug}`} legacyBehavior>
+            <Link href={`/product/${product.slug}`} legacyBehavior>
               <a className="hover:underline">
                 <h2 className="text-lg font-semibold">{product.name}</h2>
               </a>
             </Link>
-            {/* ------------------------- */}
-            
-            <p className="text-sm text-gray-600">{product.description}</p> {/* Deskripsi bisa opsional */}
+            <p className="text-sm text-gray-600">{product.description}</p>
             <p className="text-primary font-bold">{formatCurrency(product.price)}</p>
             <div className="flex items-center gap-2">
               <Button
@@ -94,7 +89,9 @@ const CartPage = () => {
           <Button variant="outline" onClick={clearCart}>
             Hapus Semua
           </Button>
-          <Button>Checkout</Button>
+          <Link href="/checkout">
+            <Button>Checkout</Button>
+          </Link>
         </div>
       </div>
     </div>

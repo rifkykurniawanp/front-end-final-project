@@ -3,13 +3,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ChevronRight, Users, BookOpen, ShoppingBag, Star, Zap, Globe, TrendingUp, Play, CheckCircle, ArrowRight } from 'lucide-react';
 import { cva, type VariantProps } from "class-variance-authority";
 import { ButtonProps, CardProps, TabsProps, TabsListProps, TabsTriggerProps, TabsContentProps, AnimatedSectionProps, TeamMember, Feature, Stat } from "@/types/about";
-// Utility for merging Tailwind classes
 const cn = (...inputs: (string | undefined | null | boolean)[]): string => {
-    // A simplified version of the 'cn' utility for this self-contained component
     return inputs.filter(Boolean).join(' ');
 };
 
-// Button Component
 const buttonVariants = cva(
     "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
     {
@@ -47,7 +44,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 Button.displayName = "Button";
 
-// Card Components
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
     ({ className, ...props }, ref) => (
         <div
@@ -66,7 +62,6 @@ const CardContent = React.forwardRef<HTMLDivElement, CardProps>(
 );
 CardContent.displayName = "CardContent";
 
-// Tabs Components
 const Tabs: React.FC<TabsProps> = ({ children }) => <div>{children}</div>;
 
 const TabsList = React.forwardRef<HTMLDivElement, TabsListProps>(
@@ -174,7 +169,6 @@ const stats: Stat[] = [
     { number: "180+", label: "Negara Terjangkau", icon: <Globe className="w-6 h-6" /> },
 ];
 
-// --- Reusable Animated Section Wrapper ---
 const AnimatedSection: React.FC<AnimatedSectionProps> = ({ children, id }) => {
     const ref = useRef<HTMLElement>(null);
     const [isVisible, setIsVisible] = useState<boolean>(false);
@@ -213,7 +207,6 @@ const AnimatedSection: React.FC<AnimatedSectionProps> = ({ children, id }) => {
     );
 };
 
-// --- Main Page Component ---
 const AboutPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'mission' | 'vision' | 'values'>('mission');
 
@@ -221,11 +214,9 @@ const AboutPage: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 text-gray-800 font-sans">
-            {/* Subtle background pattern */}
             <div className="absolute inset-0 h-full w-full bg-white bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:32px_32px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] -z-10"></div>
             
             <div className="relative z-10">
-                {/* Hero Section */}
                 <section className="pt-24 pb-32 px-4">
                     <div className="max-w-7xl mx-auto text-center">
                         <div className="inline-flex items-center px-4 py-2 bg-gray-100 rounded-full border border-gray-200 mb-8 animate-fade-in-up">
@@ -281,7 +272,6 @@ const AboutPage: React.FC = () => {
                     </div>
                 </AnimatedSection>
 
-                {/* Mission/Vision Section */}
                 <AnimatedSection id="mission-vision">
                     <div className="py-20 px-4">
                         <div className="max-w-7xl mx-auto">
@@ -346,7 +336,6 @@ const AboutPage: React.FC = () => {
                     </div>
                 </AnimatedSection>
 
-                {/* Features Section */}
                 <AnimatedSection id="features">
                     <div className="py-20 px-4 bg-white">
                         <div className="max-w-7xl mx-auto">
@@ -372,7 +361,6 @@ const AboutPage: React.FC = () => {
                     </div>
                 </AnimatedSection>
 
-                {/* Team Section */}
                 <AnimatedSection id="team">
                     <div className="py-20 px-4">
                         <div className="max-w-7xl mx-auto">

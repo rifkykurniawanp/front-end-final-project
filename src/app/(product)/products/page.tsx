@@ -4,7 +4,7 @@ import React, { useState, useMemo, FC } from "react";
 import { useRouter } from 'next/navigation';
 import { FilterSidebar } from "@/components/product/FilterSideBar";
 import { ProductGrid } from "@/components/product/ProductGrid";
-import { allProducts } from "../data/product";
+import { allProducts } from "../../data/product";
 import { useCart } from "@/hooks/useCart";
 import { FilterState, Product } from "@/types/product";
 

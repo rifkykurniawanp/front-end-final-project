@@ -36,7 +36,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
 
   return (
     <div className="container mx-auto max-w-5xl py-8 px-4">
-       <Link href="/product" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6">
+       <Link href="/products" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Kembali ke semua produk
        </Link>

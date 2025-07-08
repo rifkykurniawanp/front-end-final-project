@@ -2,7 +2,7 @@ import React from 'react';
 import { FooterBrand } from './FooterBrand';
 import { FooterLinkGrid } from './FooterLinkGrid';
 import { FooterLegal } from './Footerlegal';
-import { cn } from '@/lib/utils'; // Opsional: utilitas untuk class name
+import { cn } from '@/lib/utils';
 
 interface FooterProps {
   className?: string;

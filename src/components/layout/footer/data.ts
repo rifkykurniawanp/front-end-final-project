@@ -1,27 +1,37 @@
-import { TwitterIcon, InstagramIcon, LinkedinIcon, GithubIcon } from '@/components/icons/index';
+import { Twitter, Instagram, Linkedin, Github } from 'lucide-react';
 
-export const socialLinks = [
+export const SocialLinks = [
   {
     href: "https://twitter.com/teacoffeehub",
-    icon: TwitterIcon,
-    label: "Twitter"
+    icon: Twitter,
+    label: "Twitter",
+    color: "hover:text-blue-400",
+    bgColor: "hover:bg-blue-50",
   },
   {
     href: "https://instagram.com/teacoffeehub",
-    icon: InstagramIcon,
-    label: "Instagram"
+    icon: Instagram,
+    label: "Instagram",
+    color: "hover:text-pink-500",
+    bgColor: "hover:bg-pink-50",
   },
   {
     href: "https://linkedin.com/company/teacoffeehub",
-    icon: LinkedinIcon,
-    label: "LinkedIn"
+    icon: Linkedin,
+    label: "LinkedIn",
+    color: "hover:text-blue-600",
+    bgColor: "hover:bg-blue-50",
   },
   {
     href: "https://github.com/teacoffeehub",
-    icon: GithubIcon,
-    label: "GitHub"
+    icon: Github,
+    label: "GitHub",
+    color: "hover:text-gray-800",
+    bgColor: "hover:bg-gray-50",
   },
 ];
+
+
 
 export const linkSections = [
   {
@@ -86,54 +96,4 @@ export const legalLinks = [
   { name: 'Syarat & Ketentuan', href: '/terms' },
   { name: 'Kebijakan Refund', href: '/refund' },
   { name: 'Pengaturan Cookie', href: '/cookies' },
-];
-
-// Featured bundles for footer highlights
-export const featuredBundles = [
-  {
-    name: 'Tea Starter Kit',
-    description: 'Perfect untuk pemula tea lover',
-    originalPrice: 'Rp 299.000',
-    bundlePrice: 'Rp 199.000',
-    href: '/bundles/tea-starter',
-    badge: 'HEMAT 33%'
-  },
-  {
-    name: 'Coffee Master Set',
-    description: 'Lengkap dengan kursus barista',
-    originalPrice: 'Rp 899.000',
-    bundlePrice: 'Rp 649.000',
-    href: '/bundles/coffee-master',
-    badge: 'TERLARIS'
-  },
-  {
-    name: 'Wellness Bundle',
-    description: 'Herbal + konsultasi kesehatan',
-    originalPrice: 'Rp 599.000',
-    bundlePrice: 'Rp 399.000',
-    href: '/bundles/wellness',
-    badge: 'REKOMENDASI'
-  }
-];
-
-// Quick access links for footer
-export const quickLinks = [
-  { name: 'Lacak Pesanan', href: '/track-order' },
-  { name: 'Gratis Ongkir', href: '/free-shipping' },
-  { name: 'Program Affiliasi', href: '/affiliate' },
-  { name: 'Poin Reward', href: '/rewards' },
-];
-
-// Newsletter signup data
-export const newsletterInfo = {
-  title: 'Dapatkan Tips & Promo Terbaru',
-  description: 'Berlangganan newsletter untuk tips brewing, resep baru, dan penawaran eksklusif',
-  placeholder: 'Masukkan email Anda...',
-  buttonText: 'Berlangganan',
-  benefits: [
-    'Tips brewing mingguan',
-    'Promo eksklusif member',
-    'Akses early bird kursus baru',
-    'Resep signature drink'
-  ]
-};
+]

@@ -1,10 +1,10 @@
-// data/tea-course.ts
-import { Course, Module, Lesson } from '@/types/course'
+import { Course, Module, Lesson } from '@/types/course';
 
 const teaLessons: { [moduleId: string]: Lesson[] } = {
   'tea-basics': [
     {
       id: 'tea-1',
+      slug: 'introduction-to-tea',
       title: 'Introduction to Tea',
       description: 'Learn about the history and cultural significance of tea around the world',
       duration: '15 min',
@@ -18,6 +18,7 @@ const teaLessons: { [moduleId: string]: Lesson[] } = {
     },
     {
       id: 'tea-2',
+      slug: 'tea-processing-methods',
       title: 'Tea Processing Methods',
       description: 'Understanding how tea leaves are processed to create different types',
       duration: '20 min',
@@ -31,6 +32,7 @@ const teaLessons: { [moduleId: string]: Lesson[] } = {
     },
     {
       id: 'tea-3',
+      slug: 'green-vs-black-tea',
       title: 'Green Tea vs Black Tea',
       description: 'Compare and contrast the characteristics of green and black teas',
       duration: '25 min',
@@ -42,6 +44,7 @@ const teaLessons: { [moduleId: string]: Lesson[] } = {
     },
     {
       id: 'tea-4',
+      slug: 'tea-tasting-basics',
       title: 'Tea Tasting Basics',
       description: 'Practice identifying different tea characteristics through tasting',
       duration: '30 min',
@@ -55,6 +58,7 @@ const teaLessons: { [moduleId: string]: Lesson[] } = {
   'tea-varieties': [
     {
       id: 'tea-5',
+      slug: 'chinese-tea-traditions',
       title: 'Chinese Tea Traditions',
       description: 'Explore the rich history and varieties of Chinese tea culture',
       duration: '30 min',
@@ -67,6 +71,7 @@ const teaLessons: { [moduleId: string]: Lesson[] } = {
     },
     {
       id: 'tea-6',
+      slug: 'japanese-tea-ceremony',
       title: 'Japanese Tea Ceremony',
       description: 'Learn about the philosophical and cultural aspects of Japanese tea ceremony',
       duration: '25 min',
@@ -79,17 +84,19 @@ const teaLessons: { [moduleId: string]: Lesson[] } = {
     },
     {
       id: 'tea-7',
+      slug: 'indian-tea-gardens',
       title: 'Indian Tea Gardens',
       description: 'Discover the famous tea growing regions of India',
       duration: '35 min',
       completed: false,
       type: 'reading',
-      content: 'India produces some of the world\'s finest teas in regions like Darjeeling...',
+      content: "India produces some of the world's finest teas in regions like Darjeeling...",
       bookmarked: false,
       notes: ''
     },
     {
       id: 'tea-8',
+      slug: 'earl-grey-english-blends',
       title: 'Earl Grey and English Blends',
       description: 'Understanding British tea culture and popular blends',
       duration: '30 min',
@@ -104,6 +111,7 @@ const teaLessons: { [moduleId: string]: Lesson[] } = {
   'tea-brewing': [
     {
       id: 'tea-9',
+      slug: 'water-temperature-guide',
       title: 'Water Temperature Guide',
       description: 'Learn the optimal water temperatures for different tea types',
       duration: '20 min',
@@ -116,6 +124,7 @@ const teaLessons: { [moduleId: string]: Lesson[] } = {
     },
     {
       id: 'tea-10',
+      slug: 'steeping-time-mastery',
       title: 'Steeping Time Mastery',
       description: 'Practice timing your tea steeping for optimal flavor',
       duration: '25 min',
@@ -127,6 +136,7 @@ const teaLessons: { [moduleId: string]: Lesson[] } = {
     },
     {
       id: 'tea-11',
+      slug: 'tea-equipment-essentials',
       title: 'Tea Equipment Essentials',
       description: 'Overview of essential tea brewing equipment and tools',
       duration: '30 min',
@@ -138,6 +148,7 @@ const teaLessons: { [moduleId: string]: Lesson[] } = {
     },
     {
       id: 'tea-12',
+      slug: 'advanced-brewing-methods',
       title: 'Advanced Brewing Methods',
       description: 'Master advanced techniques like gongfu brewing and cold brewing',
       duration: '45 min',
@@ -150,12 +161,13 @@ const teaLessons: { [moduleId: string]: Lesson[] } = {
     },
     {
       id: 'tea-13',
+      slug: 'tea-brewing-assessment',
       title: 'Tea Brewing Assessment',
       description: 'Test your knowledge of tea brewing techniques',
       duration: '30 min',
       completed: false,
       type: 'quiz',
-      questions: [
+      quiz: [
         {
           id: 'q1',
           question: 'What is the optimal water temperature for green tea?',
@@ -175,18 +187,19 @@ const teaLessons: { [moduleId: string]: Lesson[] } = {
           question: 'Which brewing method uses multiple short steeps?',
           options: ['Western brewing', 'Gongfu brewing', 'Cold brewing', 'Sun brewing'],
           correctAnswer: 1,
-          explanation: 'Gongfu brewing uses multiple short steeps to explore the tea\'s flavor evolution.'
+          explanation: "Gongfu brewing uses multiple short steeps to explore the tea's flavor evolution."
         }
       ],
       bookmarked: false,
       notes: ''
     }
   ]
-}
+};
 
 const teaModules: Module[] = [
   {
     id: 'tea-basics',
+    slug: 'tea-basics',
     title: 'Tea Fundamentals',
     description: 'Learn the basics of tea types and processing methods',
     duration: '90 min',
@@ -195,6 +208,7 @@ const teaModules: Module[] = [
   },
   {
     id: 'tea-varieties',
+    slug: 'tea-varieties',
     title: 'Tea Varieties Around the World',
     description: 'Explore different tea varieties from various regions',
     duration: '120 min',
@@ -204,6 +218,7 @@ const teaModules: Module[] = [
   },
   {
     id: 'tea-brewing',
+    slug: 'tea-brewing',
     title: 'Perfect Brewing Techniques',
     description: 'Master the art of brewing different types of tea',
     duration: '150 min',
@@ -211,10 +226,11 @@ const teaModules: Module[] = [
     lessons: teaLessons['tea-brewing'],
     prerequisites: ['tea-basics', 'tea-varieties']
   }
-]
+];
 
 export const teaCourse: Course = {
   id: 'tea-mastery',
+  slug: 'tea-mastery',
   title: 'Tea Mastery: From Leaf to Cup',
   description: 'Comprehensive guide to understanding tea varieties, brewing techniques, and tea culture from around the world.',
   instructor: 'Sarah Chen',
@@ -253,4 +269,4 @@ export const teaCourse: Course = {
   language: 'English',
   lastUpdated: new Date('2024-01-01'),
   certificate: true
-}
+};

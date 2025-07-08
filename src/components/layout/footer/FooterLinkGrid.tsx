@@ -1,5 +1,5 @@
 import React from 'react';
-import { linkSections } from './data'; // Impor data link
+import { linkSections } from './data';
 
 const FooterLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
   <li>

@@ -1,15 +1,23 @@
 "use client";
-import React from 'react';
-import { Filter, Search } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
-import { FilterState } from '@/types/product';
+import React, { useState } from "react";
+import { Filter, Search } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+
+import { FilterState } from "@/types/product";
 
 interface FilterSidebarProps {
   filters: FilterState;
@@ -24,17 +32,17 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   searchTerm,
   setSearchTerm,
   updateFilter,
-  resetFilters
+  resetFilters,
 }) => {
-  const categories = ['tea', 'coffee', 'herbal'];
-  const subcategories = ['ingredient', 'tool', 'support'];
+  const categories = ["tea", "coffee", "herbal"];
+  const subcategories = ["ingredient", "tool", "support"];
 
-  return (
-    <Card>
+  const FilterForm = (
+    <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Filter className="w-5 h-5" />
-          Filter
+          Filter Produk
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -64,13 +72,15 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                   checked={filters.category.includes(category)}
                   onCheckedChange={(checked) => {
                     if (checked) {
-                      updateFilter('category', [...filters.category, category]);
+                      updateFilter("category", [...filters.category, category]);
                     } else {
-                      updateFilter('category', filters.category.filter(c => c !== category));
+                      updateFilter("category", filters.category.filter((c) => c !== category));
                     }
                   }}
                 />
-                <Label htmlFor={category} className="capitalize">{category}</Label>
+                <Label htmlFor={category} className="capitalize">
+                  {category}
+                </Label>
               </div>
             ))}
           </div>
@@ -87,14 +97,14 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                   checked={filters.subcategory.includes(subcategory)}
                   onCheckedChange={(checked) => {
                     if (checked) {
-                      updateFilter('subcategory', [...filters.subcategory, subcategory]);
+                      updateFilter("subcategory", [...filters.subcategory, subcategory]);
                     } else {
-                      updateFilter('subcategory', filters.subcategory.filter(s => s !== subcategory));
+                      updateFilter("subcategory", filters.subcategory.filter((s) => s !== subcategory));
                     }
                   }}
                 />
                 <Label htmlFor={subcategory} className="capitalize">
-                  {subcategory === 'ingredient' ? 'Bahan' : subcategory === 'tool' ? 'Alat' : 'Penunjang'}
+                  {subcategory === "ingredient" ? "Bahan" : subcategory === "tool" ? "Alat" : "Penunjang"}
                 </Label>
               </div>
             ))}
@@ -106,14 +116,24 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           <Label>Kisaran Harga</Label>
           <Slider
             value={filters.priceRange}
-            onValueChange={(value) => updateFilter('priceRange', value as [number, number])}
+            onValueChange={(value) => updateFilter("priceRange", value as [number, number])}
             max={500000}
             step={10000}
             className="mt-2"
           />
           <div className="flex justify-between text-sm text-gray-600 mt-1">
-            <span>{filters.priceRange[0].toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</span>
-            <span>{filters.priceRange[1].toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</span>
+            <span>
+              {filters.priceRange[0].toLocaleString("id-ID", {
+                style: "currency",
+                currency: "IDR",
+              })}
+            </span>
+            <span>
+              {filters.priceRange[1].toLocaleString("id-ID", {
+                style: "currency",
+                currency: "IDR",
+              })}
+            </span>
           </div>
         </div>
 
@@ -122,10 +142,10 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           <Label>Rating Minimum</Label>
           <Select
             value={filters.rating.toString()}
-            onValueChange={(val) => updateFilter('rating', Number(val))}
+            onValueChange={(val) => updateFilter("rating", Number(val))}
           >
             <SelectTrigger>
-              <SelectValue />
+              <SelectValue placeholder="Pilih rating" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="0">Semua Rating</SelectItem>
@@ -141,5 +161,36 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
         </Button>
       </CardContent>
     </Card>
+  );
+
+  return (
+    <div className="mb-4">
+      {/* Mobile View */}
+      <div className="block md:hidden">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="outline" className="w-full mb-2">
+              <Filter className="mr-2 h-4 w-4" />
+              Tampilkan Filter
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="overflow-auto w-80">
+            <SheetHeader>
+              <SheetTitle className="text-lg font-semibold flex items-center gap-2">
+                <Filter className="w-5 h-5" />
+                Filter Produk
+              </SheetTitle>
+            </SheetHeader>
+
+            <div className="mt-4">
+              {FilterForm}
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      {/* Desktop View */}
+      <div className="hidden md:block w-full md:w-64">{FilterForm}</div>
+    </div>
   );
 };

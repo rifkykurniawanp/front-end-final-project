@@ -4,17 +4,18 @@ import { allProducts } from '@/app/data/product';
 import { Product } from '@/types/product';
 import { ProductDetailClient } from '@/components/product/ProductDetailClient';
 
-async function getProductById(id: string): Promise<Product | undefined> {
-  return allProducts.find(product => product.id === id); 
+async function getProductBySlug(slug: string): Promise<Product | undefined> {
+  return allProducts.find(product => product.slug === slug);
 }
 
 interface ProductPageProps {
-  params: { id: string };
+  params: Promise<{ slug: string }>; // Changed: params is now a Promise
 }
 
-const ProductPage = async ({ params }: ProductPageProps) => {
-  const { id } = params;
-  const product = await getProductById(id);
+const ProductPage = async (props: ProductPageProps) => {
+  const { slug } = await props.params; // Changed: await the params
+
+  const product = await getProductBySlug(slug);
 
   if (!product) {
     notFound();
