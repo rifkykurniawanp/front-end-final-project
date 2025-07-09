@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import type { User as UserType } from '@/types'; // Rename import
+import type { User as UserType } from '@/types/header'; // Rename import
 
 interface ProfileDropdownProps {
   user: UserType;

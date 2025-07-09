@@ -1,12 +1,11 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { DollarSign, Users, ShoppingCart, Activity } from 'lucide-react';
 import { StatCard } from '../shared/stat-card';
 import { ChartCard } from '../shared/chart-card';
 import { CrudTable } from '../shared/crud-table';
 import { DataService } from '@/app/data/dashboard';
-
 
 export const AdminDashboard: React.FC = () => {
   const users = DataService.getUsers();
@@ -56,15 +55,35 @@ export const AdminDashboard: React.FC = () => {
           className="lg:col-span-4"
         >
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={salesData} margin={{ bottom: 20 }}>
-              <CartesianGrid strokeDasharray="3 3" />
+            <AreaChart data={salesData} margin={{ bottom: 20 }}>
               <XAxis dataKey="name" tickLine={false} axisLine={false} />
               <YAxis tickFormatter={v => `Rp${v/1000}K`} tickLine={false} axisLine={false} />
               <Tooltip />
-              <Legend />
-              <Bar dataKey="courses" name="Courses" fill="hsl(var(--primary))" radius={[4,4,0,0]} />
-              <Bar dataKey="products" name="Products" fill="hsl(var(--secondary))" radius={[4,4,0,0]} />
-            </BarChart>
+              <Area
+                type="monotone"
+                dataKey="courses"
+                stroke="#f59e0b"
+                fill="url(#coursesGradient)"
+                name="Courses"
+              />
+              <Area
+                type="monotone"
+                dataKey="products"
+                stroke="#eab308"
+                fill="url(#productsGradient)"
+                name="Products"
+              />
+              <defs>
+                <linearGradient id="coursesGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="productsGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#eab308" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#eab308" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+            </AreaChart>
           </ResponsiveContainer>
         </ChartCard>
 
@@ -100,7 +119,7 @@ export const AdminDashboard: React.FC = () => {
           <TabsTrigger value="courses">Courses</TabsTrigger>
           <TabsTrigger value="products">Products</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="students">
           <CrudTable title="Manage Students" data={users.students} columns={userColumns} />
         </TabsContent>

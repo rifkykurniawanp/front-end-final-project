@@ -5,7 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import type { Notification } from '@/types'; // Impor dari types
+import type { Notification } from '@/types/header'; // Impor dari types
 
 interface NotificationPopoverProps {
   notifications: Notification[];

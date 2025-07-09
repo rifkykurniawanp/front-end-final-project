@@ -1,21 +1,20 @@
+'use client';
+
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
-import { BookOpen, ShoppingCart, User, GraduationCap, Award } from 'lucide-react';
+import { ShoppingCart, User, GraduationCap, Award, BookOpen } from 'lucide-react';
+import MyCoursePage from '@/app/(course)/components/MyCourse';
 
 export const UserDashboard: React.FC = () => {
   const profile = { name: 'Ahmad Wijaya', email: 'ahmad@example.com', joined: '12 Jan 2024' };
-  const activeCourses = [
-    { title: 'Tea Brewing Excellence', progress: 75, instructor: 'Master Chen' },
-    { title: 'Barista Professional', progress: 45, instructor: 'Sarah Williams' }
-  ];
+
   const orders = [
     { id: 'ORD-12389', name: 'Premium Green Tea', status: 'Shipped', date: '28 Jun 2024' },
-    { id: 'ORD-12390', name: 'Arabica Coffee Beans', status: 'Processing', date: '01 Jul 2024' }
+    { id: 'ORD-12390', name: 'Arabica Coffee Beans', status: 'Processing', date: '01 Jul 2024' },
   ];
 
   return (
@@ -39,27 +38,7 @@ export const UserDashboard: React.FC = () => {
         </TabsList>
 
         <TabsContent value="courses" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Continue Learning</CardTitle>
-              <CardDescription>Pick up where you left off</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {activeCourses.map((course, i) => (
-                <div key={i} className="p-4 border rounded-lg bg-muted/40">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <h4 className="font-semibold">{course.title}</h4>
-                      <p className="text-sm text-muted-foreground">by {course.instructor}</p>
-                    </div>
-                    <Button size="sm">Continue</Button>
-                  </div>
-                  <Progress value={course.progress} className="h-2 mb-2" />
-                  <span className="text-sm text-muted-foreground">{course.progress}% Complete</span>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+          <MyCoursePage />
         </TabsContent>
 
         <TabsContent value="products" className="mt-4">
@@ -79,7 +58,7 @@ export const UserDashboard: React.FC = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {orders.map(order => (
+                  {orders.map((order) => (
                     <TableRow key={order.id}>
                       <TableCell className="font-medium">{order.id}</TableCell>
                       <TableCell>{order.name}</TableCell>

@@ -12,8 +12,9 @@ interface SectionListProps {
 export function SectionList({ course }: SectionListProps) {
   const router = useRouter();
 
-  const handleLessonClick = (lessonId: string) => {
-    router.push(`/lesson/${lessonId}`);
+  const handleLessonClick = (lesson: Lesson) => {
+    // Fixed: Use the same URL pattern as in CourseDetailPage
+    router.push(`/course/${course.slug}/${lesson.slug}`);
   };
 
   const getLessonIcon = (lessonType: string) => {
@@ -96,7 +97,7 @@ export function SectionList({ course }: SectionListProps) {
                   </div>
 
                   <Button
-                    onClick={() => handleLessonClick(lesson.id)}
+                    onClick={() => handleLessonClick(lesson)}
                     variant="outline"
                     size="sm"
                     className="flex-shrink-0"

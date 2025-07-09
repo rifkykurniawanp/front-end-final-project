@@ -2,28 +2,28 @@ import { Twitter, Instagram, Linkedin, Github } from 'lucide-react';
 
 export const SocialLinks = [
   {
-    href: "https://twitter.com/teacoffeehub",
+    href: "https://twitter.com/ruind",
     icon: Twitter,
     label: "Twitter",
     color: "hover:text-blue-400",
     bgColor: "hover:bg-blue-50",
   },
   {
-    href: "https://instagram.com/teacoffeehub",
+    href: "https://instagram.com/ruind",
     icon: Instagram,
     label: "Instagram",
     color: "hover:text-pink-500",
     bgColor: "hover:bg-pink-50",
   },
   {
-    href: "https://linkedin.com/company/teacoffeehub",
+    href: "https://linkedin.com/company/ruind",
     icon: Linkedin,
     label: "LinkedIn",
     color: "hover:text-blue-600",
     bgColor: "hover:bg-blue-50",
   },
   {
-    href: "https://github.com/teacoffeehub",
+    href: "https://github.com/ruind",
     icon: Github,
     label: "GitHub",
     color: "hover:text-gray-800",
@@ -37,7 +37,7 @@ export const linkSections = [
   {
     title: 'Produk',
     links: [
-      { name: 'Teh Premium', href: '/tea' },
+      { name: 'Teh Premium', href: '/product/tea' },
       { name: 'Kopi Artisan', href: '/coffee' },
       { name: 'Herbal Alami', href: '/herbal' },
       { name: 'Matcha Jepang', href: '/matcha' },

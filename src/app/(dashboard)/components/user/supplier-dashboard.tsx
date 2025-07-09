@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { DollarSign, ShoppingCart, Package, Users } from "lucide-react";
 
 import { StatCard } from '../shared/stat-card';
@@ -39,13 +39,19 @@ export const SupplierDashboard: React.FC = () => {
 
       <ChartCard title="Sales Performance" description="Last months revenue">
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={salesData}>
+          <AreaChart data={salesData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+            <defs>
+              <linearGradient id="amberGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
+              </linearGradient>
+            </defs>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />
             <Tooltip />
-            <Line type="monotone" dataKey="products" stroke="hsl(var(--primary))" activeDot={{ r: 8 }} />
-          </LineChart>
+            <Area type="monotone" dataKey="products" stroke="#f59e0b" fillOpacity={1} fill="url(#amberGradient)" />
+          </AreaChart>
         </ResponsiveContainer>
       </ChartCard>
 
@@ -54,7 +60,7 @@ export const SupplierDashboard: React.FC = () => {
           <TabsTrigger value="products">Manage Products</TabsTrigger>
           <TabsTrigger value="buyers">View Buyers</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="products">
           <CrudTable 
             title="My Products" 
@@ -62,6 +68,7 @@ export const SupplierDashboard: React.FC = () => {
             columns={productColumns} 
           />
         </TabsContent>
+
         <TabsContent value="buyers">
           <Card>
             <CardHeader>

@@ -2,8 +2,8 @@
 
 import React, { useState, useMemo, FC } from "react";
 import { useRouter } from 'next/navigation';
-import { FilterSidebar } from "@/components/product/FilterSideBar";
-import { ProductGrid } from "@/components/product/ProductGrid";
+import { FilterSidebar } from "@/app/(product)/components/FilterSideBar";
+import { ProductGrid } from "@/app/(product)/components/ProductGrid";
 import { allProducts } from "../../data/product";
 import { useCart } from "@/hooks/useCart";
 import { FilterState, Product } from "@/types/product";

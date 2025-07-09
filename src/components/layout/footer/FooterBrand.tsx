@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { SocialLinks } from './data'; // pastikan ini diexport dengan benar dari file data
+import { SocialLinks } from './data';
 
 export const FooterBrand = () => (
   <div className="md:col-span-4 lg:col-span-5">
