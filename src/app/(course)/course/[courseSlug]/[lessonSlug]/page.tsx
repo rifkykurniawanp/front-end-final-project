@@ -2,15 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { teaCourse } from "@/app/data/tea-course";
-import { coffeeCourse } from "@/app/data/coffee-course";
-import { herbalCourse } from "@/app/data/herb-course";
+import { teaCourse } from "@/app/data/courses/tea";
+import { coffeeCourse } from "@/app/data/courses/coffee";
+import { herbalCourse } from "@/app/data/courses/herbal";
 import { Lesson, Course } from "@/types/course";
-import { VideoPlayer } from "../../../components/VideoPlayer";
-import { LessonTabs } from "../../../components/LessonTabs";
-import { CreateNoteAtTime } from "../../../components/CreateNoteAtTime";
-import { QuizRenderer } from "../../../components/QuizRenderer";
-import { ModuleSidebar } from "@/app/(course)/components/ModuleSideBar";
+import { VideoPlayer } from "../../../../../components/course/VideoPlayer";
+import { LessonTabs } from "../../../../../components/course/LessonTabs";
+import { CreateNoteAtTime } from "../../../../../components/course/CreateNoteAtTime";
+import { QuizRenderer } from "../../../../../components/course/QuizRenderer";
+import { ModuleSidebar } from "@/components/course/ModuleSideBar";
 import { Button } from "@/components/ui/button";
 
 export default function LessonPage() {
@@ -81,14 +81,14 @@ export default function LessonPage() {
 
   if (!lesson || !course) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <p className="text-slate-600">Loading lesson...</p>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <p className="text-gray-600">Loading lesson...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div className="min-h-screen bg-white p-6">
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-8">
         <div className="lg:col-span-1">
           <div className="sticky top-20">
@@ -98,40 +98,43 @@ export default function LessonPage() {
 
         <div className="lg:col-span-3 space-y-6">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-slate-800">{lesson.title}</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{lesson.title}</h1>
             {completedLessons.has(lesson.id) && (
               <span className="text-green-600 text-sm font-medium">✓ Completed</span>
             )}
           </div>
 
           {lesson.type === "video" && (
-            <VideoPlayer url={lesson.videoUrl || ""} onTimeUpdate={setCurrentTime} />
+            <VideoPlayer 
+              src={lesson.videoUrl || ""} 
+              onTimeUpdate={setCurrentTime} 
+            />
           )}
 
           <LessonTabs lesson={lesson} activeTab={activeTab} onTabChange={setActiveTab} />
 
           <div className="mt-6">
             {activeTab === "content" && (
-              <div className="text-slate-700 text-sm leading-relaxed">
-                {lesson.content ? <p>{lesson.content}</p> : <p className="italic text-slate-500">No content provided.</p>}
+              <div className="text-gray-700 text-sm leading-relaxed">
+                {lesson.content ? <p>{lesson.content}</p> : <p className="italic text-gray-500">No content provided.</p>}
               </div>
             )}
 
             {activeTab === "notes" && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-700 mb-2">Create Note</h2>
+                  <h2 className="text-lg font-semibold text-gray-700 mb-2">Create Note</h2>
                   <CreateNoteAtTime currentTime={currentTime} onSave={(note) => setNotes([...notes, note])} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-600 mb-2">Your Notes</h3>
+                  <h3 className="text-sm font-semibold text-gray-600 mb-2">Your Notes</h3>
                   <ul className="space-y-2">
                     {notes.length === 0 ? (
-                      <li className="text-slate-500 text-sm">No notes yet.</li>
+                      <li className="text-gray-500 text-sm">No notes yet.</li>
                     ) : (
                       notes.map((note, idx) => (
-                        <li key={idx} className="text-sm text-slate-700">
-                          <span className="text-blue-600 font-medium">[{note.time.toFixed(1)}s]</span> - {note.text}
+                        <li key={idx} className="text-sm text-gray-700">
+                          <span className="text-amber-600 font-medium">[{note.time.toFixed(1)}s]</span> - {note.text}
                         </li>
                       ))
                     )}
@@ -142,13 +145,13 @@ export default function LessonPage() {
 
             {activeTab === "quiz" && lesson.quiz && lesson.quiz.length > 0 && (
               <div className="mt-4">
-                <h2 className="text-lg font-semibold text-slate-800 mb-2">Quiz</h2>
+                <h2 className="text-lg font-semibold text-gray-800 mb-2">Quiz</h2>
                 <QuizRenderer questions={lesson.quiz} />
               </div>
             )}
           </div>
 
-          <div className="flex justify-between pt-8 border-t border-slate-200 mt-8">
+          <div className="flex justify-between pt-8 border-t border-gray-200 mt-8">
             <div>
               {prevLesson && (
                 <Button variant="outline" onClick={() => router.push(`/course/${courseSlug}/${prevLesson.slug}`)}>
@@ -165,7 +168,7 @@ export default function LessonPage() {
                   🎉 Complete Course
                 </Button>
               ) : (
-                <Button onClick={handleCompleteAndContinue} className="bg-blue-600 hover:bg-blue-700">
+                <Button onClick={handleCompleteAndContinue} className="bg-amber-600 hover:bg-amber-700">
                   ✅ Complete & Continue
                 </Button>
               )}

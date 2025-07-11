@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { allCourses } from "@/app/data/all-course";
-import { allProducts } from "@/app/data/product";
+import { allCourses } from "@/app/data/courses";
+import { allProducts } from "@/app/data/products/index";
 
 export default function HomePage() {
   const courses = allCourses.slice(0, 3);

@@ -2,9 +2,9 @@
 
 import React, { useState, useMemo, FC } from "react";
 import { useRouter } from 'next/navigation';
-import { FilterSidebar } from "@/app/(product)/components/FilterSideBar";
-import { ProductGrid } from "@/app/(product)/components/ProductGrid";
-import { allProducts } from "../../data/product";
+import { FilterSidebar } from "@/components/product/FilterSideBar";
+import { ProductGrid } from "@/components/product/ProductGrid";
+import { allProducts } from "../../data/products/index";
 import { useCart } from "@/hooks/useCart";
 import { FilterState, Product } from "@/types/product";
 
@@ -25,13 +25,23 @@ const ProductPage: FC = () => {
   };
 
   const filteredProducts = useMemo(() => {
-    return allProducts.filter((product) => {
-      const matchesCategory = filters.category.length === 0 || filters.category.includes(product.category);
-      const matchesPrice = product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1];
-      const matchesSearch = searchTerm === "" || product.name.toLowerCase().includes(searchTerm.toLowerCase());
-      return matchesCategory && matchesPrice && matchesSearch;
-    });
-  }, [filters, searchTerm]);
+  return allProducts.filter((product) => {
+    const matchesCategory =
+      filters.category.length === 0 || filters.category.includes(product.category);
+
+    const matchesSubcategory =
+      filters.subcategory.length === 0 || filters.subcategory.includes(product.subcategory);
+
+    const matchesPrice =
+      product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1];
+
+    const matchesSearch =
+      searchTerm === "" || product.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+    return matchesCategory && matchesSubcategory && matchesPrice && matchesSearch;
+  });
+}, [filters, searchTerm]);
+
 
   const { addToCart } = useCart(); 
 

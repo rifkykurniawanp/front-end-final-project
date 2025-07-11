@@ -1,0 +1,61 @@
+import { Product } from '@/types/product';
+
+export const coffeeIngredients: Product[] = [
+  {
+    id: 'coffee-001',
+    slug: 'ethiopian-yirgacheffe',
+    name: 'Ethiopian Yirgacheffe',
+    description: 'Kopi single origin dengan rasa fruity dan floral yang kompleks',
+    price: 165000,
+    image: '/api/placeholder/300/300',
+    category: 'coffee',
+    subcategory: 'ingredient',
+    stock: 38,
+    rating: 4.9,
+    reviews: 156,
+    tags: ['single-origin', 'fruity', 'premium'],
+    origin: 'Ethiopia',
+    weight: '200g',
+    roastLevel: 'light',
+    caffeine: 'high',
+    brewingMethod: ['pour-over', 'french-press', 'espresso']
+  },
+  {
+    id: 'coffee-002',
+    slug: 'colombian-supremo',
+    name: 'Colombian Supremo',
+    description: 'Kopi Colombia dengan body yang seimbang dan rasa cokelat',
+    price: 145000,
+    image: '/api/placeholder/300/300',
+    category: 'coffee',
+    subcategory: 'ingredient',
+    stock: 52,
+    rating: 4.7,
+    reviews: 203,
+    tags: ['balanced', 'chocolate', 'smooth'],
+    origin: 'Colombia',
+    weight: '200g',
+    roastLevel: 'medium',
+    caffeine: 'high',
+    brewingMethod: ['espresso', 'drip', 'french-press']
+  },
+  {
+    id: 'coffee-003',
+    slug: 'java-robusta',
+    name: 'Java Robusta',
+    description: 'Kopi robusta dari Jawa dengan rasa yang kuat dan bold',
+    price: 95000,
+    image: '/api/placeholder/300/300',
+    category: 'coffee',
+    subcategory: 'ingredient',
+    stock: 41,
+    rating: 4.5,
+    reviews: 87,
+    tags: ['bold', 'strong', 'local'],
+    origin: 'Indonesia',
+    weight: '200g',
+    roastLevel: 'dark',
+    caffeine: 'high',
+    brewingMethod: ['espresso', 'turkish', 'moka-pot']
+  }
+];

@@ -1,3 +1,5 @@
+import { LucideIcon } from "lucide-react";
+
 export interface Lesson {
   id: string;
   title: string;
@@ -46,7 +48,7 @@ export interface Course {
   duration: string;
   level: 'Beginner' | 'Intermediate' | 'Advanced';
   modules: Module[];
-  icon: React.ReactNode;
+  icon: React.ReactNode | LucideIcon;
   color: string;
   category: 'Tea' | 'Coffee' | 'Herbal';
   price: number;

@@ -1,8 +1,8 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
-import { allProducts } from '@/app/data/product';
+import { allProducts } from '@/app/data/products/index';
 import { Product } from '@/types/product';
-import { ProductDetailClient } from '@/app/(product)/components/ProductDetailClient';
+import { ProductDetailClient } from '@/components/product/ProductDetailClient';
 
 async function getProductBySlug(slug: string): Promise<Product | undefined> {
   return allProducts.find(product => product.slug === slug);

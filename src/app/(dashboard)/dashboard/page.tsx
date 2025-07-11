@@ -1,13 +1,13 @@
 "use client";
 import React from 'react';
-import { AdminDashboard } from '@/app/(dashboard)/components/user/admin-dashboard';
-import { UserDashboard } from '@/app/(dashboard)/components/user/user-dashboard';
-import { InstructorDashboard } from '@/app/(dashboard)/components/user/instructor-dashboard';
-import { SupplierDashboard } from '@/app/(dashboard)/components/user/supplier-dashboard';
+import { AdminDashboard } from '@/components/dashboard/user/admin-dashboard';
+import { UserDashboard } from '@/components/dashboard/user/user-dashboard';
+import { InstructorDashboard } from '@/components/dashboard/user/instructor-dashboard';
+import { SupplierDashboard } from '@/components/dashboard/user/supplier-dashboard';
 import LoginPage from '@/app/login/page';
 
 const MainDashboard: React.FC = () => {
-  const currentUserRole = "ADMIN";
+  const currentUserRole = "USER";
   
   const getDashboardComponent = (role: string) => {
     switch (role) {
