@@ -3,7 +3,7 @@
 import { useCart } from "@/hooks/useCart";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@/fetch-API/utils";
 
 const CheckoutPage = () => {
   const { cart, total, itemCount } = useCart();

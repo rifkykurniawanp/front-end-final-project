@@ -9,21 +9,33 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
+import { authApi } from '@/fetch-API/API/auth.api'
+import { RegisterDto, RoleName } from '@/types/auth'
 
-interface RegisterFormData {
+type RegisterFormData = {
   firstName: string
   lastName: string
   email: string
   password: string
   confirmPassword: string
+  phone: string
+  address: string
+  role: RoleName
+  isBuyer: boolean
+  isStudent: boolean
 }
 
-interface FormErrors {
+type FormErrors = {
   firstName?: string
   lastName?: string
   email?: string
   password?: string
   confirmPassword?: string
+  phone?: string
+  address?: string
+  role?: string
   general?: string
 }
 
@@ -34,7 +46,12 @@ export default function RegisterPage() {
     lastName: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    phone: '',
+    address: '',
+    role: 'USER',
+    isBuyer: false,
+    isStudent: false
   })
   const [errors, setErrors] = useState<FormErrors>({})
   const [isLoading, setIsLoading] = useState(false)
@@ -66,13 +83,11 @@ export default function RegisterPage() {
       newErrors.email = 'Please enter a valid email address'
     }
 
-    // Password validation
+    // Password validation (minimum 6 characters as per backend)
     if (!formData.password) {
       newErrors.password = 'Password is required'
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters'
-    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-      newErrors.password = 'Password must contain at least one uppercase letter, one lowercase letter, and one number'
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters'
     }
 
     // Confirm password validation
@@ -82,15 +97,20 @@ export default function RegisterPage() {
       newErrors.confirmPassword = 'Passwords do not match'
     }
 
+    // Role validation
+    if (!formData.role) {
+      newErrors.role = 'Role is required'
+    }
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
+    const { name, value, type, checked } = e.target
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }))
 
     // Clear error for this field when user starts typing
@@ -98,6 +118,21 @@ export default function RegisterPage() {
       setErrors(prev => ({
         ...prev,
         [name]: undefined
+      }))
+    }
+  }
+
+  const handleRoleChange = (value: RoleName) => {
+    setFormData(prev => ({
+      ...prev,
+      role: value
+    }))
+
+    // Clear role error when user selects a role
+    if (errors.role) {
+      setErrors(prev => ({
+        ...prev,
+        role: undefined
       }))
     }
   }
@@ -113,34 +148,59 @@ export default function RegisterPage() {
     setErrors({})
 
     try {
-      // Replace this with your actual API call
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          firstName: formData.firstName.trim(),
-          lastName: formData.lastName.trim(),
-          email: formData.email.toLowerCase().trim(),
-          password: formData.password,
-        }),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Registration failed')
+      // Prepare data according to RegisterDto interface - simplified for testing
+      const registerData: RegisterDto = {
+        email: formData.email.toLowerCase().trim(),
+        password: formData.password,
+        role: formData.role,
+        // Only include non-empty optional fields
+        ...(formData.firstName.trim() && { firstName: formData.firstName.trim() }),
+        ...(formData.lastName.trim() && { lastName: formData.lastName.trim() }),
+        ...(formData.phone.trim() && { phone: formData.phone.trim() }),
+        ...(formData.address.trim() && { address: formData.address.trim() }),
+        // Include booleans only if they are true
+        ...(formData.isBuyer && { isBuyer: formData.isBuyer }),
+        ...(formData.isStudent && { isStudent: formData.isStudent }),
       }
 
-      const data = await response.json()
+      console.log('Sending registration data:', registerData) // Debug log
+
+      // Use your authApi instead of direct fetch
+      const response = await authApi.register(registerData)
       
-      // Successful registration
+      // Successful registration - you now have access to the user data and token
+      console.log('Registration successful:', response)
+      
+      // You might want to store the token or redirect based on your app's flow
       router.push('/login?message=Registration successful! Please log in.')
       
     } catch (error) {
-      setErrors({
-        general: error instanceof Error ? error.message : 'An unexpected error occurred'
-      })
+      console.error('Registration error:', error)
+      
+      // Handle specific error cases
+      if (error instanceof Error) {
+        if (error.message.includes('409') || error.message.toLowerCase().includes('conflict')) {
+          setErrors({
+            email: 'This email address is already registered. Please use a different email or try logging in.'
+          })
+        } else if (error.message.includes('400')) {
+          setErrors({
+            general: 'Invalid registration data. Please check your information and try again.'
+          })
+        } else if (error.message.includes('422')) {
+          setErrors({
+            general: 'Please check that all fields are filled out correctly.'
+          })
+        } else {
+          setErrors({
+            general: error.message || 'Registration failed. Please try again.'
+          })
+        }
+      } else {
+        setErrors({
+          general: 'An unexpected error occurred. Please try again.'
+        })
+      }
     } finally {
       setIsLoading(false)
     }
@@ -212,6 +272,76 @@ export default function RegisterPage() {
                 {errors.email && (
                   <p className="text-sm text-red-500">{errors.email}</p>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone (optional)</Label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  className={errors.phone ? 'border-red-500' : ''}
+                  placeholder="+1234567890"
+                />
+                {errors.phone && (
+                  <p className="text-sm text-red-500">{errors.phone}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="address">Address (optional)</Label>
+                <Input
+                  id="address"
+                  name="address"
+                  type="text"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  className={errors.address ? 'border-red-500' : ''}
+                  placeholder="123 Main St, City, Country"
+                />
+                {errors.address && (
+                  <p className="text-sm text-red-500">{errors.address}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="role">Role</Label>
+                <Select value={formData.role} onValueChange={handleRoleChange}>
+                  <SelectTrigger className={errors.role ? 'border-red-500' : ''}>
+                    <SelectValue placeholder="Select your role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="USER">User</SelectItem>
+                    <SelectItem value="SUPPLIER">Supplier</SelectItem>
+                    <SelectItem value="INSTRUCTOR">Instructor</SelectItem>
+                    <SelectItem value="ADMIN">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.role && (
+                  <p className="text-sm text-red-500">{errors.role}</p>
+                )}
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="isBuyer" 
+                    checked={formData.isBuyer}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isBuyer: !!checked }))}
+                  />
+                  <Label htmlFor="isBuyer">I want to purchase products</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="isStudent" 
+                    checked={formData.isStudent}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isStudent: !!checked }))}
+                  />
+                  <Label htmlFor="isStudent">I want to enroll in courses</Label>
+                </div>
               </div>
 
               <div className="space-y-2">

@@ -7,7 +7,7 @@ import { SupplierDashboard } from '@/components/dashboard/user/supplier-dashboar
 import LoginPage from '@/app/login/page';
 
 const MainDashboard: React.FC = () => {
-  const currentUserRole = "USER";
+  const currentUserRole = "SUPPLIER";
   
   const getDashboardComponent = (role: string) => {
     switch (role) {

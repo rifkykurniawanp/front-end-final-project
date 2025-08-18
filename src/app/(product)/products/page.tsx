@@ -1,52 +1,70 @@
 "use client";
 
-import React, { useState, useMemo, FC } from "react";
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, FC } from "react";
+import { useRouter } from "next/navigation";
 import { FilterSidebar } from "@/components/product/FilterSideBar";
 import { ProductGrid } from "@/components/product/ProductGrid";
-import { allProducts } from "../../data/products/index";
 import { useCart } from "@/hooks/useCart";
 import { FilterState, Product } from "@/types/product";
+import { productsApi } from "@/fetch-API/API/products.api";
 
 const ProductPage: FC = () => {
   const router = useRouter();
+  const { addToCart } = useCart();
+
   const [filters, setFilters] = useState<FilterState>({
-    category: [], subcategory: [], priceRange: [0, 500000], rating: 0, caffeine: [], origin: []
+    category: [],
+    subcategory: [],
+    priceRange: [0, 500000],
+    rating: 0,
+    caffeine: [],
+    origin: [],
   });
+
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   const updateFilter = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   const resetFilters = () => {
-    setFilters({ category: [], subcategory: [], priceRange: [0, 500000], rating: 0, caffeine: [], origin: []});
+    setFilters({ category: [], subcategory: [], priceRange: [0, 500000], rating: 0, caffeine: [], origin: [] });
     setSearchTerm("");
   };
 
-  const filteredProducts = useMemo(() => {
-  return allProducts.filter((product) => {
-    const matchesCategory =
-      filters.category.length === 0 || filters.category.includes(product.category);
+  // Fetch products whenever filters or searchTerm change
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      setError(null);
 
-    const matchesSubcategory =
-      filters.subcategory.length === 0 || filters.subcategory.includes(product.subcategory);
+      try {
+        const params = {
+          search: searchTerm || undefined,
+          category: filters.category.length > 0 ? filters.category : undefined,
+          subcategory: filters.subcategory.length > 0 ? filters.subcategory : undefined,
+          minPrice: filters.priceRange[0],
+          maxPrice: filters.priceRange[1],
+          // Tambahkan field filter lain sesuai ProductFilterDto
+          origin: filters.origin.length > 0 ? filters.origin : undefined,
+        };
 
-    const matchesPrice =
-      product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1];
+        const data = await productsApi.getAll(params);
+        setProducts(data);
+      } catch (err: any) {
+        setError(err.message || "Gagal mengambil produk");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    const matchesSearch =
-      searchTerm === "" || product.name.toLowerCase().includes(searchTerm.toLowerCase());
-
-    return matchesCategory && matchesSubcategory && matchesPrice && matchesSearch;
-  });
-}, [filters, searchTerm]);
-
-
-  const { addToCart } = useCart(); 
+    fetchProducts();
+  }, [filters, searchTerm]);
 
   const handleBuyNow = (product: Product, quantity: number) => {
-
     console.log(`Membeli ${quantity} ${product.name}`);
     router.push(`/checkout?productId=${product.id}&quantity=${quantity}`);
   };
@@ -65,11 +83,15 @@ const ProductPage: FC = () => {
           />
         </div>
         <div className="flex-1">
-          <ProductGrid
-            products={filteredProducts}
-            addToCart={addToCart} 
-            buyNow={handleBuyNow}  
-          />
+          {loading && <p>Loading...</p>}
+          {error && <p className="text-red-500">{error}</p>}
+          {!loading && !error && (
+            <ProductGrid
+              products={products}
+              addToCart={addToCart}
+              buyNow={handleBuyNow}
+            />
+          )}
         </div>
       </div>
     </div>

@@ -1,49 +1,103 @@
+import { ProductCategory, ProductOrigin, ProductStatus, ProductTagName } from './enum';
+import type { User } from './user';
+
 export interface Product {
-  id: string;
+  id: number;
+  slug: string;
   name: string;
-  description: string;
+  description?: string | null;
   price: number;
-  image: string;
-  category: 'tea' | 'coffee' | 'herbal';
-  subcategory: 'ingredient' | 'tool' | 'support';
   stock: number;
+  image?: string | null;
+  category: ProductCategory;
+  status: ProductStatus;
+  supplierId: number;
   rating: number;
-  reviews: number;
-  tags: string[];
-  origin?: string;
-  weight?: string;
-  roastLevel?: 'light' | 'medium' | 'dark';
-  brewingMethod?: string[];
-  caffeine?: 'none' | 'low' | 'medium' | 'high';
+  reviewCount: number;
+  origin: ProductOrigin;
+  weight?: string | null;
+  tags: ProductTagName[];
+  createdAt: Date;
+}
+
+export interface ProductWithRelations extends Product {
+  supplier?: User;
+  reviews?: ProductReview[];
+  cartItems?: CartItem[];
+  orderItems?: ProductOrderItem[];
+}
+
+export interface ProductReview {
+  id: number;
+  productId: number;
+  userId: number;
+  rating: number;
+  comment?: string | null;
+  createdAt: Date;
+  product?: Product;
+  user?: User;
+}
+
+export interface CreateProductDto {
   slug: string;
-}
-
-export interface ProductCategory {
-  id: string;
   name: string;
-  description: string;
-  icon: string;
-  products: Product[];
-}
-
-export interface FilterState {
-  category: string[];
-  subcategory: string[];
-  priceRange: [number, number];
-  rating: number;
-  caffeine: string[];
-  origin: string[];
-}
-
-export interface CartProduct {
-  id: string;
-  name: string;
+  description?: string;
   price: number;
-  image: string; 
-  slug: string;
+  stock?: number;
+  image?: string;
+  category: ProductCategory;
+  status?: ProductStatus;
+  supplierId: number;
+  origin: ProductOrigin;
+  weight?: string;
+  tags?: ProductTagName[];
 }
 
-export interface CartItem {
-  product: CartProduct;
-  quantity: number;
+export interface UpdateProductDto {
+  slug?: string;
+  name?: string;
+  description?: string;
+  price?: number;
+  stock?: number;
+  image?: string;
+  category?: ProductCategory;
+  status?: ProductStatus;
+  origin?: ProductOrigin;
+  weight?: string;
+  tags?: ProductTagName[];
 }
+
+export interface CreateProductReviewDto {
+  productId: number;
+  rating: number;
+  comment?: string;
+}
+
+export interface ProductResponseDto extends Product {
+  supplier?: User;
+  reviews?: ProductReview[];
+}
+
+export interface UpdateProductReviewDto {
+  rating?: number;
+  comment?: string;
+}
+
+// For filtering and searching
+export interface ProductFilterDto {
+  category?: ProductCategory[];
+  origin?: ProductOrigin[];
+  tags?: ProductTagName[];
+  minPrice?: number;
+  maxPrice?: number;
+  status?: ProductStatus[];
+  search?: string;
+  supplierId?: number;
+  page?: number;
+  limit?: number;
+  sortBy?: 'name' | 'price' | 'rating' | 'createdAt';
+  sortOrder?: 'asc' | 'desc';
+}
+
+import type { CartItem } from './cart';
+import type { ProductOrderItem } from './order';

@@ -14,7 +14,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Plus, Minus, Check } from 'lucide-react';
-import { formatCurrency, cn } from '@/lib/utils';
+import { formatCurrency, cn } from '@/fetch-API/utils';
 
 export interface ProductCardProps {
   product: Product;

@@ -9,8 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useCart } from '@/hooks/useCart';
-import { formatCurrency } from '@/lib/utils';
-import { cn } from '@/lib/utils';
+import { formatCurrency } from '@/fetch-API/utils';
+import { cn } from '@/fetch-API/utils';
 import { Minus, Plus, Check, ArrowLeft, Star } from 'lucide-react';
 
 interface ProductDetailClientProps {

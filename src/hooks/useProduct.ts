@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo } from 'react';
 import { FilterState } from '../types/product';
-import { allProducts } from '../app/data/product';
+import { allProducts } from '../app/data/products/index';
 
 export const useProducts = (initialFilters?: Partial<FilterState>) => {
   const [filters, setFilters] = useState<FilterState>({

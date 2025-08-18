@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils'; // utilitas untuk menggabungkan class (dari shadcn/ui)
+import { cn } from '@/fetch-API/utils'; // utilitas untuk menggabungkan class (dari shadcn/ui)
 
 import type { HeaderProps } from '@/types/header';
 import { Logo } from './logo';

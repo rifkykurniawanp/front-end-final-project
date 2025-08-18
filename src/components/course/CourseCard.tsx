@@ -1,107 +1,103 @@
 "use client";
 
-import { Course } from "@/types/course";
-import { useRouter } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, BookOpen, Users, Play } from "lucide-react";
+import { Star, Users, Clock, BookOpen } from "lucide-react";
+import type { CourseWithRelations } from "@/types/course";
+import { useRouter } from "next/navigation"; // Import useRouter
 
 interface CourseCardProps {
-  course: Course;
+  course: CourseWithRelations;
 }
 
-export function CourseCard({ course }: CourseCardProps) {
+export default function CourseCard({ course }: CourseCardProps) {
   const router = useRouter();
 
-  const handleViewCourse = () => {
+  const handleCardClick = () => {
     router.push(`/course/${course.slug}`);
   };
 
-  const handleStartCourse = () => {
-    const firstLesson = course.modules[0]?.lessons[0];
-    if (firstLesson) {
-      router.push(`/course/${course.slug}/${firstLesson.slug}`);
-    }
-  };
-
-  const totalLessons = course.modules.reduce(
-    (total, module) => total + module.lessons.length,
-    0
-  );
-
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-all duration-200 hover:border-amber-200">
-      {/* Course Header */}
-      <div className="h-48 bg-gradient-to-br from-amber-500 to-amber-600 relative">
-        <div className="absolute inset-0 bg-black/10" />
-        <div className="absolute bottom-4 left-4 right-4">
-          <h3 className="text-white text-xl font-bold mb-2 drop-shadow-sm">
-            {course.title}
-          </h3>
-          <div className="flex items-center gap-2 text-white/95">
-            <Users className="w-4 h-4" />
-            <span className="text-sm font-medium">{course.instructor}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Course Content */}
-      <div className="p-6">
-        <p className="text-slate-600 text-sm mb-4 line-clamp-3 leading-relaxed">
+    <Card
+      className="cursor-pointer hover:shadow-xl transition-all duration-200 rounded-2xl border border-amber-200 bg-gradient-to-br from-orange-50 to-amber-100"
+      onClick={handleCardClick} // Attach the new handler
+    >
+      {/* Header */}
+      <CardHeader>
+        <CardTitle className="text-lg font-bold text-amber-800">
+          {course.title}
+        </CardTitle>
+        <p className="text-sm text-amber-700/80 line-clamp-2">
           {course.description}
         </p>
+      </CardHeader>
 
-        {/* Course Stats */}
-        <div className="flex items-center gap-4 mb-4 text-sm text-slate-600">
-          <div className="flex items-center gap-1.5">
-            <BookOpen className="w-4 h-4 text-amber-600" />
-            <span>{totalLessons} lessons</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Clock className="w-4 h-4 text-amber-600" />
+      {/* Content */}
+      <CardContent className="space-y-3">
+        {/* Rating */}
+        <div className="flex items-center gap-2 text-sm text-amber-700">
+          <Star className="w-4 h-4 text-amber-500 fill-amber-400" />
+          <span className="font-medium">{course.rating.toFixed(1)}</span>
+        </div>
+
+        {/* Students */}
+        <div className="flex items-center gap-2 text-sm text-amber-700">
+          <Users className="w-4 h-4 text-amber-500" />
+          <span>{course.students} students</span>
+        </div>
+
+        {/* Duration */}
+        {course.duration && (
+          <div className="flex items-center gap-2 text-sm text-amber-700">
+            <Clock className="w-4 h-4 text-amber-500" />
             <span>{course.duration}</span>
           </div>
+        )}
+
+        {/* Level */}
+        <div className="flex items-center gap-2 text-sm text-amber-700">
+          <BookOpen className="w-4 h-4 text-amber-500" />
+          <span>{course.level}</span>
         </div>
 
         {/* Tags */}
-        <div className="flex flex-wrap gap-2 mb-5">
-          {course.tags.slice(0, 3).map((tag, idx) => (
-            <Badge 
-              key={idx} 
-              variant="secondary" 
-              className="text-xs bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
-            >
-              {tag}
-            </Badge>
-          ))}
-          {course.tags.length > 3 && (
-            <Badge 
-              variant="outline" 
-              className="text-xs border-amber-200 text-amber-600 hover:bg-amber-50"
-            >
-              +{course.tags.length - 3} more
+        <div className="flex gap-2 flex-wrap">
+          <Badge
+            variant="secondary"
+            className="bg-amber-200 text-amber-800 hover:bg-amber-300"
+          >
+            {course.category}
+          </Badge>
+          {course.certificate && (
+            <Badge className="bg-amber-500 text-white hover:bg-amber-600">
+              Certificate
             </Badge>
           )}
         </div>
 
-        {/* Actions */}
-        <div className="flex gap-3">
+        {/* Instructor */}
+        {course.instructor && (
+          <p className="text-xs text-amber-700">
+            by <span className="font-semibold">{course.instructor.firstName}</span>
+          </p>
+        )}
+
+        {/* Price + Button */}
+        <div className="flex justify-between items-center mt-4">
+          <span className="font-bold text-amber-800">${course.price}</span>
           <Button
-            onClick={handleStartCourse}
-            className="flex-1 bg-amber-600 hover:bg-amber-700 text-white shadow-sm"
+            size="sm"
+            className="bg-amber-600 hover:bg-amber-700 text-white shadow-md"
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent the card's onClick from triggering
+              // Add specific logic for the enroll button here if needed
+            }}
           >
-            <Play className="w-4 h-4 mr-2" />
-            Start Course
-          </Button>
-          <Button 
-            onClick={handleViewCourse} 
-            variant="outline" 
-            className="px-4 border-amber-200 text-amber-700 hover:bg-amber-50 hover:border-amber-300"
-          >
-            View Details
+            Enroll
           </Button>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
