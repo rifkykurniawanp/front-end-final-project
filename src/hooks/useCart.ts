@@ -1,21 +1,16 @@
-// hooks/useCart.ts
-import { useState, useEffect, useCallback } from 'react';
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
 import {
   CartItem,
-  Cart,
+  CartWithItems,
   AddToCartDto,
   UpdateCartItemDto,
-} from '@/types/cart';
-import {
-  Product
-} from '@/types/product';
-import {
-  Course } from '@/types/course';
-import { CartItemType } from '@/types/enum';
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  'https://final-project-be-rifkykurniawanp-production.up.railway.app';
+} from "@/types/cart";
+import { Product } from "@/types/product";
+import { Course } from "@/types/course";
+import { CartItemType } from "@/types/enum";
+import { cartApi } from "@/lib/API/core/carts.api";
 
 interface UseCartReturn {
   cart: CartItem[];
@@ -31,7 +26,11 @@ interface UseCartReturn {
   refreshCart: () => Promise<void>;
 }
 
-export const useCart = (userId?: string, token?: string): UseCartReturn => {
+export const useCart = (
+  userId?: string,
+  token?: string,
+  userRole?: string
+): UseCartReturn => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartId, setCartId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -40,76 +39,49 @@ export const useCart = (userId?: string, token?: string): UseCartReturn => {
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  // ---------- API helper ----------
-  const apiCall = async (endpoint: string, options: RequestInit = {}) => {
-    const response = await fetch(`${API_BASE_URL}/api/v1${endpoint}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      ...options,
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`API error: ${response.status} - ${errorText}`);
-    }
-
-    return response.json();
-  };
-
-  // ---------- Cart initialization ----------
-  const getOrCreateCart = async (): Promise<number> => {
-    if (!userId || userId === 'guest') {
-      const guestCartId = localStorage.getItem('guestCartId');
-      if (guestCartId) return parseInt(guestCartId);
-
-      const mockCartId = Date.now();
-      localStorage.setItem('guestCartId', mockCartId.toString());
-      return mockCartId;
-    }
-
-    const response: Cart = await apiCall(`/users/${userId}/cart`);
-    return response.id;
-  };
-
+  // ---------- Cart Initialization ----------
   const loadCart = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      if (!userId || userId === 'guest') {
-        const guestCart = localStorage.getItem('guestCart');
-        if (guestCart) {
-          const parsedCart: CartItem[] = JSON.parse(guestCart);
-          setCart(parsedCart);
-          setCartId(parseInt(localStorage.getItem('guestCartId') || '0'));
-        } else {
-          setCart([]);
-          setCartId(null);
-        }
+      // Role bukan USER → kosongkan cart
+      if (userRole !== "USER") {
+        setCart([]);
+        setCartId(null);
         return;
       }
 
+      // Guest cart via localStorage
+      if (!userId || userId === "guest") {
+        const guestCart = localStorage.getItem("guestCart");
+        const guestCartId = localStorage.getItem("guestCartId");
+        setCart(guestCart ? JSON.parse(guestCart) : []);
+        setCartId(guestCartId ? parseInt(guestCartId) : null);
+        return;
+      }
+
+      // Authenticated USER
       if (!token) {
         setCart([]);
         return;
       }
 
-      const cartResponse: Cart = await apiCall(`/users/${userId}/cart`);
-      setCartId(cartResponse.id);
-      setCart(cartResponse.items || []);
+      const response: CartWithItems = await cartApi.getMyCart(token);
+      setCartId(response.id);
+      setCart(response.items || []);
     } catch (err: any) {
       setError(err.message);
-      console.error('Error loading cart:', err);
+      console.error("Error loading cart:", err);
     } finally {
       setIsLoading(false);
     }
-  }, [userId, token]);
+  }, [userId, token, userRole]);
 
-  const saveGuestCart = (cartItems: CartItem[]) => {
-    if (!userId || userId === 'guest') {
-      localStorage.setItem('guestCart', JSON.stringify(cartItems));
+  const saveGuestCart = (items: CartItem[]) => {
+    if (!userId || userId === "guest") {
+      localStorage.setItem("guestCart", JSON.stringify(items));
+      if (!cartId) localStorage.setItem("guestCartId", Date.now().toString());
     }
   };
 
@@ -118,19 +90,14 @@ export const useCart = (userId?: string, token?: string): UseCartReturn => {
     try {
       setError(null);
 
-      if (!userId || userId === 'guest') {
-        const existingIndex = cart.findIndex(
-          (c) => c.itemId === item.id && c.itemType === type,
-        );
-
+      // Guest logic
+      if (!userId || userId === "guest") {
+        const existingIndex = cart.findIndex(c => c.itemId === item.id && c.itemType === type);
         let updatedCart: CartItem[];
-
         if (existingIndex > -1) {
-          updatedCart = cart.map((c, i) =>
-            i === existingIndex ? { ...c, quantity: c.quantity + quantity } : c,
-          );
+          updatedCart = cart.map((c, i) => i === existingIndex ? { ...c, quantity: c.quantity + quantity } : c);
         } else {
-          const newCartItem: CartItem = {
+          updatedCart = [...cart, {
             id: Date.now(),
             cartId: cartId || Date.now(),
             itemType: type,
@@ -139,33 +106,22 @@ export const useCart = (userId?: string, token?: string): UseCartReturn => {
             price: item.price,
             product: type === CartItemType.PRODUCT ? (item as Product) : null,
             course: type === CartItemType.COURSE ? (item as Course) : null,
-          };
-          updatedCart = [...cart, newCartItem];
+          }];
         }
-
         setCart(updatedCart);
         saveGuestCart(updatedCart);
         return;
       }
 
-      if (!token) throw new Error('Authentication required');
-      const currentCartId = cartId || (await getOrCreateCart());
+      if (userRole !== "USER") throw new Error("Only USER role can use cart");
+      if (!token) throw new Error("Authentication required");
 
-      const dto: AddToCartDto = {
-        itemType: type,
-        itemId: item.id,
-        quantity,
-      };
-
-      await apiCall(`/cart/${currentCartId}/items`, {
-        method: 'POST',
-        body: JSON.stringify(dto),
-      });
-
+      const dto: AddToCartDto = { itemType: type, itemId: item.id, quantity };
+      await cartApi.addItem(dto, token);
       await loadCart();
     } catch (err: any) {
       setError(err.message);
-      console.error('Error adding to cart:', err);
+      console.error("Error adding to cart:", err);
     }
   };
 
@@ -173,19 +129,21 @@ export const useCart = (userId?: string, token?: string): UseCartReturn => {
     try {
       setError(null);
 
-      if (!userId || userId === 'guest') {
-        const updatedCart = cart.filter((c) => c.id !== itemId);
+      if (!userId || userId === "guest") {
+        const updatedCart = cart.filter(c => c.id !== itemId);
         setCart(updatedCart);
         saveGuestCart(updatedCart);
         return;
       }
 
-      if (!token) throw new Error('Authentication required');
-      await apiCall(`/cart/items/${itemId}`, { method: 'DELETE' });
+      if (userRole !== "USER") throw new Error("Only USER role can use cart");
+      if (!token) throw new Error("Authentication required");
+
+      await cartApi.removeItem(itemId, token);
       await loadCart();
     } catch (err: any) {
       setError(err.message);
-      console.error('Error removing from cart:', err);
+      console.error("Error removing from cart:", err);
     }
   };
 
@@ -194,27 +152,22 @@ export const useCart = (userId?: string, token?: string): UseCartReturn => {
       setError(null);
       if (quantity <= 0) return removeFromCart(itemId);
 
-      if (!userId || userId === 'guest') {
-        const updatedCart = cart.map((c) =>
-          c.id === itemId ? { ...c, quantity } : c,
-        );
+      if (!userId || userId === "guest") {
+        const updatedCart = cart.map(c => c.id === itemId ? { ...c, quantity } : c);
         setCart(updatedCart);
         saveGuestCart(updatedCart);
         return;
       }
 
-      if (!token) throw new Error('Authentication required');
+      if (userRole !== "USER") throw new Error("Only USER role can use cart");
+      if (!token) throw new Error("Authentication required");
+
       const dto: UpdateCartItemDto = { quantity };
-
-      await apiCall(`/cart/items/${itemId}`, {
-        method: 'PATCH',
-        body: JSON.stringify(dto),
-      });
-
+      await cartApi.updateItem(itemId, dto, token);
       await loadCart();
     } catch (err: any) {
       setError(err.message);
-      console.error('Error updating quantity:', err);
+      console.error("Error updating quantity:", err);
     }
   };
 
@@ -222,28 +175,24 @@ export const useCart = (userId?: string, token?: string): UseCartReturn => {
     try {
       setError(null);
 
-      if (!userId || userId === 'guest') {
+      if (!userId || userId === "guest") {
         setCart([]);
-        localStorage.removeItem('guestCart');
-        localStorage.removeItem('guestCartId');
+        localStorage.removeItem("guestCart");
+        localStorage.removeItem("guestCartId");
         setCartId(null);
         return;
       }
 
-      if (!token || !cartId) {
-        setCart([]);
-        return;
-      }
+      if (userRole !== "USER") throw new Error("Only USER role can use cart");
+      if (!token || !cartId) return;
 
-      await apiCall(`/cart/${cartId}/clear`, { method: 'DELETE' });
+      await cartApi.clear(token);
       setCart([]);
     } catch (err: any) {
       setError(err.message);
-      console.error('Error clearing cart:', err);
+      console.error("Error clearing cart:", err);
     }
   };
-
-  const refreshCart = loadCart;
 
   useEffect(() => {
     loadCart();
@@ -260,6 +209,6 @@ export const useCart = (userId?: string, token?: string): UseCartReturn => {
     removeFromCart,
     updateQuantity,
     clearCart,
-    refreshCart,
+    refreshCart: loadCart,
   };
 };

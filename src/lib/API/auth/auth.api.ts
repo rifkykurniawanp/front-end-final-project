@@ -1,9 +1,7 @@
-// src/fetch-API/API/auth.api.ts
 import { AuthResponse, LoginDto, RegisterDto } from "@/types/auth";
-import { apiFetch } from "@/fetch-API/API/api-fetch";
+import { apiFetch } from "@/lib/API/core/api-fetch";
 
 export const authApi = {
-  // Login user
   login: (data: LoginDto) =>
     apiFetch<AuthResponse>("/auth/login", {
       method: "POST",

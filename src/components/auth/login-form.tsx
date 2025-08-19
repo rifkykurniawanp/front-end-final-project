@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { cn } from "@/fetch-API/utils"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { authApi } from "@/fetch-API/API/auth.api" // asumsi kamu punya API client
+import { authApi } from "@/lib/API/auth/auth.api"
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
   const [email, setEmail] = useState("")
@@ -23,16 +23,20 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
-
-    // langsung optimis → UI update duluan
     setLoading(true)
 
     try {
       const res = await authApi.login({ email, password })
-      // asumsi response: { token, user }
+      
+      // Store token (keeping your existing structure)
       localStorage.setItem("token", res.accessToken)
-      // bisa juga simpan user ke context / zustand / jotai
-      window.location.href = "/dashboard" // redirect optimistik
+      
+      // Store user data for dashboard role checking
+      localStorage.setItem("user", JSON.stringify(res.user))
+      
+      // Redirect to dashboard
+      window.location.href = "/dashboard"
+      
     } catch (err: any) {
       setError(err?.message || "Login failed")
       setLoading(false)
@@ -87,12 +91,10 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
               />
             </div>
 
-            {/* Error Message */}
             {error && (
               <p className="text-red-500 text-sm text-center">{error}</p>
             )}
 
-            {/* Submit button */}
             <Button
               type="submit"
               disabled={loading}

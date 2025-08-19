@@ -12,10 +12,12 @@ interface CertificateCardProps {
 export function CertificateCard({ certificate }: CertificateCardProps) {
   const printRef = useRef<HTMLDivElement>(null);
 
+  // ✅ Hook-based approach with proper typing
   const handlePrint = useReactToPrint({
-  content: () => printRef.current,
-  documentTitle: "Course Certificate",
-});
+    contentRef: printRef,
+    documentTitle: "Course Certificate",
+    // optional: you can add pageStyle or onAfterPrint here
+  });
 
   return (
     <div className="flex flex-col items-center gap-6">
@@ -28,9 +30,7 @@ export function CertificateCard({ certificate }: CertificateCardProps) {
         <h2 className="text-3xl font-bold text-blue-700 mb-6">
           {certificate.enrollment?.student?.firstName ?? "Student Name"}
         </h2>
-        <p className="text-lg mb-4">
-          For successfully completing the course:
-        </p>
+        <p className="text-lg mb-4">For successfully completing the course:</p>
         <h3 className="text-2xl font-semibold mb-6">
           {certificate.enrollment?.course?.title ?? "Course Title"}
         </h3>
@@ -56,6 +56,7 @@ export function CertificateCard({ certificate }: CertificateCardProps) {
         </div>
       </div>
 
+      {/* Print button */}
       <Button onClick={handlePrint}>Print Certificate</Button>
     </div>
   );

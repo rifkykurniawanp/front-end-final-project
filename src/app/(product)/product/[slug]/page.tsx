@@ -1,27 +1,27 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
-import { allProducts } from '@/app/data/products/index';
-import { Product } from '@/types/product';
+import { productsApi } from '@/lib/API/products/products.api';
 import { ProductDetailClient } from '@/components/product/ProductDetailClient';
 
-async function getProductBySlug(slug: string): Promise<Product | undefined> {
-  return allProducts.find(product => product.slug === slug);
-}
-
 interface ProductPageProps {
-  params: Promise<{ slug: string }>; // Changed: params is now a Promise
+  params: { slug: string }; // ✅ just an object
 }
 
-const ProductPage = async (props: ProductPageProps) => {
-  const { slug } = await props.params; // Changed: await the params
+const ProductPage = async ({ params }: ProductPageProps) => {
+  const { slug } = params; // ✅ no await needed
 
-  const product = await getProductBySlug(slug);
+  try {
+    const product = await productsApi.getBySlug(slug);
 
-  if (!product) {
+    if (!product) {
+      notFound();
+    }
+
+    return <ProductDetailClient product={product} />;
+  } catch (error) {
+    console.error('Error fetching product:', error);
     notFound();
   }
-
-  return <ProductDetailClient product={product} />;
 };
 
 export default ProductPage;

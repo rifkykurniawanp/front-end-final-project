@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { paymentsApi } from "@/fetch-API/API/payments.api";
+import { paymentsApi } from "@/lib/API/core/payments.api";
 import { Payment } from "@/types/payment";
 
 export function usePayment(token: string) {

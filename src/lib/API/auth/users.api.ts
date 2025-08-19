@@ -1,4 +1,4 @@
-import { apiFetch } from "./api-fetch";
+import { apiFetch } from "../core/api-fetch";
 import { User } from "@/types/user";
 import { RoleName } from "@/types/auth";
 

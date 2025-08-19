@@ -27,7 +27,7 @@ export function LessonTabs({ activeTab, onTabChange, lesson }: LessonTabsProps) 
     id: "quiz" as const,
     label: "Quiz",
     icon: <HelpCircle className="w-4 h-4" />,
-    available: Array.isArray(lesson.quiz) && lesson.quiz.length > 0
+    available: Array.isArray(lesson.quizQuestions) && lesson.quizQuestions.length > 0
   }
 ];
 

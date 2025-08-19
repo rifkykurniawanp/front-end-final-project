@@ -1,6 +1,6 @@
 // course-api.ts
 import { Course, CreateCourseDto, UpdateCourseDto, CourseWithRelations } from "@/types/course";
-import { apiFetch } from "./api-fetch";
+import { apiFetch } from "../core/api-fetch";
 
 export const coursesApi = {
 

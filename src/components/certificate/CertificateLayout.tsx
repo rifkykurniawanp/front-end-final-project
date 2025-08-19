@@ -3,7 +3,7 @@
 import React from "react";
 import { Printer, Download, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { certificatesApi } from "@/fetch-API/API/certificates.api";
+import { certificatesApi } from "@/lib/API/courses";
 
 interface Props {
   certificateId: number;

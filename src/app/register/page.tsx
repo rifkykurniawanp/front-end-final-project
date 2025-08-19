@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
-import { authApi } from '@/fetch-API/API/auth.api'
+import { authApi } from '@/lib/API/auth/auth.api'
 import { RegisterDto, RoleName } from '@/types/auth'
 
 type RegisterFormData = {

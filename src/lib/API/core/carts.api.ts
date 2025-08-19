@@ -2,15 +2,9 @@ import { apiFetch } from "./api-fetch";
 import { CartItem, AddToCartDto, UpdateCartItemDto, CartWithItems, CartSummary } from "@/types/cart";
 
 export const cartApi = {
-  /**
-   * Get the current authenticated user's cart
-   */
   getMyCart: (token: string) =>
     apiFetch<CartWithItems>("/cart", { token }),
 
-  /**
-   * Add an item to the current user's cart
-   */
   addItem: (data: AddToCartDto, token: string) =>
     apiFetch<CartItem>("/cart/items", {
       method: "POST",
@@ -18,9 +12,6 @@ export const cartApi = {
       token,
     }),
 
-  /**
-   * Update a cart item by its ID
-   */
   updateItem: (itemId: number, data: UpdateCartItemDto, token: string) =>
     apiFetch<CartItem>(`/cart/items/${itemId}`, {
       method: "PATCH",

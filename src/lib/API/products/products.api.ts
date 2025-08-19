@@ -1,4 +1,4 @@
-import { apiFetch } from "./api-fetch";
+import { apiFetch } from "../core/api-fetch";
 import { ProductCategory, ProductOrigin } from "@/types/enum";
 import { CreateProductDto, ProductFilterDto, ProductResponseDto, UpdateProductDto } from "@/types/product";
 
@@ -18,16 +18,16 @@ export const productsApi = {
     });
 
     const queryString = searchParams.toString();
-    const endpoint = `/api/products${queryString ? `?${queryString}` : ""}`;
+    const endpoint = `/products${queryString ? `?${queryString}` : ""}`;
     
     return apiFetch<ProductResponseDto[]>(endpoint);
   },
 
   getById: (id: number) =>
-    apiFetch<ProductResponseDto>(`/api/products/${id}`),
+    apiFetch<ProductResponseDto>(`/products/${id}`),
 
   getBySlug: (slug: string) =>
-    apiFetch<ProductResponseDto>(`/api/products/slug/${slug}`),
+    apiFetch<ProductResponseDto>(`/products/slug/${slug}`),
 
   search: (query: string, params: Omit<ProductFilterDto, 'search'> = {}) => {
     const searchParams = new URLSearchParams({ search: query });
@@ -42,7 +42,7 @@ export const productsApi = {
       }
     });
 
-    return apiFetch<ProductResponseDto[]>(`/api/products/search?${searchParams.toString()}`);
+    return apiFetch<ProductResponseDto[]>(`/products/search?${searchParams.toString()}`);
   },
 
   getByCategory: (category: ProductCategory, params: Omit<ProductFilterDto, 'category'> = {}) => {
@@ -59,7 +59,7 @@ export const productsApi = {
     });
 
     const queryString = searchParams.toString();
-    const endpoint = `/api/products/category/${category}${queryString ? `?${queryString}` : ""}`;
+    const endpoint = `/products/category/${category}${queryString ? `?${queryString}` : ""}`;
     
     return apiFetch<ProductResponseDto[]>(endpoint);
   },
@@ -78,7 +78,7 @@ export const productsApi = {
     });
 
     const queryString = searchParams.toString();
-    const endpoint = `/api/products/supplier/${supplierId}${queryString ? `?${queryString}` : ""}`;
+    const endpoint = `/products/supplier/${supplierId}${queryString ? `?${queryString}` : ""}`;
     
     return apiFetch<ProductResponseDto[]>(endpoint);
   },
@@ -97,20 +97,20 @@ export const productsApi = {
     });
 
     const queryString = searchParams.toString();
-    const endpoint = `/api/products/origin/${origin}${queryString ? `?${queryString}` : ""}`;
+    const endpoint = `/products/origin/${origin}${queryString ? `?${queryString}` : ""}`;
     
     return apiFetch<ProductResponseDto[]>(endpoint);
   },
 
   create: (data: CreateProductDto, token: string) =>
-    apiFetch<ProductResponseDto>("/api/products", {
+    apiFetch<ProductResponseDto>("/products", {
       method: "POST",
       body: data,
       token,
     }),
 
   update: (id: number, data: UpdateProductDto, token: string) =>
-    apiFetch<ProductResponseDto>(`/api/products/${id}`, {
+    apiFetch<ProductResponseDto>(`/products/${id}`, {
       method: "PUT",
       body: data,
       token,
@@ -118,7 +118,7 @@ export const productsApi = {
 
  
   delete: (id: number, token: string) =>
-    apiFetch<void>(`/api/products/${id}`, {
+    apiFetch<void>(`/products/${id}`, {
       method: "DELETE",
       token,
     }),

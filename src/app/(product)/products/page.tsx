@@ -6,7 +6,7 @@ import { FilterSidebar } from "@/components/product/FilterSideBar";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { useCart } from "@/hooks/useCart";
 import { FilterState, Product } from "@/types/product";
-import { productsApi } from "@/fetch-API/API/products.api";
+import { productsApi } from "@/lib/API/products/products.api";
 
 const ProductPage: FC = () => {
   const router = useRouter();

@@ -1,11 +1,3 @@
-/**
- * src/types/api.ts
- *
- * This file contains reusable types and classes for API requests,
- * ensuring consistency and a single source of truth for API-related logic.
- */
-
-// ================= TYPES & INTERFACES =================
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 export interface ApiError {
@@ -23,11 +15,6 @@ export interface FetchOptions {
   timeout?: number;
 }
 
-// ================= ERROR CLASS =================
-/**
- * A custom error class for handling API-related errors.
- * It provides helper methods for identifying common error types.
- */
 export class GeneralApiError extends Error {
   constructor(
     public message: string, 
@@ -69,13 +56,6 @@ export class GeneralApiError extends Error {
   }
 }
 
-// ================= HELPER FUNCTIONS =================
-/**
- * Parses a failed HTTP response into a custom GeneralApiError.
- * @param response The failed fetch Response object.
- * @param errorText The response body text containing error details.
- * @returns A new GeneralApiError instance.
- */
 export function parseApiError(response: Response, errorText: string): GeneralApiError {
   try {
     const data = JSON.parse(errorText);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { certificatesApi } from "@/fetch-API/API/certificates.api";
+import { certificatesApi } from "@/lib/API/certificates.api";
 import { Certificate } from "@/types/course";
 
 export function useCertificate(enrollmentId: number, token: string) {

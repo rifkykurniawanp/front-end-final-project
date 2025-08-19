@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Certificate } from "@/types/course";
-import { apiFetch } from "@/fetch-API/API/api-fetch";
+import { apiFetch } from "@/lib/API/core/api-fetch";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 

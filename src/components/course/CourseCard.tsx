@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Star, Users, Clock, BookOpen } from "lucide-react";
 import type { CourseWithRelations } from "@/types/course";
-import { useRouter } from "next/navigation"; // Import useRouter
+import { useRouter } from "next/navigation";
 
 interface CourseCardProps {
   course: CourseWithRelations;
@@ -21,7 +21,7 @@ export default function CourseCard({ course }: CourseCardProps) {
   return (
     <Card
       className="cursor-pointer hover:shadow-xl transition-all duration-200 rounded-2xl border border-amber-200 bg-gradient-to-br from-orange-50 to-amber-100"
-      onClick={handleCardClick} // Attach the new handler
+      onClick={handleCardClick}
     >
       {/* Header */}
       <CardHeader>

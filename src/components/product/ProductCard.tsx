@@ -14,7 +14,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Plus, Minus, Check } from 'lucide-react';
-import { formatCurrency, cn } from '@/fetch-API/utils';
+import { formatCurrency, cn } from '@/lib/utils';
 
 export interface ProductCardProps {
   product: Product;
@@ -36,6 +36,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     setTimeout(() => setIsAdded(false), 1500);
   };
 
+  const hasValidImage = product.image && product.image.trim() !== '';
+
   return (
     <Card className="overflow-hidden shadow-sm border border-amber-100 hover:shadow-md transition-shadow flex flex-col bg-white">
       <Link
@@ -43,13 +45,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         aria-label={`Lihat detail untuk ${product.name}`}
       >
         <div className="relative w-full h-48 bg-amber-50">
-          <Image
-            src={product.image}
-            alt={product.name}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          />
+          {hasValidImage ? (
+            <Image
+              src={product.image!}
+              alt={product.name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-amber-100">
+              <div className="text-amber-400 text-4xl">📦</div>
+            </div>
+          )}
         </div>
       </Link>
 

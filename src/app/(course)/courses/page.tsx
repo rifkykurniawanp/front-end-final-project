@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import CourseCard from "@/components/course/CourseCard";
-import { coursesApi } from "@/fetch-API/API/courses.api";
+import { coursesApi } from "@/lib/API/courses.api";
 import type { CourseWithRelations } from "@/types/course";
 import { allCourses } from "@/app/data/courses";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ import {
   CommandInput,
   CommandItem,
 } from "@/components/ui/command";
-import { cn } from "@/fetch-API/utils";
+import { cn } from "@/lib/utils";
 
 // Dummy data for categories. In a real app, this would come from an API.
 const categories = [
