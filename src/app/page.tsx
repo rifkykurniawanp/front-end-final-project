@@ -1,14 +1,42 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { allCourses } from "@/app/data/courses";
-import { allProducts } from "@/app/data/products/index";
+import { coursesApi } from "@/lib/API/courses";
+import { productsApi } from "@/lib/API/products";
+import { CourseWithRelations } from "@/types/course";
+import { ProductResponseDto } from "@/types/product";
 
 export default function HomePage() {
-  const courses = allCourses.slice(0, 3);
-  const product = allProducts.slice(0, 3);
+  const [courses, setCourses] = useState<CourseWithRelations[]>([]);
+  const [products, setProducts] = useState<ProductResponseDto[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch top 3 courses
+        const allCourses = await coursesApi.getAll({ page: 1, limit: 3 });
+        setCourses(allCourses);
+
+        // Fetch top 3 products
+        const allProducts = await productsApi.getAll();
+        setProducts(allProducts.slice(0, 3));
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return <div className="min-h-screen flex justify-center items-center">Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-stone-50">
@@ -70,7 +98,7 @@ export default function HomePage() {
             <div className="w-16 h-0.5 bg-amber-600 mx-auto mt-2" />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {product.map((product) => (
+            {products.map((product) => (
               <Card key={product.id} className="bg-white hover:bg-stone-50 transition">
                 <CardContent className="p-6">
                   <CardTitle className="text-lg font-light text-stone-800">{product.name}</CardTitle>

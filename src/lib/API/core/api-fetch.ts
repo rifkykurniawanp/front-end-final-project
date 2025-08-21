@@ -7,20 +7,23 @@ export async function apiFetch<T = unknown>(
   endpoint: string,
   options: FetchOptions = {}
 ): Promise<T> {
-  const { 
-    method = "GET", 
-    body, 
-    token, 
-    headers = {}, 
-    isBlob = false, 
-    timeout = 30000 
+  const {
+    method = "GET",
+    body,
+    token,
+    headers = {},
+    isBlob = false,
+    timeout = 30000
   } = options;
 
   const url = `${API_BASE_URL}${API_VERSION}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
 
+  // Auto-get token from localStorage if not provided
+  const authToken = token || (typeof window !== 'undefined' ? localStorage.getItem('token') : null);
+
   const requestHeaders: Record<string, string> = {
     ...(!isBlob && { "Content-Type": "application/json" }),
-    ...(token && { Authorization: `Bearer ${token}` }),
+    ...(authToken && { Authorization: `Bearer ${authToken}` }),
     ...headers,
   };
 
@@ -55,21 +58,21 @@ export async function apiFetch<T = unknown>(
     return text ? JSON.parse(text) as T : {} as T;
   } catch (error) {
     clearTimeout(timeoutId);
-    
+   
     if (error instanceof GeneralApiError) throw error;
-    
+   
     if (error instanceof DOMException && error.name === 'AbortError') {
       throw new GeneralApiError("Request timeout", 408);
     }
-    
+   
     if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new GeneralApiError("Network connection failed", 0);
     }
-    
+   
     if (error instanceof Error) {
       throw new GeneralApiError(error.message, 500);
     }
-    
+   
     throw new GeneralApiError("Unknown network error", 500);
   }
 }

@@ -19,7 +19,11 @@ interface UseCartReturn {
   itemCount: number;
   isLoading: boolean;
   error: string | null;
-  addToCart: (item: Product | Course, type: CartItemType, quantity?: number) => Promise<void>;
+  addToCart: (
+    item: Product | Course,
+    type: CartItemType,
+    quantity?: number
+  ) => Promise<void>;
   removeFromCart: (itemId: number) => Promise<void>;
   updateQuantity: (itemId: number, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
@@ -39,21 +43,34 @@ export const useCart = (
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
+  const isGuest = !userId || userId === "guest";
+  const isUserRole = userRole === "USER";
+
+  // ---------- Helpers ----------
+  const saveGuestCart = (items: CartItem[], currentCartId?: number | null) => {
+    if (isGuest) {
+      localStorage.setItem("guestCart", JSON.stringify(items));
+      if (!currentCartId) {
+        const newId = Date.now();
+        localStorage.setItem("guestCartId", newId.toString());
+        setCartId(newId);
+      }
+    }
+  };
+
   // ---------- Cart Initialization ----------
   const loadCart = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      // Role bukan USER → kosongkan cart
-      if (userRole !== "USER") {
+      if (!isUserRole) {
         setCart([]);
         setCartId(null);
         return;
       }
 
-      // Guest cart via localStorage
-      if (!userId || userId === "guest") {
+      if (isGuest) {
         const guestCart = localStorage.getItem("guestCart");
         const guestCartId = localStorage.getItem("guestCartId");
         setCart(guestCart ? JSON.parse(guestCart) : []);
@@ -61,7 +78,6 @@ export const useCart = (
         return;
       }
 
-      // Authenticated USER
       if (!token) {
         setCart([]);
         return;
@@ -71,49 +87,56 @@ export const useCart = (
       setCartId(response.id);
       setCart(response.items || []);
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "Failed to load cart");
       console.error("Error loading cart:", err);
     } finally {
       setIsLoading(false);
     }
-  }, [userId, token, userRole]);
-
-  const saveGuestCart = (items: CartItem[]) => {
-    if (!userId || userId === "guest") {
-      localStorage.setItem("guestCart", JSON.stringify(items));
-      if (!cartId) localStorage.setItem("guestCartId", Date.now().toString());
-    }
-  };
+  }, [isGuest, isUserRole, token]);
 
   // ---------- Mutations ----------
-  const addToCart = async (item: Product | Course, type: CartItemType, quantity = 1) => {
+  const addToCart = async (
+    item: Product | Course,
+    type: CartItemType,
+    quantity = 1
+  ) => {
     try {
       setError(null);
 
-      // Guest logic
-      if (!userId || userId === "guest") {
-        const existingIndex = cart.findIndex(c => c.itemId === item.id && c.itemType === type);
+      if (isGuest) {
+        const existingIndex = cart.findIndex(
+          (c) => c.itemId === item.id && c.itemType === type
+        );
+
         let updatedCart: CartItem[];
         if (existingIndex > -1) {
-          updatedCart = cart.map((c, i) => i === existingIndex ? { ...c, quantity: c.quantity + quantity } : c);
+          updatedCart = cart.map((c, i) =>
+            i === existingIndex
+              ? { ...c, quantity: c.quantity + quantity }
+              : c
+          );
         } else {
-          updatedCart = [...cart, {
-            id: Date.now(),
-            cartId: cartId || Date.now(),
-            itemType: type,
-            itemId: item.id,
-            quantity,
-            price: item.price,
-            product: type === CartItemType.PRODUCT ? (item as Product) : null,
-            course: type === CartItemType.COURSE ? (item as Course) : null,
-          }];
+          updatedCart = [
+            ...cart,
+            {
+              id: Date.now(),
+              cartId: cartId || Date.now(),
+              itemType: type,
+              itemId: item.id,
+              quantity,
+              price: item.price,
+              product: type === CartItemType.PRODUCT ? (item as Product) : null,
+              course: type === CartItemType.COURSE ? (item as Course) : null,
+            },
+          ];
         }
+
         setCart(updatedCart);
-        saveGuestCart(updatedCart);
+        saveGuestCart(updatedCart, cartId);
         return;
       }
 
-      if (userRole !== "USER") throw new Error("Only USER role can use cart");
+      if (!isUserRole) throw new Error("Only USER role can use cart");
       if (!token) throw new Error("Authentication required");
       if (!cartId) throw new Error("Cart ID not available");
 
@@ -121,7 +144,7 @@ export const useCart = (
       await cartApi.addItem(cartId, dto, token);
       await loadCart();
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "Failed to add item");
       console.error("Error adding to cart:", err);
     }
   };
@@ -130,21 +153,21 @@ export const useCart = (
     try {
       setError(null);
 
-      if (!userId || userId === "guest") {
-        const updatedCart = cart.filter(c => c.id !== itemId);
+      if (isGuest) {
+        const updatedCart = cart.filter((c) => c.id !== itemId);
         setCart(updatedCart);
-        saveGuestCart(updatedCart);
+        saveGuestCart(updatedCart, cartId);
         return;
       }
 
-      if (userRole !== "USER") throw new Error("Only USER role can use cart");
+      if (!isUserRole) throw new Error("Only USER role can use cart");
       if (!token) throw new Error("Authentication required");
       if (!cartId) throw new Error("Cart ID not available");
 
       await cartApi.removeItem(cartId, itemId, token);
       await loadCart();
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "Failed to remove item");
       console.error("Error removing from cart:", err);
     }
   };
@@ -154,14 +177,16 @@ export const useCart = (
       setError(null);
       if (quantity <= 0) return removeFromCart(itemId);
 
-      if (!userId || userId === "guest") {
-        const updatedCart = cart.map(c => c.id === itemId ? { ...c, quantity } : c);
+      if (isGuest) {
+        const updatedCart = cart.map((c) =>
+          c.id === itemId ? { ...c, quantity } : c
+        );
         setCart(updatedCart);
-        saveGuestCart(updatedCart);
+        saveGuestCart(updatedCart, cartId);
         return;
       }
 
-      if (userRole !== "USER") throw new Error("Only USER role can use cart");
+      if (!isUserRole) throw new Error("Only USER role can use cart");
       if (!token) throw new Error("Authentication required");
       if (!cartId) throw new Error("Cart ID not available");
 
@@ -169,7 +194,7 @@ export const useCart = (
       await cartApi.updateItem(cartId, itemId, dto, token);
       await loadCart();
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "Failed to update quantity");
       console.error("Error updating quantity:", err);
     }
   };
@@ -178,7 +203,7 @@ export const useCart = (
     try {
       setError(null);
 
-      if (!userId || userId === "guest") {
+      if (isGuest) {
         setCart([]);
         localStorage.removeItem("guestCart");
         localStorage.removeItem("guestCartId");
@@ -186,21 +211,21 @@ export const useCart = (
         return;
       }
 
-      if (userRole !== "USER") throw new Error("Only USER role can use cart");
+      if (!isUserRole) throw new Error("Only USER role can use cart");
       if (!token || !cartId) return;
 
-      // Clear cart by removing all items individually since clear method doesn't exist
-      const itemsToRemove = [...cart];
-      for (const item of itemsToRemove) {
+      // Clear cart by removing all items individually
+      for (const item of cart) {
         await cartApi.removeItem(cartId, item.id, token);
       }
       await loadCart();
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "Failed to clear cart");
       console.error("Error clearing cart:", err);
     }
   };
 
+  // ---------- Lifecycle ----------
   useEffect(() => {
     loadCart();
   }, [loadCart]);

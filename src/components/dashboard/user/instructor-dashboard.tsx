@@ -5,7 +5,7 @@ import { DollarSign, Users, BookOpen, Star } from "lucide-react";
 
 import { StatCard } from '../shared/stat-card';
 import { ChartCard } from '../shared/chart-card';
-import { CrudTable } from '../shared/crud-table';
+import  CrudTable  from '../shared/crud-table';
 import { DataService } from '@/app/data/dashboard';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 

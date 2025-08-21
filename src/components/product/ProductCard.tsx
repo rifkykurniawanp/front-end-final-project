@@ -1,58 +1,78 @@
 "use client";
 
-import React, { useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { Product } from '@/types/product';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Plus, Minus, Check } from 'lucide-react';
-import { formatCurrency, cn } from '@/lib/utils';
+import React, { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Product } from "@/types/product";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus, Minus, Check } from "lucide-react";
+import { formatCurrency, cn } from "@/lib/utils";
+import { useCartContext } from "@/context/CartContext"; // ✅ pakai context
+import { usePayment } from "@/hooks/usePayment";
+import { CartItemType, PaymentStatus, PayableType } from "@/types/enum";
 
-export interface ProductCardProps {
+interface ProductCardProps {
   product: Product;
-  addToCart: (product: Product, quantity: number) => void;
-  buyNow: (product: Product, quantity: number) => void;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({
-  product,
-  addToCart,
-  buyNow,
-}) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
+  const [isBuying, setIsBuying] = useState(false);
 
-  const handleAddToCartClick = () => {
-    addToCart(product, quantity);
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 1500);
+  const { addToCart, cart, cartId, refreshCart } = useCartContext(); // ✅ context global
+  const { createPayment } = usePayment(localStorage.getItem("token") || "");
+
+  const handleAddToCartClick = async () => {
+    try {
+      await addToCart(product, CartItemType.PRODUCT, quantity);
+      await refreshCart(); // ✅ sinkronisasi
+      setIsAdded(true);
+      setTimeout(() => setIsAdded(false), 1500);
+    } catch (err) {
+      console.error("Gagal tambah ke cart:", err);
+    }
   };
 
-  const hasValidImage = product.image && product.image.trim() !== '';
+  const handleBuyNowClick = async () => {
+    try {
+      if (isBuying) return;
+      setIsBuying(true);
+
+      await addToCart(product, CartItemType.PRODUCT, quantity);
+      await refreshCart();
+
+      if (!cartId) throw new Error("Cart ID tidak tersedia");
+
+      const cartItems = cart.filter((c) => c.itemId === product.id && c.itemType === CartItemType.PRODUCT);
+      const totalAmount = cartItems.reduce((sum, c) => sum + c.price * c.quantity, 0);
+
+      const payment = await createPayment({
+        cartId,
+        amount: totalAmount,
+        status: PaymentStatus.PENDING,
+        paymentMethod: "online",
+        payableType: PayableType.PRODUCT,
+        payableId: cartId,
+      });
+
+      if (payment?.id) window.location.href = `/payment/${payment.id}`;
+    } catch (err) {
+      console.error("Gagal beli sekarang:", err);
+    } finally {
+      setIsBuying(false);
+    }
+  };
+
+  const hasValidImage = product.image && product.image.trim() !== "";
 
   return (
     <Card className="overflow-hidden shadow-sm border border-amber-100 hover:shadow-md transition-shadow flex flex-col bg-white">
-      <Link
-        href={`/product/${product.slug}`}
-        aria-label={`Lihat detail untuk ${product.name}`}
-      >
+      <Link href={`/product/${product.slug}`} aria-label={`Lihat detail untuk ${product.name}`}>
         <div className="relative w-full h-48 bg-amber-50">
           {hasValidImage ? (
-            <Image
-              src={product.image!}
-              alt={product.name}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            />
+            <Image src={product.image!} alt={product.name} fill className="object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-amber-100">
               <div className="text-amber-400 text-4xl">📦</div>
@@ -63,10 +83,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
       <CardHeader>
         <CardTitle className="truncate text-amber-700">
-          <Link
-            href={`/product/${product.slug}`}
-            className="hover:underline text-amber-700"
-          >
+          <Link href={`/product/${product.slug}`} className="hover:underline text-amber-700">
             {product.name}
           </Link>
         </CardTitle>
@@ -76,30 +93,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       </CardHeader>
 
       <CardContent className="py-2">
-        <p className="text-2xl font-semibold text-amber-600">
-          {formatCurrency(product.price)}
-        </p>
+        <p className="text-2xl font-semibold text-amber-600">{formatCurrency(product.price)}</p>
       </CardContent>
 
       <CardFooter className="flex flex-col items-start gap-4 mt-auto pt-4">
         <div className="flex items-center justify-center gap-4 w-full">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-            className="transition-transform active:scale-90 border-amber-200"
-          >
+          <Button size="sm" variant="outline" onClick={() => setQuantity((q) => Math.max(1, q - 1))}>
             <Minus className="w-4 h-4" />
           </Button>
-          <span className="font-bold text-lg w-8 text-center" aria-live="polite">
-            {quantity}
-          </span>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setQuantity((q) => q + 1)}
-            className="transition-transform active:scale-90 border-amber-200"
-          >
+          <span className="font-bold text-lg w-8 text-center">{quantity}</span>
+          <Button size="sm" variant="outline" onClick={() => setQuantity((q) => q + 1)}>
             <Plus className="w-4 h-4" />
           </Button>
         </div>
@@ -110,10 +113,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             disabled={isAdded}
             size="sm"
             className={cn(
-              "flex-1 transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-95",
-              isAdded
-                ? "bg-green-500 hover:bg-green-600 text-white"
-                : "border border-amber-600 text-amber-700 bg-white hover:bg-amber-50"
+              "flex-1 transition-all",
+              isAdded ? "bg-green-500 text-white" : "border border-amber-600 text-amber-700 bg-white"
             )}
           >
             {isAdded ? (
@@ -124,12 +125,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               "Tambah Keranjang"
             )}
           </Button>
-          <Button
-            onClick={() => buyNow(product, quantity)}
-            size="sm"
-            className="flex-1 transition-transform hover:scale-105 active:scale-95 bg-amber-600 text-white hover:bg-amber-700"
-          >
-            Beli Sekarang
+          <Button onClick={handleBuyNowClick} size="sm" disabled={isBuying} className="flex-1 bg-amber-600 text-white">
+            {isBuying ? "Memproses..." : "Beli Sekarang"}
           </Button>
         </div>
       </CardFooter>

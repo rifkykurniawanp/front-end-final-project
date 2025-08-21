@@ -1,34 +1,14 @@
 "use client";
 
-import React, { useCallback } from "react";
+import React from "react";
 import { Product } from "@/types/product";
 import { ProductCard } from "./ProductCard";
 
 interface ProductGridProps {
   products: Product[];
-  addToCart: (product: Product, quantity: number) => void;
-  buyNow: (product: Product, quantity: number) => void;
 }
 
-export const ProductGrid: React.FC<ProductGridProps> = ({
-  products,
-  addToCart,
-  buyNow,
-}) => {
-  const handleAddToCart = useCallback(
-    (product: Product, quantity: number) => {
-      addToCart(product, quantity);
-    },
-    [addToCart]
-  );
-
-  const handleBuyNow = useCallback(
-    (product: Product, quantity: number) => {
-      buyNow(product, quantity);
-    },
-    [buyNow]
-  );
-
+export const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
   if (!products || products.length === 0) {
     return (
       <div className="text-center text-gray-500 py-10">
@@ -43,8 +23,6 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
         <ProductCard
           key={product.id ?? `${product.name}-${Math.random()}`}
           product={product}
-          addToCart={handleAddToCart}
-          buyNow={handleBuyNow}
         />
       ))}
     </div>

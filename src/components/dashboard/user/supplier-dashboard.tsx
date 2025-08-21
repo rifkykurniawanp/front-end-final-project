@@ -6,7 +6,7 @@ import { DollarSign, ShoppingCart, Package, Users } from "lucide-react";
 
 import { StatCard } from '../shared/stat-card';
 import { ChartCard } from '../shared/chart-card';
-import { CrudTable } from '../shared/crud-table';
+import CrudTable  from '../shared/crud-table';
 import { DataService } from '@/app/data/dashboard';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 
