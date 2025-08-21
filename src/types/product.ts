@@ -99,5 +99,15 @@ export interface ProductFilterDto {
   sortOrder?: 'asc' | 'desc';
 }
 
+export interface FilterState {
+  category: ProductCategory[];
+  origin: ProductOrigin[];
+  tags: ProductTagName[];
+  priceRange: [number, number];
+  status: ProductStatus[];
+  minRating: number;
+}
+
+
 import type { CartItem } from './cart';
 import type { ProductOrderItem } from './order';

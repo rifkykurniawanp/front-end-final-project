@@ -115,9 +115,10 @@ export const useCart = (
 
       if (userRole !== "USER") throw new Error("Only USER role can use cart");
       if (!token) throw new Error("Authentication required");
+      if (!cartId) throw new Error("Cart ID not available");
 
       const dto: AddToCartDto = { itemType: type, itemId: item.id, quantity };
-      await cartApi.addItem(dto, token);
+      await cartApi.addItem(cartId, dto, token);
       await loadCart();
     } catch (err: any) {
       setError(err.message);
@@ -138,8 +139,9 @@ export const useCart = (
 
       if (userRole !== "USER") throw new Error("Only USER role can use cart");
       if (!token) throw new Error("Authentication required");
+      if (!cartId) throw new Error("Cart ID not available");
 
-      await cartApi.removeItem(itemId, token);
+      await cartApi.removeItem(cartId, itemId, token);
       await loadCart();
     } catch (err: any) {
       setError(err.message);
@@ -161,9 +163,10 @@ export const useCart = (
 
       if (userRole !== "USER") throw new Error("Only USER role can use cart");
       if (!token) throw new Error("Authentication required");
+      if (!cartId) throw new Error("Cart ID not available");
 
       const dto: UpdateCartItemDto = { quantity };
-      await cartApi.updateItem(itemId, dto, token);
+      await cartApi.updateItem(cartId, itemId, dto, token);
       await loadCart();
     } catch (err: any) {
       setError(err.message);
@@ -186,8 +189,12 @@ export const useCart = (
       if (userRole !== "USER") throw new Error("Only USER role can use cart");
       if (!token || !cartId) return;
 
-      await cartApi.clear(token);
-      setCart([]);
+      // Clear cart by removing all items individually since clear method doesn't exist
+      const itemsToRemove = [...cart];
+      for (const item of itemsToRemove) {
+        await cartApi.removeItem(cartId, item.id, token);
+      }
+      await loadCart();
     } catch (err: any) {
       setError(err.message);
       console.error("Error clearing cart:", err);

@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect, FC } from "react";
 import { useRouter } from "next/navigation";
 import { FilterSidebar } from "@/components/product/FilterSideBar";
@@ -11,27 +10,38 @@ import { productsApi } from "@/lib/API/products/products.api";
 const ProductPage: FC = () => {
   const router = useRouter();
   const { addToCart } = useCart();
-
+  
   const [filters, setFilters] = useState<FilterState>({
     category: [],
-    subcategory: [],
-    priceRange: [0, 500000],
-    rating: 0,
-    caffeine: [],
     origin: [],
+    tags: [],
+    priceRange: [0, 500000],
+    status: [],
+    minRating: 0,
   });
-
+  
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const updateFilter = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
+  // Type-safe update filter function
+  const updateFilter = (key: keyof FilterState, value: FilterState[keyof FilterState]) => {
+    setFilters((prev: FilterState) => ({ 
+      ...prev, 
+      [key]: value 
+    }));
   };
 
   const resetFilters = () => {
-    setFilters({ category: [], subcategory: [], priceRange: [0, 500000], rating: 0, caffeine: [], origin: [] });
+    setFilters({
+      category: [],
+      origin: [],
+      tags: [],
+      priceRange: [0, 500000],
+      status: [],
+      minRating: 0,
+    });
     setSearchTerm("");
   };
 
@@ -40,18 +50,18 @@ const ProductPage: FC = () => {
     const fetchProducts = async () => {
       setLoading(true);
       setError(null);
-
       try {
         const params = {
           search: searchTerm || undefined,
           category: filters.category.length > 0 ? filters.category : undefined,
-          subcategory: filters.subcategory.length > 0 ? filters.subcategory : undefined,
+          origin: filters.origin.length > 0 ? filters.origin : undefined,
+          tags: filters.tags.length > 0 ? filters.tags : undefined,
+          status: filters.status.length > 0 ? filters.status : undefined,
           minPrice: filters.priceRange[0],
           maxPrice: filters.priceRange[1],
-          // Tambahkan field filter lain sesuai ProductFilterDto
-          origin: filters.origin.length > 0 ? filters.origin : undefined,
+          minRating: filters.minRating > 0 ? filters.minRating : undefined,
         };
-
+        
         const data = await productsApi.getAll(params);
         setProducts(data);
       } catch (err: any) {

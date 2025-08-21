@@ -1,33 +1,48 @@
-import { apiFetch } from "../core/api-fetch"; // Import the separated apiFetch utility
+// lessons-api.ts
+import { apiFetch } from "../core/api-fetch";
 import { Lesson, CreateLessonDto, UpdateLessonDto } from "@/types/course";
 
 export const lessonsApi = {
-  getByModule: (moduleId: number, token?: string) =>
-    apiFetch<Lesson[]>(`/course-modules/${moduleId}/lessons`, { token }),
-    
-  getById: (id: number, token?: string) =>
-    apiFetch<Lesson>(`/lessons/${id}`, { token }),
-
-  getBySlug: (slug: string, token?: string) =>
-    apiFetch<Lesson>(`/lessons/slug/${slug}`, { token }),
-    
-  create: (data: CreateLessonDto, token: string) =>
-    apiFetch<Lesson>("/lessons", {
+  // ===== ADMIN / INSTRUCTOR =====
+  create: (moduleId: number, data: CreateLessonDto, token: string) =>
+    apiFetch<Lesson>(`/api/modules/${moduleId}/lessons`, {
       method: "POST",
       body: data,
       token,
     }),
-    
+
+  getByModule: (moduleId: number, token: string) =>
+    apiFetch<Lesson[]>(`/api/modules/${moduleId}/lessons`, { token }),
+
+  getById: (id: number, token?: string) =>
+    apiFetch<Lesson>(`/api/lessons/${id}`, { token }),
+
+  getBySlug: (slug: string, token?: string) =>
+    apiFetch<Lesson>(`/api/lessons/slug/${slug}`, { token }),
+
   update: (id: number, data: UpdateLessonDto, token: string) =>
-    apiFetch<Lesson>(`/lessons/${id}`, {
+    apiFetch<Lesson>(`/api/lessons/${id}`, {
       method: "PATCH",
       body: data,
       token,
     }),
-    
+
   delete: (id: number, token: string) =>
-    apiFetch<{ message: string }>(`/lessons/${id}`, {
+    apiFetch<void>(`/api/lessons/${id}`, {
       method: "DELETE",
       token,
     }),
+
+  // ===== USER PROGRESS =====
+  getProgress: (lessonId: number, token: string) =>
+    apiFetch<any>(`/api/lessons/${lessonId}/progress`, { token }),
+
+  completeLesson: (lessonId: number, token: string) =>
+    apiFetch<any>(`/api/lessons/${lessonId}/complete`, {
+      method: "POST",
+      token,
+    }),
+
+  getCourseProgress: (courseId: number, token: string) =>
+    apiFetch<any>(`/api/courses/${courseId}/progress`, { token }),
 };

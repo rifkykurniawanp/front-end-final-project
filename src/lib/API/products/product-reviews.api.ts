@@ -10,37 +10,37 @@ export const productReviewsApi = {
     if (params.limit) searchParams.append('limit', params.limit.toString());
    
     const queryString = searchParams.toString();
-    const endpoint = `/products/${productId}/reviews${queryString ? `?${queryString}` : ""}`;
+    const endpoint = `/product-reviews/product/${productId}${queryString ? `?${queryString}` : ""}`;
    
     return apiFetch<ProductReviewResponseDto[]>(endpoint);
   },
 
-  create: (productId: number, data: CreateProductReviewDto, token: string) =>
-    apiFetch<ProductReviewResponseDto>(`/products/${productId}/reviews`, {
+  create: (userId: number, data: CreateProductReviewDto, token: string) =>
+    apiFetch<ProductReviewResponseDto>(`/product-reviews?userId=${userId}`, {
       method: "POST",
       body: data,
       token,
     }),
 
   getAverageRating: (productId: number) =>
-    apiFetch<number>(`/products/${productId}/reviews/average`),
-  getById: (id: number) =>
-    apiFetch<ProductReviewResponseDto>(`/reviews/${id}`),
+    apiFetch<number>(`/product-reviews/product/${productId}/average-rating`),
+
+  getById: (reviewId: number) =>
+    apiFetch<ProductReviewResponseDto>(`/product-reviews/${reviewId}`),
 
   update: (reviewId: number, data: UpdateProductReviewDto, token: string) =>
-    apiFetch<ProductReviewResponseDto>(`/reviews/${reviewId}`, {
-      method: "PUT",
+    apiFetch<ProductReviewResponseDto>(`/product-reviews/${reviewId}`, {
+      method: "PATCH",
       body: data,
       token,
     }),
 
   delete: (reviewId: number, token: string) =>
-    apiFetch<void>(`/reviews/${reviewId}`, {
+    apiFetch<void>(`/product-reviews/${reviewId}`, {
       method: "DELETE",
       token,
     }),
-
-  
+ 
   getByUserId: (userId: number, token: string, params: { page?: number; limit?: number } = {}) => {
     const searchParams = new URLSearchParams();
    
@@ -48,12 +48,12 @@ export const productReviewsApi = {
     if (params.limit) searchParams.append('limit', params.limit.toString());
    
     const queryString = searchParams.toString();
-    // FIXED: Remove /v1 from endpoint since it's already in API_VERSION
-    const endpoint = `/users/${userId}/reviews${queryString ? `?${queryString}` : ""}`;
+    const endpoint = `/product-reviews/user/${userId}${queryString ? `?${queryString}` : ""}`;
    
     return apiFetch<ProductReviewResponseDto[]>(endpoint, { token });
   },
 
+  // Note: This endpoint doesn't exist in backend - you may need to add it
   getProductStats: (productId: number) =>
-    apiFetch<ProductReviewsStats>(`/products/${productId}/reviews/stats`),
+    apiFetch<ProductReviewsStats>(`/product-reviews/product/${productId}/stats`),
 };

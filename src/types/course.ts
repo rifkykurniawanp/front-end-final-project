@@ -113,6 +113,10 @@ export interface Certificate {
   enrollment?: CourseEnrollment;
 }
 
+export interface IssueCertificateDto {
+  enrollmentId: number;
+  // Add other fields as needed based on your backend DTO
+}
 // For forms and API requests
 export interface CreateCourseDto {
   title: string;
@@ -200,6 +204,11 @@ export interface CreateAssignmentSubmissionDto {
 export interface UpdateAssignmentSubmissionDto {
   content?: string;
   grade?: number;
+}
+
+export interface GradeAssignmentSubmissionDto {
+  grade: number;
+  feedback?: string;
 }
 
 export interface UpdateLessonProgressDto {

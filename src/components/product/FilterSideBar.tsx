@@ -9,53 +9,34 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { ProductCategory, ProductOrigin, ProductStatus, ProductTagName } from "@/types/enum";
-
-// Updated FilterState to match your actual types
-export interface FilterState {
-  category: ProductCategory[];
-  origin: ProductOrigin[];
-  tags: ProductTagName[];
-  priceRange: [number, number];
-  status: ProductStatus[];
-  minRating: number;
-}
+import { FilterState } from "@/types/product";
 
 interface FilterSidebarProps {
   filters: FilterState;
   searchTerm: string;
   setSearchTerm: (value: string) => void;
-  updateFilter: <K extends keyof FilterState>(key: K, value: FilterState[K]) => void;
+  updateFilter: (key: keyof FilterState, value: FilterState[keyof FilterState]) => void;
   resetFilters: () => void;
 }
 
-// Get all enum values dynamically
 const getCategoryConfig = () => {
   const config: Record<string, { label: string; emoji: string }> = {};
-  Object.values(ProductCategory).forEach((category) => {
-    switch (category.toLowerCase()) {
-      case 'tea':
-        config[category] = { label: "Teh", emoji: "🍃" };
-        break;
-      case 'coffee':
-        config[category] = { label: "Kopi", emoji: "☕" };
-        break;
-      case 'herbal':
-        config[category] = { label: "Herbal", emoji: "🌿" };
-        break;
+  (Object.keys(ProductCategory) as Array<keyof typeof ProductCategory>).forEach((key) => {
+    const category = ProductCategory[key];
+    switch (category) {
+      case ProductCategory.TEA:
+        config[category] = { label: "Teh", emoji: "🍃" }; break;
+      case ProductCategory.COFFEE:
+        config[category] = { label: "Kopi", emoji: "☕" }; break;
+      case ProductCategory.HERBAL:
+        config[category] = { label: "Herbal", emoji: "🌿" }; break;
+      case ProductCategory.EQUIPMENT:
+        config[category] = { label: "Peralatan", emoji: "🔧" }; break;
       default:
-        config[category] = { 
-          label: category.charAt(0).toUpperCase() + category.slice(1).toLowerCase(), 
-          emoji: "📦" 
-        };
+        config[category] = { label: category, emoji: "📦" };
     }
   });
   return config;
@@ -63,25 +44,21 @@ const getCategoryConfig = () => {
 
 const getOriginConfig = () => {
   const config: Record<string, { label: string; emoji: string }> = {};
-  Object.values(ProductOrigin).forEach((origin) => {
-    switch (origin.toLowerCase()) {
-      case 'local':
-      case 'lokal':
-        config[origin] = { label: "Lokal", emoji: "🇮🇩" };
-        break;
-      case 'imported':
-      case 'import':
-        config[origin] = { label: "Impor", emoji: "🌍" };
-        break;
-      case 'organic':
-      case 'organik':
-        config[origin] = { label: "Organik", emoji: "🌱" };
-        break;
+  (Object.keys(ProductOrigin) as Array<keyof typeof ProductOrigin>).forEach((key) => {
+    const origin = ProductOrigin[key];
+    switch (origin) {
+      case ProductOrigin.INDONESIA:
+        config[origin] = { label: "Indonesia", emoji: "🇮🇩" }; break;
+      case ProductOrigin.VIETNAM:
+        config[origin] = { label: "Vietnam", emoji: "🇻🇳" }; break;
+      case ProductOrigin.BRAZIL:
+        config[origin] = { label: "Brazil", emoji: "🇧🇷" }; break;
+      case ProductOrigin.ETHIOPIA:
+        config[origin] = { label: "Ethiopia", emoji: "🇪🇹" }; break;
+      case ProductOrigin.OTHER:
+        config[origin] = { label: "Lainnya", emoji: "🌍" }; break;
       default:
-        config[origin] = { 
-          label: origin.charAt(0).toUpperCase() + origin.slice(1).toLowerCase(), 
-          emoji: "🌍" 
-        };
+        config[origin] = { label: origin, emoji: "🌍" };
     }
   });
   return config;
@@ -89,32 +66,21 @@ const getOriginConfig = () => {
 
 const getTagConfig = () => {
   const config: Record<string, { label: string; emoji: string }> = {};
-  Object.values(ProductTagName).forEach((tag) => {
-    switch (tag.toLowerCase()) {
-      case 'premium':
-        config[tag] = { label: "Premium", emoji: "⭐" };
-        break;
-      case 'bestseller':
-      case 'terlaris':
-        config[tag] = { label: "Terlaris", emoji: "🔥" };
-        break;
-      case 'new':
-      case 'baru':
-        config[tag] = { label: "Baru", emoji: "✨" };
-        break;
-      case 'discount':
-      case 'diskon':
-        config[tag] = { label: "Diskon", emoji: "🏷️" };
-        break;
-      case 'popular':
-      case 'populer':
-        config[tag] = { label: "Populer", emoji: "👑" };
-        break;
-      default:
-        config[tag] = { 
-          label: tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase(), 
-          emoji: "🏷️" 
-        };
+  (Object.keys(ProductTagName) as Array<keyof typeof ProductTagName>).forEach((key) => {
+    const tag = ProductTagName[key];
+    switch (tag) {
+      case ProductTagName.ARABICA: 
+        config[tag] = { label: "Arabica", emoji: "☕" }; break;
+      case ProductTagName.ROBUSTA: 
+        config[tag] = { label: "Robusta", emoji: "☕" }; break;
+      case ProductTagName.GREEN_TEA: 
+        config[tag] = { label: "Teh Hijau", emoji: "🍵" }; break;
+      case ProductTagName.HERBAL: 
+        config[tag] = { label: "Herbal", emoji: "🌿" }; break;
+      case ProductTagName.EQUIPMENT: 
+        config[tag] = { label: "Peralatan", emoji: "🔧" }; break;
+      default: 
+        config[tag] = { label: (tag as string).replace(/_/g, ' '), emoji: "🏷️" };
     }
   });
   return config;
@@ -122,25 +88,17 @@ const getTagConfig = () => {
 
 const getStatusConfig = () => {
   const config: Record<string, { label: string; emoji: string }> = {};
-  Object.values(ProductStatus).forEach((status) => {
-    switch (status.toLowerCase()) {
-      case 'active':
-      case 'aktif':
-        config[status] = { label: "Aktif", emoji: "✅" };
-        break;
-      case 'inactive':
-      case 'nonaktif':
-        config[status] = { label: "Nonaktif", emoji: "❌" };
-        break;
-      case 'out_of_stock':
-      case 'habis':
-        config[status] = { label: "Habis", emoji: "📭" };
-        break;
-      default:
-        config[status] = { 
-          label: status.charAt(0).toUpperCase() + status.slice(1).toLowerCase(), 
-          emoji: "📊" 
-        };
+  (Object.keys(ProductStatus) as Array<keyof typeof ProductStatus>).forEach((key) => {
+    const status = ProductStatus[key];
+    switch (status) {
+      case ProductStatus.ACTIVE: 
+        config[status] = { label: "Aktif", emoji: "✅" }; break;
+      case ProductStatus.OUT_OF_STOCK: 
+        config[status] = { label: "Habis Stok", emoji: "📭" }; break;
+      case ProductStatus.DRAFT: 
+        config[status] = { label: "Draft", emoji: "📝" }; break;
+      default: 
+        config[status] = { label: (status as string).replace(/_/g, ' '), emoji: "📊" };
     }
   });
   return config;
@@ -150,86 +108,75 @@ const RATING_OPTIONS = [
   { value: 0, label: "Semua Rating", stars: "" },
   { value: 3, label: "3+ Bintang", stars: "⭐⭐⭐" },
   { value: 4, label: "4+ Bintang", stars: "⭐⭐⭐⭐" },
-  { value: 4.5, label: "4.5+ Bintang", stars: "⭐⭐⭐⭐⭐" }
+  { value: 4.5, label: "4.5+ Bintang", stars: "⭐⭐⭐⭐⭐" },
 ];
 
-export const FilterSidebar: React.FC<FilterSidebarProps> = ({
-  filters,
-  searchTerm,
-  setSearchTerm,
-  updateFilter,
-  resetFilters,
+// Type guards for array filters
+const isArrayFilter = (value: any): value is any[] => Array.isArray(value);
+const getArrayFilterLength = (value: any): number => isArrayFilter(value) ? value.length : 0;
+
+export const FilterSidebar: React.FC<FilterSidebarProps> = ({ 
+  filters, 
+  searchTerm, 
+  setSearchTerm, 
+  updateFilter, 
+  resetFilters 
 }) => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-  // Get dynamic configurations
   const CATEGORY_CONFIG = getCategoryConfig();
   const ORIGIN_CONFIG = getOriginConfig();
   const TAG_CONFIG = getTagConfig();
   const STATUS_CONFIG = getStatusConfig();
 
-  const formatCurrency = (value: number) => {
-    return value.toLocaleString("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    });
-  };
+  const formatCurrency = (value: number) =>
+    value.toLocaleString("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 });
 
   const getActiveFilterCount = () => {
     let count = 0;
     if (searchTerm?.trim()) count++;
-    if (filters.category?.length > 0) count++;
-    if (filters.origin?.length > 0) count++;
-    if (filters.tags?.length > 0) count++;
-    if (filters.status?.length > 0) count++;
-    if (filters.priceRange?.[0] > 0 || filters.priceRange?.[1] < 500000) count++;
+    if (getArrayFilterLength(filters.category) > 0) count++;
+    if (getArrayFilterLength(filters.origin) > 0) count++;
+    if (getArrayFilterLength(filters.tags) > 0) count++;
+    if (getArrayFilterLength(filters.status) > 0) count++;
+    if (filters.priceRange[0] > 0 || filters.priceRange[1] < 500000) count++;
     if (filters.minRating > 0) count++;
     return count;
   };
 
-  const handleClearSearch = () => {
-    setSearchTerm("");
-  };
+  const handleClearSearch = () => setSearchTerm("");
+  const handleResetWithClose = () => { resetFilters(); setIsSheetOpen(false); };
 
-  const handleResetWithClose = () => {
-    resetFilters();
-    setIsSheetOpen(false);
-  };
-
-  const handleCheckboxChange = <T extends string>(
-    filterKey: keyof FilterState,
-    value: T,
-    currentArray: T[] = []
+  const handleCheckboxChange = (
+    filterKey: 'category' | 'origin' | 'tags' | 'status',
+    value: string
   ) => {
-    const safeArray = currentArray || [];
-    const newArray = safeArray.includes(value)
-      ? safeArray.filter((item) => item !== value)
-      : [...safeArray, value];
-    updateFilter(filterKey, newArray as FilterState[keyof FilterState]);
+    const currentArray = filters[filterKey] as any[] || [];
+    const newArray = currentArray.includes(value) 
+      ? currentArray.filter((i) => i !== value) 
+      : [...currentArray, value];
+    updateFilter(filterKey, newArray as any);
   };
 
   const FilterContent = () => (
     <div className="space-y-6">
-      {/* Search Section */}
+      {/* Search */}
       <div className="space-y-3">
-        <Label htmlFor="search" className="text-sm font-semibold text-gray-700">
-          🔍 Cari Produk
-        </Label>
+        <Label htmlFor="search" className="text-sm font-semibold text-gray-700">🔍 Cari Produk</Label>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            id="search"
-            placeholder="Masukkan nama produk..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-10 border-amber-200 focus:border-amber-400 focus:ring-amber-400"
+          <Input 
+            id="search" 
+            placeholder="Masukkan nama produk..." 
+            value={searchTerm} 
+            onChange={(e) => setSearchTerm(e.target.value)} 
+            className="pl-10 pr-10 border-amber-200 focus:border-amber-400 focus:ring-amber-400" 
           />
           {searchTerm && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClearSearch}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleClearSearch} 
               className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-gray-100"
             >
               <X className="h-3 w-3" />
@@ -237,16 +184,15 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           )}
         </div>
       </div>
-
       <Separator className="bg-amber-100" />
 
-      {/* Category Section */}
+      {/* Category Filter */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <Label className="text-sm font-semibold text-gray-700">📁 Kategori</Label>
-          {(filters.category?.length || 0) > 0 && (
+          {getArrayFilterLength(filters.category) > 0 && (
             <Badge variant="secondary" className="bg-amber-100 text-amber-700">
-              {filters.category?.length || 0}
+              {getArrayFilterLength(filters.category)}
             </Badge>
           )}
         </div>
@@ -255,8 +201,8 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
             <div key={key} className="flex items-center space-x-3 p-2 rounded-md hover:bg-amber-50 transition-colors">
               <Checkbox
                 id={`category-${key}`}
-                checked={filters.category?.includes(key as ProductCategory) || false}
-                onCheckedChange={() => handleCheckboxChange('category', key as ProductCategory, filters.category)}
+                checked={filters.category.includes(key as ProductCategory)}
+                onCheckedChange={() => handleCheckboxChange('category', key)}
                 className="border-amber-300 data-[state=checked]:bg-amber-600 data-[state=checked]:border-amber-600"
               />
               <Label htmlFor={`category-${key}`} className="flex items-center gap-2 cursor-pointer flex-1">
@@ -267,16 +213,15 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           ))}
         </div>
       </div>
-
       <Separator className="bg-amber-100" />
 
-      {/* Origin Section */}
+      {/* Origin Filter */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <Label className="text-sm font-semibold text-gray-700">🌍 Asal Produk</Label>
-          {(filters.origin?.length || 0) > 0 && (
+          {getArrayFilterLength(filters.origin) > 0 && (
             <Badge variant="secondary" className="bg-amber-100 text-amber-700">
-              {filters.origin?.length || 0}
+              {getArrayFilterLength(filters.origin)}
             </Badge>
           )}
         </div>
@@ -285,8 +230,8 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
             <div key={key} className="flex items-center space-x-3 p-2 rounded-md hover:bg-amber-50 transition-colors">
               <Checkbox
                 id={`origin-${key}`}
-                checked={filters.origin?.includes(key as ProductOrigin) || false}
-                onCheckedChange={() => handleCheckboxChange('origin', key as ProductOrigin, filters.origin)}
+                checked={filters.origin.includes(key as ProductOrigin)}
+                onCheckedChange={() => handleCheckboxChange('origin', key)}
                 className="border-amber-300 data-[state=checked]:bg-amber-600 data-[state=checked]:border-amber-600"
               />
               <Label htmlFor={`origin-${key}`} className="flex items-center gap-2 cursor-pointer flex-1">
@@ -297,16 +242,15 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           ))}
         </div>
       </div>
-
       <Separator className="bg-amber-100" />
 
-      {/* Tags Section */}
+      {/* Tags Filter */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <Label className="text-sm font-semibold text-gray-700">🏷️ Label Produk</Label>
-          {(filters.tags?.length || 0) > 0 && (
+          {getArrayFilterLength(filters.tags) > 0 && (
             <Badge variant="secondary" className="bg-amber-100 text-amber-700">
-              {filters.tags?.length || 0}
+              {getArrayFilterLength(filters.tags)}
             </Badge>
           )}
         </div>
@@ -314,12 +258,12 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           {Object.entries(TAG_CONFIG).map(([key, config]) => (
             <div key={key} className="flex items-center space-x-3 p-2 rounded-md hover:bg-amber-50 transition-colors">
               <Checkbox
-                id={`tag-${key}`}
-                checked={filters.tags?.includes(key as ProductTagName) || false}
-                onCheckedChange={() => handleCheckboxChange('tags', key as ProductTagName, filters.tags)}
+                id={`tags-${key}`}
+                checked={filters.tags.includes(key as ProductTagName)}
+                onCheckedChange={() => handleCheckboxChange('tags', key)}
                 className="border-amber-300 data-[state=checked]:bg-amber-600 data-[state=checked]:border-amber-600"
               />
-              <Label htmlFor={`tag-${key}`} className="flex items-center gap-2 cursor-pointer flex-1">
+              <Label htmlFor={`tags-${key}`} className="flex items-center gap-2 cursor-pointer flex-1">
                 <span>{config.emoji}</span>
                 <span className="text-sm">{config.label}</span>
               </Label>
@@ -327,16 +271,15 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           ))}
         </div>
       </div>
-
       <Separator className="bg-amber-100" />
 
-      {/* Status Section */}
+      {/* Status Filter */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <Label className="text-sm font-semibold text-gray-700">📊 Status Produk</Label>
-          {(filters.status?.length || 0) > 0 && (
+          {getArrayFilterLength(filters.status) > 0 && (
             <Badge variant="secondary" className="bg-amber-100 text-amber-700">
-              {filters.status?.length || 0}
+              {getArrayFilterLength(filters.status)}
             </Badge>
           )}
         </div>
@@ -345,8 +288,8 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
             <div key={key} className="flex items-center space-x-3 p-2 rounded-md hover:bg-amber-50 transition-colors">
               <Checkbox
                 id={`status-${key}`}
-                checked={filters.status?.includes(key as ProductStatus) || false}
-                onCheckedChange={() => handleCheckboxChange('status', key as ProductStatus, filters.status)}
+                checked={filters.status.includes(key as ProductStatus)}
+                onCheckedChange={() => handleCheckboxChange('status', key)}
                 className="border-amber-300 data-[state=checked]:bg-amber-600 data-[state=checked]:border-amber-600"
               />
               <Label htmlFor={`status-${key}`} className="flex items-center gap-2 cursor-pointer flex-1">
@@ -357,39 +300,37 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           ))}
         </div>
       </div>
-
       <Separator className="bg-amber-100" />
 
-      {/* Price Range Section */}
+      {/* Price Range */}
       <div className="space-y-4">
         <Label className="text-sm font-semibold text-gray-700">💰 Kisaran Harga</Label>
         <div className="px-2">
-          <Slider
-            value={filters.priceRange || [0, 500000]}
-            onValueChange={(value) => updateFilter("priceRange", value as [number, number])}
-            max={500000}
-            step={10000}
-            className="w-full"
+          <Slider 
+            value={filters.priceRange} 
+            onValueChange={(value) => updateFilter("priceRange", value as any)} 
+            max={500000} 
+            step={10000} 
+            className="w-full" 
           />
           <div className="flex justify-between text-xs text-gray-600 mt-2 px-1">
             <span className="font-medium bg-amber-50 px-2 py-1 rounded">
-              {formatCurrency(filters.priceRange?.[0] || 0)}
+              {formatCurrency(filters.priceRange[0])}
             </span>
             <span className="font-medium bg-amber-50 px-2 py-1 rounded">
-              {formatCurrency(filters.priceRange?.[1] || 500000)}
+              {formatCurrency(filters.priceRange[1])}
             </span>
           </div>
         </div>
       </div>
-
       <Separator className="bg-amber-100" />
 
-      {/* Rating Section */}
+      {/* Rating Filter */}
       <div className="space-y-3">
         <Label className="text-sm font-semibold text-gray-700">⭐ Rating Minimum</Label>
-        <Select
-          value={(filters.minRating || 0).toString()}
-          onValueChange={(val) => updateFilter("minRating", Number(val))}
+        <Select 
+          value={filters.minRating.toString()} 
+          onValueChange={(value) => updateFilter("minRating", Number(value) as any)}
         >
           <SelectTrigger className="border-amber-200 focus:border-amber-400 focus:ring-amber-400">
             <SelectValue placeholder="Pilih rating minimum" />
@@ -407,64 +348,14 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
         </Select>
       </div>
 
-      {/* Active Filters Summary */}
-      {getActiveFilterCount() > 0 && (
-        <>
-          <Separator className="bg-amber-100" />
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label className="text-sm font-semibold text-gray-700">🏷️ Filter Aktif</Label>
-              <Badge className="bg-amber-600 text-white">
-                {getActiveFilterCount()}
-              </Badge>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {searchTerm?.trim() && (
-                <Badge variant="outline" className="text-xs border-amber-300">
-                  Pencarian: {searchTerm}
-                </Badge>
-              )}
-              {filters.category?.map((cat) => (
-                <Badge key={cat} variant="outline" className="text-xs border-amber-300">
-                  {CATEGORY_CONFIG[cat]?.label || cat}
-                </Badge>
-              ))}
-              {filters.origin?.map((origin) => (
-                <Badge key={origin} variant="outline" className="text-xs border-amber-300">
-                  {ORIGIN_CONFIG[origin]?.label || origin}
-                </Badge>
-              ))}
-              {filters.tags?.map((tag) => (
-                <Badge key={tag} variant="outline" className="text-xs border-amber-300">
-                  {TAG_CONFIG[tag]?.label || tag}
-                </Badge>
-              ))}
-              {filters.status?.map((status) => (
-                <Badge key={status} variant="outline" className="text-xs border-amber-300">
-                  {STATUS_CONFIG[status]?.label || status}
-                </Badge>
-              ))}
-              {(filters.minRating || 0) > 0 && (
-                <Badge variant="outline" className="text-xs border-amber-300">
-                  Rating {filters.minRating}+
-                </Badge>
-              )}
-            </div>
-          </div>
-        </>
-      )}
-
-      <Separator className="bg-amber-100" />
-
       {/* Reset Button */}
       <Button 
         variant="outline" 
         onClick={handleResetWithClose} 
-        className="w-full border-amber-300 text-amber-700 hover:bg-amber-50 hover:text-amber-800 transition-colors"
+        className="w-full border-amber-300 text-amber-700 hover:bg-amber-50 hover:text-amber-800 transition-colors mt-4" 
         disabled={getActiveFilterCount() === 0}
       >
-        <RotateCcw className="mr-2 h-4 w-4" />
-        Reset Semua Filter
+        <RotateCcw className="mr-2 h-4 w-4" /> Reset Semua Filter
       </Button>
     </div>
   );
@@ -475,12 +366,8 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
       <div className="block lg:hidden">
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild>
-            <Button 
-              variant="outline" 
-              className="w-full mb-4 border-amber-300 text-amber-700 hover:bg-amber-50 relative"
-            >
-              <Filter className="mr-2 h-4 w-4" />
-              Filter Produk
+            <Button variant="outline" className="w-full mb-4 border-amber-300 text-amber-700 hover:bg-amber-50 relative">
+              <Filter className="mr-2 h-4 w-4" /> Filter Produk
               {getActiveFilterCount() > 0 && (
                 <Badge className="ml-2 bg-amber-600 text-white text-xs px-1.5 py-0.5">
                   {getActiveFilterCount()}
@@ -491,8 +378,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           <SheetContent side="left" className="overflow-auto w-80 sm:w-96">
             <SheetHeader className="pb-4">
               <SheetTitle className="text-lg font-semibold flex items-center gap-2 text-amber-700">
-                <Filter className="w-5 h-5" />
-                Filter Produk
+                <Filter className="w-5 h-5" /> Filter Produk
               </SheetTitle>
             </SheetHeader>
             <FilterContent />
@@ -506,8 +392,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center justify-between text-amber-700">
               <div className="flex items-center gap-2">
-                <Filter className="w-5 h-5" />
-                Filter Produk
+                <Filter className="w-5 h-5" /> Filter Produk
               </div>
               {getActiveFilterCount() > 0 && (
                 <Badge className="bg-amber-600 text-white">

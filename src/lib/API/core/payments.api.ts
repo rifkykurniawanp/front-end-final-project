@@ -11,18 +11,15 @@ export const paymentsApi = {
   create: (data: Partial<Payment>, token: string) =>
     apiFetch<Payment>("/payments", { method: "POST", body: data, token }),
 
-  updateStatus: (id: number, data: Partial<Payment>, token: string) =>
-    apiFetch<Payment>(`/payments/${id}`, { method: "PUT", body: data, token }),
+  updateStatus: (id: number, data: { status: string }, token: string) =>
+    apiFetch<Payment>(`/payments/${id}/status`, { method: "PUT", body: data, token }),
 
   getUserPayments: (userId: number, token: string) =>
-    apiFetch<Payment[]>(`/users/${userId}/payments`, { method: "GET", token }),
+    apiFetch<Payment[]>(`/payments/user/${userId}`, { method: "GET", token }),
 
   verify: (id: number, token: string) =>
     apiFetch<Payment>(`/payments/${id}/verify`, { method: "POST", token }),
 
-  cancel: (id: number, token: string) =>
-    apiFetch<Payment>(`/payments/${id}/cancel`, { method: "POST", token }),
-
-  webhook: (data: unknown) =>
-    apiFetch("/payments/webhook", { method: "POST", body: data }),
+  cancel: (id: number, data: { reason?: string }, token: string) =>
+    apiFetch<Payment>(`/payments/${id}/cancel`, { method: "POST", body: data, token }),
 };

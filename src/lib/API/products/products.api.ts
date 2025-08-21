@@ -30,7 +30,7 @@ export const productsApi = {
     apiFetch<ProductResponseDto>(`/products/slug/${slug}`),
 
   search: (query: string, params: Omit<ProductFilterDto, 'search'> = {}) => {
-    const searchParams = new URLSearchParams({ search: query });
+    const searchParams = new URLSearchParams({ q: query });
     
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
@@ -46,60 +46,15 @@ export const productsApi = {
   },
 
   getByCategory: (category: ProductCategory, params: Omit<ProductFilterDto, 'category'> = {}) => {
-    const searchParams = new URLSearchParams();
-    
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        if (Array.isArray(value)) {
-          value.forEach(v => searchParams.append(key, v.toString()));
-        } else {
-          searchParams.append(key, value.toString());
-        }
-      }
-    });
-
-    const queryString = searchParams.toString();
-    const endpoint = `/products/category/${category}${queryString ? `?${queryString}` : ""}`;
-    
-    return apiFetch<ProductResponseDto[]>(endpoint);
+    return apiFetch<ProductResponseDto[]>(`/products/category/${category}`);
   },
 
   getBySupplierId: (supplierId: number, params: Omit<ProductFilterDto, 'supplierId'> = {}) => {
-    const searchParams = new URLSearchParams();
-    
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        if (Array.isArray(value)) {
-          value.forEach(v => searchParams.append(key, v.toString()));
-        } else {
-          searchParams.append(key, value.toString());
-        }
-      }
-    });
-
-    const queryString = searchParams.toString();
-    const endpoint = `/products/supplier/${supplierId}${queryString ? `?${queryString}` : ""}`;
-    
-    return apiFetch<ProductResponseDto[]>(endpoint);
+    return apiFetch<ProductResponseDto[]>(`/products/supplier/${supplierId}`);
   },
 
   getByOrigin: (origin: ProductOrigin, params: Omit<ProductFilterDto, 'origin'> = {}) => {
-    const searchParams = new URLSearchParams();
-    
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        if (Array.isArray(value)) {
-          value.forEach(v => searchParams.append(key, v.toString()));
-        } else {
-          searchParams.append(key, value.toString());
-        }
-      }
-    });
-
-    const queryString = searchParams.toString();
-    const endpoint = `/products/origin/${origin}${queryString ? `?${queryString}` : ""}`;
-    
-    return apiFetch<ProductResponseDto[]>(endpoint);
+    return apiFetch<ProductResponseDto[]>(`/products/origin/${origin}`);
   },
 
   create: (data: CreateProductDto, token: string) =>
@@ -111,12 +66,11 @@ export const productsApi = {
 
   update: (id: number, data: UpdateProductDto, token: string) =>
     apiFetch<ProductResponseDto>(`/products/${id}`, {
-      method: "PUT",
+      method: "PATCH",
       body: data,
       token,
     }),
 
- 
   delete: (id: number, token: string) =>
     apiFetch<void>(`/products/${id}`, {
       method: "DELETE",

@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/hooks/useCart";
 import { formatCurrency, cn } from "@/lib/utils";
 import { Minus, Plus, Check, ArrowLeft, Star } from "lucide-react";
+import { CartItemType } from "@/types/enum";
 
 interface ProductDetailClientProps {
   product: ProductWithRelations;
@@ -22,14 +23,14 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
   const router = useRouter();
   const { addToCart } = useCart();
 
-  const handleAddToCartClick = () => {
-    addToCart({
-      itemType: "PRODUCT", // ✅ sesuai enum CartItemType
-      itemId: product.id,
-      quantity,
-    });
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000);
+  const handleAddToCartClick = async () => {
+    try {
+      await addToCart(product, CartItemType.PRODUCT, quantity);
+      setIsAdded(true);
+      setTimeout(() => setIsAdded(false), 2000);
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+    }
   };
 
   const handleBuyNowClick = () => {

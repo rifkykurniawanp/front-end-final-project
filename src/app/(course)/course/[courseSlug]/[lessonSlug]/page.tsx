@@ -16,7 +16,6 @@ import { ModuleSidebar } from "@/components/course/ModuleSideBar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
-// API (tetap pakai path yang Anda gunakan)
 import { lessonsApi } from "@/lib/API/courses";
 import { lessonProgressApi } from "@/lib/API/courses";
 import { coursesApi } from "@/lib/API/courses";
@@ -75,6 +74,27 @@ export default function LessonPage() {
     localStorage.setItem(completedStorageKey, JSON.stringify([...setVal]));
   };
 
+  // ---------- Helper to find course by slug ----------
+  const findCourseBySlug = async (slug: string, token?: string): Promise<CourseWithRelations | null> => {
+    try {
+      // Since coursesApi doesn't have getBySlug, we'll get all courses and find by slug
+      const allCourses = await coursesApi.getAll({ page: 1, limit: 100 }, token);
+      
+      // Find course by slug
+      const foundCourse = allCourses.find((course: any) => course.slug === slug);
+      
+      if (foundCourse) {
+        // Get full course details with relations
+        return await coursesApi.getById(foundCourse.id, token);
+      }
+      
+      return null;
+    } catch (error) {
+      console.error("Error finding course by slug:", error);
+      return null;
+    }
+  };
+
   // ---------- Fetch Course + Lesson + Progress ----------
   useEffect(() => {
     if (!courseSlug || !lessonSlug) return;
@@ -84,9 +104,10 @@ export default function LessonPage() {
       setError(null);
 
       try {
-        // 1) Course by slug
-        const courseResp = await coursesApi.getBySlug(courseSlug, token || undefined);
+        // 1) Course by slug - using workaround since getBySlug doesn't exist
+        const courseResp = await findCourseBySlug(courseSlug, token || undefined);
         if (!courseResp) {
+          setError("Course not found");
           router.push("/");
           return;
         }
@@ -95,6 +116,7 @@ export default function LessonPage() {
         // 2) Lesson by slug
         const lessonResp = await lessonsApi.getBySlug(lessonSlug, token || undefined);
         if (!lessonResp) {
+          setError("Lesson not found");
           router.push(`/course/${courseSlug}`);
           return;
         }
@@ -123,16 +145,22 @@ export default function LessonPage() {
           }
         }
 
-        // 4) Progress: API → fallback localStorage
+        // 4) Progress: Use course progress endpoint instead of user progress
         if (user && token) {
           try {
-            const prog: LessonProgress[] = await lessonProgressApi.getByUser(
-              user.id,
-              token
-            );
-            const doneIds = new Set<number>(
-              prog.filter((p) => p.completed).map((p) => p.lessonId)
-            );
+            const progressData = await lessonsApi.getCourseProgress(courseResp.id, token);
+            
+            // Extract completed lesson IDs from progress data
+            let doneIds = new Set<number>();
+            if (Array.isArray(progressData)) {
+              doneIds = new Set<number>(
+                progressData
+                  .filter((p: any) => p.completed)
+                  .map((p: any) => p.lessonId || p.id)
+                  .filter((id: any) => Number.isFinite(Number(id)))
+              );
+            }
+            
             setCompletedLessons(doneIds);
             // keep localStorage in sync (optional)
             saveCompletedToLocal(doneIds);
@@ -187,18 +215,13 @@ export default function LessonPage() {
     // Optimistic local update
     applyCompleteLocally(id);
 
-    // If authenticated, sync to backend
+    // If authenticated, sync to backend using the lessons API
     if (user && token) {
       try {
-        // coba endpoint markComplete dulu
-        await lessonProgressApi.markComplete(id, user.id, token);
-      } catch {
-        // fallback ke PATCH update
-        try {
-          await lessonProgressApi.update(id, user.id, { completed: true }, token);
-        } catch (err) {
-          console.error("Failed to sync progress to server", err);
-        }
+        // Use the backend's lesson completion endpoint
+        await lessonsApi.completeLesson(id, token);
+      } catch (err) {
+        console.error("Failed to sync progress to server", err);
       }
     }
   };

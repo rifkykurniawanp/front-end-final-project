@@ -1,26 +1,19 @@
+// lessonProgress-api.ts
 import { apiFetch } from "../core/api-fetch";
-import { LessonProgress, UpdateLessonProgressDto } from "@/types/course";
 
 export const lessonProgressApi = {
+  // Get course progress (JWT required)
+  getByCourse: (courseId: number, token: string) =>
+    apiFetch<any>(`/api/courses/${courseId}/progress`, { token }),
 
-  getByUser: (userId: number, token: string) =>
-    apiFetch<LessonProgress[]>(`/users/${userId}/lesson-progress`, { token }),
-    
-  getByLesson: (lessonId: number, userId: number, token: string) =>
-    apiFetch<LessonProgress>(`/lessons/${lessonId}/progress/${userId}`, { token }),
-    
-  
-  update: (lessonId: number, userId: number, data: UpdateLessonProgressDto, token: string) =>
-    apiFetch<LessonProgress>(`/lessons/${lessonId}/progress/${userId}`, {
-      method: "PATCH",
-      body: data,
-      token,
-    }),
-    
+  // Get lesson progress (JWT required)
+  getByLesson: (lessonId: number, token: string) =>
+    apiFetch<any>(`/api/lessons/${lessonId}/progress`, { token }),
 
-  markComplete: (lessonId: number, userId: number, token: string) =>
-    apiFetch<LessonProgress>(`/lessons/${lessonId}/progress/${userId}/complete`, {
-      method: "PATCH",
+  // Mark lesson complete (JWT required)
+  markComplete: (lessonId: number, token: string) =>
+    apiFetch<any>(`/api/lessons/${lessonId}/complete`, {
+      method: "POST",
       token,
     }),
 };

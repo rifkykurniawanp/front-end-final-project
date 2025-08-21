@@ -1,45 +1,42 @@
 import { apiFetch } from "./api-fetch";
-import { CartItem, AddToCartDto, UpdateCartItemDto, CartWithItems, CartSummary } from "@/types/cart";
+import { CartItem, AddToCartDto, UpdateCartItemDto, CartWithItems } from "@/types/cart";
 
 export const cartApi = {
+  // Get current user's cart
   getMyCart: (token: string) =>
-    apiFetch<CartWithItems>("/cart", { token }),
+    apiFetch<CartWithItems>("/carts", { token }),
 
-  addItem: (data: AddToCartDto, token: string) =>
-    apiFetch<CartItem>("/cart/items", {
+  // Get cart items by cart ID
+  getCartById: (cartId: number, token: string) =>
+    apiFetch<CartWithItems>(`/carts/${cartId}/items`, { token }),
+
+  // Add item to cart
+  addItem: (cartId: number, data: AddToCartDto, token: string) =>
+    apiFetch<CartWithItems>(`/carts/${cartId}/items`, {
       method: "POST",
       body: data,
       token,
     }),
 
-  updateItem: (itemId: number, data: UpdateCartItemDto, token: string) =>
-    apiFetch<CartItem>(`/cart/items/${itemId}`, {
-      method: "PATCH",
+  // Update cart item
+  updateItem: (cartId: number, itemId: number, data: UpdateCartItemDto, token: string) =>
+    apiFetch<CartWithItems>(`/carts/${cartId}/items/${itemId}`, {
+      method: "PUT",
       body: data,
       token,
     }),
 
-  /**
-   * Remove a cart item by its ID
-   */
-  removeItem: (itemId: number, token: string) =>
-    apiFetch<{ message: string }>(`/cart/items/${itemId}`, {
+  // Remove cart item
+  removeItem: (cartId: number, itemId: number, token: string) =>
+    apiFetch<void>(`/carts/${cartId}/items/${itemId}`, {
       method: "DELETE",
       token,
     }),
 
-  /**
-   * Clear all items in the current user's cart
-   */
-  clear: (token: string) =>
-    apiFetch<{ message: string }>("/cart/clear", {
-      method: "DELETE",
+  // Checkout cart
+  checkout: (cartId: number, token: string) =>
+    apiFetch<any>(`/carts/${cartId}/checkout`, {
+      method: "POST",
       token,
     }),
-
-  /**
-   * Get a summary of the current user's cart (total items, total amount)
-   */
-  getSummary: (token: string) =>
-    apiFetch<CartSummary>("/cart/summary", { token }),
 };

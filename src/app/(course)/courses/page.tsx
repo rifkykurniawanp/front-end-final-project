@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import CourseCard from "@/components/course/CourseCard";
-import { coursesApi } from "@/lib/API/courses.api";
+import { coursesApi } from "@/lib/API/courses";
 import type { CourseWithRelations } from "@/types/course";
 import { allCourses } from "@/app/data/courses";
 import { Button } from "@/components/ui/button";

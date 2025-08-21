@@ -1,43 +1,55 @@
-
 import { apiFetch } from "../core/api-fetch";
-import { AssignmentSubmission, CreateAssignmentSubmissionDto, UpdateAssignmentSubmissionDto } from "@/types/course";
+import { AssignmentSubmission, CreateAssignmentSubmissionDto, UpdateAssignmentSubmissionDto, GradeAssignmentSubmissionDto } from "@/types/course";
 
 export const assignmentSubmissionsApi = {
-
-  getByAssignment: (assignmentId: number, token: string) =>
-    apiFetch<AssignmentSubmission[]>(`/assignments/${assignmentId}/submissions`, { token }),
-   
-  getByUser: (userId: number, token: string) =>
-    apiFetch<AssignmentSubmission[]>(`/users/${userId}/assignment-submissions`, { token }),
+  getByAssignment: (
+    assignmentId: number, 
+    token: string,
+    params?: { page?: number; limit?: number; graded?: boolean; userId?: number }
+  ) => {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.graded !== undefined) queryParams.append('graded', params.graded.toString());
+    if (params?.userId) queryParams.append('userId', params.userId.toString());
     
-  getById: (id: number, token: string) =>
-    apiFetch<AssignmentSubmission>(`/assignment-submissions/${id}`, { token }),
+    const queryString = queryParams.toString();
+    return apiFetch<AssignmentSubmission[]>(
+      `/assignments/${assignmentId}/submissions${queryString ? `?${queryString}` : ''}`, 
+      { token }
+    );
+  },
    
-  create: (data: CreateAssignmentSubmissionDto, token: string) =>
-    apiFetch<AssignmentSubmission>("/assignment-submissions", {
+  getById: (id: number, token: string) =>
+    apiFetch<AssignmentSubmission>(`/submissions/${id}`, { token }),
+   
+  submit: (assignmentId: number, data: CreateAssignmentSubmissionDto, token: string) =>
+    apiFetch<AssignmentSubmission>(`/assignments/${assignmentId}/submit`, {
       method: "POST",
       body: data,
       token,
     }),
    
   update: (id: number, data: UpdateAssignmentSubmissionDto, token: string) =>
-    apiFetch<AssignmentSubmission>(`/assignment-submissions/${id}`, {
-      method: "PATCH",
+    apiFetch<AssignmentSubmission>(`/submissions/${id}`, {
+      method: "PUT",
       body: data,
       token,
     }),
-    
+   
   delete: (id: number, token: string) =>
-    apiFetch<{ message: string }>(`/assignment-submissions/${id}`, {
+    apiFetch<void>(`/submissions/${id}`, {
       method: "DELETE",
       token,
     }),
-    
- 
-  grade: (id: number, grade: number, token: string) =>
-    apiFetch<AssignmentSubmission>(`/assignment-submissions/${id}/grade`, {
-      method: "PATCH",
-      body: { grade },
+   
+  grade: (id: number, data: GradeAssignmentSubmissionDto, token: string) =>
+    apiFetch<AssignmentSubmission>(`/submissions/${id}/grade`, {
+      method: "PUT",
+      body: data,
       token,
     }),
+
+  getStats: (assignmentId: number, token: string) =>
+    apiFetch<any>(`/assignments/${assignmentId}/submissions/stats`, { token }),
 };
