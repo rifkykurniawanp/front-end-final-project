@@ -1,5 +1,12 @@
 import { apiFetch } from "../core/api-fetch";
-import { AssignmentSubmission, CreateAssignmentSubmissionDto, UpdateAssignmentSubmissionDto, GradeAssignmentSubmissionDto } from "@/types/course";
+import type {
+  AssignmentSubmission,
+  AssignmentSubmissionList,
+  CreateAssignmentSubmissionDto,
+  UpdateAssignmentSubmissionDto,
+  GradeAssignmentSubmissionDto,
+  AssignmentSubmissionStats,
+} from "@/types";
 
 export const assignmentSubmissionsApi = {
   getByAssignment: (
@@ -14,7 +21,7 @@ export const assignmentSubmissionsApi = {
     if (params?.userId) queryParams.append('userId', params.userId.toString());
     
     const queryString = queryParams.toString();
-    return apiFetch<AssignmentSubmission[]>(
+    return apiFetch<AssignmentSubmissionList>(
       `/assignments/${assignmentId}/submissions${queryString ? `?${queryString}` : ''}`, 
       { token }
     );
@@ -51,5 +58,5 @@ export const assignmentSubmissionsApi = {
     }),
 
   getStats: (assignmentId: number, token: string) =>
-    apiFetch<any>(`/assignments/${assignmentId}/submissions/stats`, { token }),
+    apiFetch<AssignmentSubmissionStats>(`/assignments/${assignmentId}/submissions/stats`, { token }),
 };

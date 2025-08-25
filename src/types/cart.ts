@@ -14,6 +14,8 @@ export interface Cart {
   user?: User;
   items?: CartItem[];
   payments?: Payment[];
+  totalItems?: number;
+  totalAmount?: number;
 }
 
 export interface CartItem {
@@ -28,18 +30,16 @@ export interface CartItem {
   course?: Course | null;
 }
 
-// For API requests
 export interface AddToCartDto {
   itemType: CartItemType;
   itemId: number;
-  quantity?: number;
-}
-
-export interface UpdateCartItemDto {
   quantity: number;
 }
 
-// Cart with populated items for display
+export interface UpdateCartDto {
+  userId?: number;
+}
+
 export interface CartWithItems extends Cart {
   items: CartItemWithDetails[];
 }
@@ -49,7 +49,6 @@ export interface CartItemWithDetails extends CartItem {
   course?: Course;
 }
 
-// For checkout process
 export interface CartSummary {
   totalItems: number;
   totalAmount: number;

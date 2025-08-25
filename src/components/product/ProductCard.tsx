@@ -6,11 +6,11 @@ import Link from "next/link";
 import { Product } from "@/types/product";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Minus, Check } from "lucide-react";
-import { formatCurrency, cn } from "@/lib/utils";
-import { useCartContext } from "@/context/CartContext"; // ✅ pakai context
-import { usePayment } from "@/hooks/usePayment";
-import { CartItemType, PaymentStatus, PayableType } from "@/types/enum";
+import { Plus, Minus } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
+import { CartItemType } from "@/types/enum";
+import { AddToCartButton } from "@/components/cart/AddToCartButton";
+import { useCartContext } from "@/context/CartContext";
 
 interface ProductCardProps {
   product: Product;
@@ -18,52 +18,7 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [quantity, setQuantity] = useState(1);
-  const [isAdded, setIsAdded] = useState(false);
-  const [isBuying, setIsBuying] = useState(false);
-
-  const { addToCart, cart, cartId, refreshCart } = useCartContext(); // ✅ context global
-  const { createPayment } = usePayment(localStorage.getItem("token") || "");
-
-  const handleAddToCartClick = async () => {
-    try {
-      await addToCart(product, CartItemType.PRODUCT, quantity);
-      await refreshCart(); // ✅ sinkronisasi
-      setIsAdded(true);
-      setTimeout(() => setIsAdded(false), 1500);
-    } catch (err) {
-      console.error("Gagal tambah ke cart:", err);
-    }
-  };
-
-  const handleBuyNowClick = async () => {
-    try {
-      if (isBuying) return;
-      setIsBuying(true);
-
-      await addToCart(product, CartItemType.PRODUCT, quantity);
-      await refreshCart();
-
-      if (!cartId) throw new Error("Cart ID tidak tersedia");
-
-      const cartItems = cart.filter((c) => c.itemId === product.id && c.itemType === CartItemType.PRODUCT);
-      const totalAmount = cartItems.reduce((sum, c) => sum + c.price * c.quantity, 0);
-
-      const payment = await createPayment({
-        cartId,
-        amount: totalAmount,
-        status: PaymentStatus.PENDING,
-        paymentMethod: "online",
-        payableType: PayableType.PRODUCT,
-        payableId: cartId,
-      });
-
-      if (payment?.id) window.location.href = `/payment/${payment.id}`;
-    } catch (err) {
-      console.error("Gagal beli sekarang:", err);
-    } finally {
-      setIsBuying(false);
-    }
-  };
+  const { cart } = useCartContext();
 
   const hasValidImage = product.image && product.image.trim() !== "";
 
@@ -98,36 +53,30 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
       <CardFooter className="flex flex-col items-start gap-4 mt-auto pt-4">
         <div className="flex items-center justify-center gap-4 w-full">
-          <Button size="sm" variant="outline" onClick={() => setQuantity((q) => Math.max(1, q - 1))}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+          >
             <Minus className="w-4 h-4" />
           </Button>
           <span className="font-bold text-lg w-8 text-center">{quantity}</span>
-          <Button size="sm" variant="outline" onClick={() => setQuantity((q) => q + 1)}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setQuantity((q) => q + 1)}
+          >
             <Plus className="w-4 h-4" />
           </Button>
         </div>
 
+        {/* Add to cart → selalu tampil, tapi handle login ada di AddToCartButton */}
         <div className="flex w-full gap-2">
-          <Button
-            onClick={handleAddToCartClick}
-            disabled={isAdded}
-            size="sm"
-            className={cn(
-              "flex-1 transition-all",
-              isAdded ? "bg-green-500 text-white" : "border border-amber-600 text-amber-700 bg-white"
-            )}
-          >
-            {isAdded ? (
-              <span className="flex items-center">
-                <Check className="w-4 h-4 mr-2" /> Ditambahkan!
-              </span>
-            ) : (
-              "Tambah Keranjang"
-            )}
-          </Button>
-          <Button onClick={handleBuyNowClick} size="sm" disabled={isBuying} className="flex-1 bg-amber-600 text-white">
-            {isBuying ? "Memproses..." : "Beli Sekarang"}
-          </Button>
+          <AddToCartButton
+            itemId={product.id}
+            itemType={CartItemType.PRODUCT}
+            quantity={quantity}
+          />
         </div>
       </CardFooter>
     </Card>

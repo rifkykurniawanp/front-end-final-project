@@ -1,6 +1,6 @@
 "use client";
 
-import { Lesson } from "@/types/course";
+import { Lesson } from "@/types";
 import { Play, StickyNote, HelpCircle } from "lucide-react";
 
 interface LessonTabsProps {

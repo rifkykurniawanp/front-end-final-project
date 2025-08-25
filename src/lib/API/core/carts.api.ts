@@ -1,16 +1,35 @@
+// =================== cart-api.ts ===================
 import { apiFetch } from "./api-fetch";
-import { CartItem, AddToCartDto, UpdateCartItemDto, CartWithItems } from "@/types/cart";
+import {
+  CartWithItems,
+  AddToCartDto,
+  UpdateCartDto,
+} from "@/types";
 
 export const cartApi = {
-  // Get current user's cart
   getMyCart: (token: string) =>
-    apiFetch<CartWithItems>("/carts", { token }),
+    apiFetch<CartWithItems[]>("/carts", { token }),
 
-  // Get cart items by cart ID
   getCartById: (cartId: number, token: string) =>
-    apiFetch<CartWithItems>(`/carts/${cartId}/items`, { token }),
+    apiFetch<CartWithItems>(`/carts/${cartId}`, { token }),
 
-  // Add item to cart
+  createCart: (token: string) =>
+    apiFetch<CartWithItems>("/carts", {
+      method: "POST",
+      body: {},
+      token,
+    }),
+
+  updateCart: (cartId: number, data: UpdateCartDto, token: string) =>
+    apiFetch<CartWithItems>(`/carts/${cartId}`, {
+      method: "PUT",
+      body: data,
+      token,
+    }),
+
+  removeCart: (cartId: number, token: string) =>
+    apiFetch<void>(`/carts/${cartId}`, { method: "DELETE", token }),
+
   addItem: (cartId: number, data: AddToCartDto, token: string) =>
     apiFetch<CartWithItems>(`/carts/${cartId}/items`, {
       method: "POST",
@@ -18,25 +37,9 @@ export const cartApi = {
       token,
     }),
 
-  // Update cart item
-  updateItem: (cartId: number, itemId: number, data: UpdateCartItemDto, token: string) =>
-    apiFetch<CartWithItems>(`/carts/${cartId}/items/${itemId}`, {
-      method: "PUT",
-      body: data,
-      token,
-    }),
-
-  // Remove cart item
   removeItem: (cartId: number, itemId: number, token: string) =>
     apiFetch<void>(`/carts/${cartId}/items/${itemId}`, {
       method: "DELETE",
-      token,
-    }),
-
-  // Checkout cart
-  checkout: (cartId: number, token: string) =>
-    apiFetch<any>(`/carts/${cartId}/checkout`, {
-      method: "POST",
       token,
     }),
 };

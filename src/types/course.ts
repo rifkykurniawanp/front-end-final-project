@@ -1,123 +1,32 @@
-import { CourseCategory, CourseLevel, LessonType } from './enum';
-import type { User } from './user';
+import { CourseLevel, CourseCategory } from './enum';
 
 // ================= COURSE TYPES =================
+
+export interface Instructor {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
 
 export interface Course {
   id: number;
   title: string;
   slug: string;
-  description?: string | null;
-  syllabus?: string | null;
+  description?: string;
+  syllabus?: string;
   price: number;
-  instructorId: number;
   rating: number;
   students: number;
-  duration?: string | null;
+  duration?: string;
   level: CourseLevel;
   category: CourseCategory;
   language: string;
   certificate: boolean;
   createdAt: Date;
+  instructor: Instructor;
 }
 
-export interface CourseWithRelations extends Course {
-  instructor?: User;
-  modules?: CourseModule[];
-  cartItems?: CartItem[];
-  enrollments?: CourseEnrollment[];
-}
-
-export interface CourseModule {
-  id: number;
-  courseId: number;
-  title: string;
-  orderNumber: number;
-  course?: Course;
-  lessons?: Lesson[];
-}
-
-export interface Lesson {
-  id: number;
-  moduleId: number;
-  slug?: string | null;
-  title: string;
-  description?: string | null;
-  duration?: string | null;
-  type: LessonType;
-  videoUrl?: string | null;
-  content?: string | null;
-  quizQuestions?: any; // JSON type
-  passingScore: number;
-  orderNumber: number;
-  createdAt: Date;
-  module?: CourseModule;
-  progresses?: LessonProgress[];
-  assignments?: Assignment[];
-}
-
-export interface LessonProgress {
-  lessonId: number;
-  userId: number;
-  completed: boolean;
-  updatedAt: Date;
-  lesson?: Lesson;
-  user?: User;
-}
-
-export interface Assignment {
-  id: number;
-  lessonId: number;
-  title: string;
-  instructions: string;
-  dueDate?: Date | null;
-  createdAt: Date;
-  lesson?: Lesson;
-  submissions?: AssignmentSubmission[];
-}
-
-export interface AssignmentSubmission {
-  id: number;
-  assignmentId: number;
-  userId: number;
-  content?: string | null;
-  grade?: number | null;
-  submittedAt: Date;
-  assignment?: Assignment;
-  user?: User;
-}
-
-export interface CourseEnrollment {
-  id: number;
-  courseId: number;
-  studentId: number;
-  paymentId: number;
-  pricePaid: number;
-  progress: number;
-  certificateAwarded: boolean;
-  enrolledAt: Date;
-  course?: Course;
-  student?: User;
-  payment?: Payment;
-  certificate?: Certificate;
-}
-
-export interface Certificate {
-  id: number;
-  enrollmentId: number;
-  finalLessonsCompleted: boolean;
-  finalAssignmentsCompleted: boolean;
-  eligible: boolean;
-  issuedAt?: Date | null;
-  certificateUrl?: string | null;
-  enrollment?: CourseEnrollment;
-}
-
-export interface IssueCertificateDto {
-  enrollmentId: number;
-  // Add other fields as needed based on your backend DTO
-}
-// For forms and API requests
 export interface CreateCourseDto {
   title: string;
   slug: string;
@@ -138,6 +47,7 @@ export interface UpdateCourseDto {
   description?: string;
   syllabus?: string;
   price?: number;
+  instructorId?: number;
   duration?: string;
   level?: CourseLevel;
   category?: CourseCategory;
@@ -145,92 +55,41 @@ export interface UpdateCourseDto {
   certificate?: boolean;
 }
 
-export interface CreateCourseModuleDto {
-  courseId: number;
-  title: string;
-  orderNumber: number;
+export interface CourseWithRelations extends Course {
+  modules?: Array<any>;
+  enrollments?: Array<any>;
 }
 
-export interface UpdateCourseModuleDto {
-  title?: string;
-  orderNumber?: number;
-}
-
-export interface CreateLessonDto {
-  moduleId: number;
-  slug?: string;
+export interface CourseResponseDto {
+  id: number;
   title: string;
+  slug: string;
   description?: string;
+  syllabus?: string;
+  price: number;
+  rating: number;
+  students: number;
   duration?: string;
-  type: LessonType;
-  videoUrl?: string;
-  content?: string;
-  quizQuestions?: any;
-  passingScore?: number;
-  orderNumber: number;
+  level: CourseLevel;
+  category: CourseCategory;
+  language: string;
+  certificate: boolean;
+  createdAt: Date;
+  instructor: Instructor;
+  modules?: Array<any>;
+  enrollments?: Array<any>;
 }
 
-export interface UpdateLessonDto {
-  slug?: string;
-  title?: string;
-  description?: string;
-  duration?: string;
-  type?: LessonType;
-  videoUrl?: string;
-  content?: string;
-  quizQuestions?: any;
-  passingScore?: number;
-  orderNumber?: number;
-}
-
-export interface CreateAssignmentDto {
-  lessonId: number;
-  title: string;
-  instructions: string;
-  dueDate?: Date;
-}
-
-export interface UpdateAssignmentDto {
-  title?: string;
-  instructions?: string;
-  dueDate?: Date;
-}
-
-export interface CreateAssignmentSubmissionDto {
-  assignmentId: number;
-  content?: string;
-}
-
-export interface UpdateAssignmentSubmissionDto {
-  content?: string;
-  grade?: number;
-}
-
-export interface GradeAssignmentSubmissionDto {
-  grade: number;
-  feedback?: string;
-}
-
-export interface UpdateLessonProgressDto {
-  completed: boolean;
-}
-
-// For filtering and searching
-export interface CourseFilterDto {
-  category?: CourseCategory[];
-  level?: CourseLevel[];
-  minPrice?: number;
-  maxPrice?: number;
-  instructorId?: number;
-  language?: string;
-  certificate?: boolean;
-  search?: string;
+export interface CoursePaginationParams {
   page?: number;
   limit?: number;
-  sortBy?: 'title' | 'price' | 'rating' | 'students' | 'createdAt';
-  sortOrder?: 'asc' | 'desc';
 }
 
-// Import types from other files
-import type { CartItem } from './cart';
-import type { Payment } from './payment';
+// ================= PAGINATION TYPES =================
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}

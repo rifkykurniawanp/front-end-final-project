@@ -1,3 +1,63 @@
+// types/dashboard.ts
+import { CourseWithRelations } from "@/types/course";
+import { ProductResponseDto } from "@/types/product";
+import { User } from "@/types/user";
+import { RoleName, CourseCategory, CourseLevel, ProductCategory, ProductOrigin, ProductStatus } from "@/types/enum";
+
+export interface Column<T> {
+  Header: string;
+  accessor: keyof T;
+}
+
+export interface CrudTableProps<T extends { id: number }> {
+  title: string;
+  columns: Column<T>[];
+  data: T[];
+  loading: boolean;
+  onAdd?: () => void;
+  onEdit?: (row: T) => void;
+  onDelete?: (row: T) => void;
+  onRefresh: () => void;
+}
+
+export interface UserFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  phone: string;
+  address: string;
+  role: RoleName;
+  isBuyer: boolean;
+  isStudent: boolean;
+}
+
+export interface CourseFormData {
+  title: string;
+  slug?: string;              // Added optional slug
+  description: string;
+  syllabus: string;
+  price: number;
+  instructorId: number;       // Added missing instructorId
+  duration: string;
+  level: CourseLevel;
+  category: CourseCategory;
+  language: string;
+  certificate: boolean;
+}
+
+export interface ProductFormData {
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  category: ProductCategory;
+  imageUrl: string;
+  origin: ProductOrigin;      // Made required to match API
+  status?: ProductStatus;     // Keep optional
+  weight?: string;            // Keep optional
+}
+
 export interface StatCardProps {
   title: string;
   icon: React.ComponentType<any>;
@@ -5,54 +65,21 @@ export interface StatCardProps {
   description: string;
 }
 
-export interface User {
-  id: number;
-  name: string;
-  email: string;
-  revenue?: number;
-}
-
-export interface Course {
-  id: number;
+export interface ChartCardProps {
   title: string;
-  instructor: string;
-  students: number;
-  progress?: number;
+  description: string;
+  className?: string;
+  children: React.ReactNode;
 }
 
-export interface Product {
-  id: number;
-  name: string;
-  supplier: string;
-  price: number;
-  stock: number;
-}
-
-export interface SalesData {
+export interface SalesDataPoint {
   name: string;
   courses: number;
   products: number;
 }
 
-export interface ChartCardProps {
-  title: string;
-  description: string;
-  children: React.ReactNode;
-  className?: string;
-}
-
-export interface CrudTableProps<T> {
-  title: string;
-  data: T[];
-  columns: Array<{ Header: string; accessor: keyof T }>;
-  onAdd?: () => void;
-  onEdit?: (item: T) => void;
-  onDelete?: (item: T) => void;
-}
-
-export interface DashboardView {
-  id: string;
-  label: string;
-  icon: React.ComponentType<any>;
-  component: React.ComponentType;
+export interface RecentSale {
+  name: string;
+  email: string;
+  amount: string;
 }

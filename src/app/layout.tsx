@@ -1,20 +1,12 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
-import { Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/layout/header/Index";
-import Footer from "../components/layout/footer/index"; 
-import {CartProvider} from "@/context/CartContext";
+import { Toaster } from "@/components/ui/sonner"
+import RootLayoutClient from "./RootLayoutClient";
+import { AuthProvider } from "@/context/AuthContext";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -22,18 +14,15 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const userId = "guest";
-  const token = undefined;
-  const userRole = "USER";
-   
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="antialiased flex flex-col min-h-screen">
-        <CartProvider >
-        <Header />
-        <main className="flex-grow">{children}</main>
-        <Footer />
-        </CartProvider>
+        <AuthProvider>
+          <RootLayoutClient>
+            {children}
+            <Toaster />
+          </RootLayoutClient>
+        </AuthProvider>
       </body>
     </html>
   );

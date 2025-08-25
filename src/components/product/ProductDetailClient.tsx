@@ -4,14 +4,14 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ProductWithRelations } from "@/types/product"; // pakai ini
+import { ProductWithRelations } from "@/types/product";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { useCart } from "@/hooks/useCart";
 import { formatCurrency, cn } from "@/lib/utils";
-import { Minus, Plus, Check, ArrowLeft, Star } from "lucide-react";
+import { Minus, Plus, ArrowLeft, Star } from "lucide-react";
 import { CartItemType } from "@/types/enum";
+import { AddToCartButton } from "@/components/cart/AddToCartButton";
 
 interface ProductDetailClientProps {
   product: ProductWithRelations;
@@ -19,19 +19,7 @@ interface ProductDetailClientProps {
 
 export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product }) => {
   const [quantity, setQuantity] = useState(1);
-  const [isAdded, setIsAdded] = useState(false);
   const router = useRouter();
-  const { addToCart } = useCart();
-
-  const handleAddToCartClick = async () => {
-    try {
-      await addToCart(product, CartItemType.PRODUCT, quantity);
-      setIsAdded(true);
-      setTimeout(() => setIsAdded(false), 2000);
-    } catch (error) {
-      console.error("Error adding to cart:", error);
-    }
-  };
 
   const handleBuyNowClick = () => {
     router.push(`/checkout?productId=${product.id}&quantity=${quantity}`);
@@ -153,6 +141,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                   size="icon"
                   variant="outline"
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  disabled={product.stock === 0}
                 >
                   <Minus className="w-4 h-4" />
                 </Button>
@@ -163,6 +152,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                   size="icon"
                   variant="outline"
                   onClick={() => setQuantity((q) => q + 1)}
+                  disabled={product.stock === 0}
                 >
                   <Plus className="w-4 h-4" />
                 </Button>
@@ -171,22 +161,11 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
 
             {/* Buttons */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Button
-                onClick={handleAddToCartClick}
-                disabled={isAdded || product.stock === 0}
-                size="lg"
-                variant="secondary"
-                className={cn(
-                  "transition-all duration-300",
-                  isAdded && "bg-green-500 hover:bg-green-600 text-white"
-                )}
-              >
-                {product.stock === 0
-                  ? "Stok Habis"
-                  : isAdded
-                  ? "Ditambahkan"
-                  : "Add to Cart"}
-              </Button>
+              <AddToCartButton
+                itemId={product.id}
+                itemType={CartItemType.PRODUCT}
+                quantity={quantity}
+              />
               <Button
                 onClick={handleBuyNowClick}
                 size="lg"

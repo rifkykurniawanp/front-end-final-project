@@ -1,10 +1,11 @@
 "use client";
 
-import { CourseWithRelations, CourseModule, Lesson } from "@/types/course";
+import { CourseWithRelations, CourseModule, Lesson } from "@/types";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, ChevronDown, Play, FileText, HelpCircle, Check } from "lucide-react";
 import { useState } from "react";
+import { LessonType } from "@/types/enum";
 
 interface ModuleSidebarProps {
   course: CourseWithRelations;
@@ -14,7 +15,7 @@ interface ModuleSidebarProps {
 
 export function ModuleSidebar({ 
   course, 
-  completedLessons = new Set(), 
+  completedLessons = new Set<number>(), 
   onLessonComplete 
 }: ModuleSidebarProps) {
   const router = useRouter();
@@ -32,13 +33,13 @@ export function ModuleSidebar({
     router.push(`/course/${course.slug}/${lesson.slug}`);
   };
 
-  const handleLessonComplete = (lessonId: number, event: React.MouseEvent) => {
-    event.stopPropagation(); // Prevent navigation
+  const handleLessonComplete = (lessonId: number, event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
     onLessonComplete?.(lessonId);
   };
 
   const getModuleProgress = (module: CourseModule) => {
-    const lessons = module.lessons || [];
+    const lessons = module.lessons ?? [];
     const completedCount = lessons.filter(l => completedLessons.has(l.id)).length;
     return {
       completed: completedCount,
@@ -47,16 +48,17 @@ export function ModuleSidebar({
     };
   };
 
-  const getLessonIcon = (type: string) => {
+  const getLessonIcon = (type: LessonType) => {
     switch (type) {
-      case "video": return <Play className="w-4 h-4 text-amber-600" />;
-      case "reading": return <FileText className="w-4 h-4 text-amber-600" />;
-      case "quiz": return <HelpCircle className="w-4 h-4 text-amber-600" />;
+      case LessonType.VIDEO: return <Play className="w-4 h-4 text-amber-600" />;
+      case LessonType.ARTICLE: return <FileText className="w-4 h-4 text-amber-600" />;
+      case LessonType.QUIZ: return <HelpCircle className="w-4 h-4 text-amber-600" />;
+      case LessonType.ASSIGNMENT: return <HelpCircle className="w-4 h-4 text-amber-600" />; 
       default: return <Play className="w-4 h-4 text-amber-600" />;
     }
   };
 
-  const totalLessons = course.modules?.reduce((sum, m) => sum + (m.lessons?.length || 0), 0) || 0;
+  const totalLessons = course.modules?.reduce((sum: number, m: CourseModule) => sum + (m.lessons?.length ?? 0), 0) ?? 0;
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-slate-200 hover:border-amber-200 transition-colors">
@@ -73,7 +75,7 @@ export function ModuleSidebar({
       </div>
 
       <div className="p-2 space-y-2">
-        {course.modules?.map((module) => {
+        {course.modules?.map((module: CourseModule) => {
           const isExpanded = expandedModules.has(module.id);
           const progress = getModuleProgress(module);
 
@@ -107,7 +109,7 @@ export function ModuleSidebar({
 
               {isExpanded && (
                 <ul className="py-2 border-t border-slate-200">
-                  {module.lessons?.map((lesson) => {
+                  {module.lessons?.map((lesson: Lesson) => {
                     const isCompleted = completedLessons.has(lesson.id);
                     return (
                       <li key={lesson.id} className="flex items-center gap-1 px-2">

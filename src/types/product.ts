@@ -1,6 +1,8 @@
 import { ProductCategory, ProductOrigin, ProductStatus, ProductTagName } from './enum';
 import type { User } from './user';
 
+// ================= PRODUCT TYPES =================
+
 export interface Product {
   id: number;
   slug: string;
@@ -18,13 +20,6 @@ export interface Product {
   weight?: string | null;
   tags: ProductTagName[];
   createdAt: Date;
-}
-
-export interface ProductWithRelations extends Product {
-  supplier?: User;
-  reviews?: ProductReview[];
-  cartItems?: CartItem[];
-  orderItems?: ProductOrderItem[];
 }
 
 export interface ProductReview {
@@ -68,14 +63,8 @@ export interface UpdateProductDto {
 }
 
 export interface CreateProductReviewDto {
-  productId: number;
   rating: number;
   comment?: string;
-}
-
-export interface ProductResponseDto extends Product {
-  supplier?: User;
-  reviews?: ProductReview[];
 }
 
 export interface UpdateProductReviewDto {
@@ -83,7 +72,6 @@ export interface UpdateProductReviewDto {
   comment?: string;
 }
 
-// For filtering and searching
 export interface ProductFilterDto {
   category?: ProductCategory[];
   origin?: ProductOrigin[];
@@ -99,6 +87,18 @@ export interface ProductFilterDto {
   sortOrder?: 'asc' | 'desc';
 }
 
+export interface ProductWithRelations extends Product {
+  supplier?: User;
+  reviews?: ProductReview[];
+  cartItems?: any[];
+  orderItems?: any[];
+}
+
+export interface ProductResponseDto extends Product {
+  supplier?: User;
+  reviews?: ProductReview[];
+}
+
 export interface FilterState {
   category: ProductCategory[];
   origin: ProductOrigin[];
@@ -108,6 +108,32 @@ export interface FilterState {
   minRating: number;
 }
 
+// ================= PRODUCT REVIEW RESPONSE TYPES =================
 
-import type { CartItem } from './cart';
-import type { ProductOrderItem } from './order';
+export interface ProductReviewResponseDto {
+  id: number;
+  productId: number;
+  userId: number;
+  rating: number;
+  comment?: string;
+  createdAt: string;
+  user?: {
+    id: number;
+    firstName?: string;
+    lastName?: string;
+    email: string;
+  };
+  product?: {
+    id: number;
+    name: string;
+    slug: string;
+  };
+}
+
+export interface ProductReviewsStats {
+  averageRating: number;
+  totalReviews: number;
+  ratingDistribution: {
+    [key: number]: number;
+  };
+}

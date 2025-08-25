@@ -64,9 +64,7 @@ export default function MyCourseComponent() {
             course.modules?.reduce(
               (sum: number, m) =>
                 sum +
-                (m.lessons?.filter(
-                  (l) => enrollment.progress >= Math.floor((l.orderNumber / totalLessons) * 100)
-                ).length || 0),
+                (m.lessons?.filter((l: any) => enrollment.progress >= Math.floor((l.orderNumber / totalLessons) * 100)).length || 0),
               0
             ) || 0;
 

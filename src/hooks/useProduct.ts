@@ -1,124 +1,160 @@
-"use client";
-import { useState, useMemo } from 'react';
-import { FilterState } from '../types/product';
-import { allProducts } from '../app/data/products/index';
+import { useState, useCallback } from "react";
+import { productsApi } from "@/lib/API/products";
+import { useAuth } from "./useAuth";
+import type {
+  ProductResponseDto,
+  CreateProductDto,
+  UpdateProductDto,
+} from "@/types";
+import { ProductStatus } from "@/types/enum";
 
-export const useProducts = (initialFilters?: Partial<FilterState>) => {
-  const [filters, setFilters] = useState<FilterState>({
-    category: [],
-    subcategory: [],
-    priceRange: [0, 500000],
-    rating: 0,
-    caffeine: [],
-    origin: [],
-    ...initialFilters
-  });
+interface UseProductReturn {
+  product: ProductResponseDto | null;
+  loading: boolean;
+  error: string | null;
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState<'name' | 'price-low' | 'price-high' | 'rating'>('name');
+  // Actions
+  fetchById: (id: number) => Promise<ProductResponseDto | null>;
+  fetchBySlug: (slug: string) => Promise<ProductResponseDto | null>;
+  reset: () => void;
 
-  const filteredProducts = useMemo(() => {
-    const filtered = allProducts.filter(product => {
-      // Search filter
-      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           product.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+  // CRUD
+  createProduct: (data: CreateProductDto) => Promise<ProductResponseDto | null>;
+  updateProduct: (
+    id: number,
+    data: UpdateProductDto
+  ) => Promise<ProductResponseDto | null>;
+  deleteProduct: (id: number) => Promise<boolean>;
 
-      // Category filter
-      const matchesCategory = filters.category.length === 0 || 
-                             filters.category.includes(product.category);
+  // Utility
+  updateStock: (id: number, stock: number) => Promise<boolean>;
+  updateStatus: (id: number, status: ProductStatus) => Promise<boolean>;
+}
 
-      // Subcategory filter
-      const matchesSubcategory = filters.subcategory.length === 0 || 
-                                 filters.subcategory.includes(product.subcategory);
+export function useProduct(): UseProductReturn {
+  const { token, user } = useAuth();
+  const [product, setProduct] = useState<ProductResponseDto | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-      // Price range filter
-      const matchesPrice = product.price >= filters.priceRange[0] && 
-                          product.price <= filters.priceRange[1];
+  const fetchById = useCallback(async (id: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await productsApi.getById(id);
+      setProduct(res);
+      return res;
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch product");
+      setProduct(null);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-      // Rating filter
-      const matchesRating = product.rating >= filters.rating;
+  const fetchBySlug = useCallback(async (slug: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await productsApi.getBySlug(slug);
+      setProduct(res);
+      return res;
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch product");
+      setProduct(null);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-      // Caffeine filter
-      const matchesCaffeine = filters.caffeine.length === 0 || 
-                             (product.caffeine && filters.caffeine.includes(product.caffeine));
-
-      // Origin filter
-      const matchesOrigin = filters.origin.length === 0 || 
-                           (product.origin && filters.origin.includes(product.origin));
-
-      return matchesSearch && matchesCategory && matchesSubcategory && 
-             matchesPrice && matchesRating && matchesCaffeine && matchesOrigin;
-    });
-
-    // Sort products
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'price-low':
-          return a.price - b.price;
-        case 'price-high':
-          return b.price - a.price;
-        case 'rating':
-          return b.rating - a.rating;
-        case 'name':
-        default:
-          return a.name.localeCompare(b.name);
-      }
-    });
-
-    return filtered;
-  }, [searchTerm, filters, sortBy]);
-
-  const updateFilter = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
-    setFilters(prev => ({
-      ...prev,
-      [key]: value
-    }));
+  const reset = () => {
+    setProduct(null);
+    setError(null);
   };
 
-  const resetFilters = () => {
-    setFilters({
-      category: [],
-      subcategory: [],
-      priceRange: [0, 500000],
-      rating: 0,
-      caffeine: [],
-      origin: []
-    });
-    setSearchTerm('');
-    setSortBy('name');
+  const createProduct = async (
+    data: CreateProductDto
+  ): Promise<ProductResponseDto | null> => {
+    if (!token) {
+      setError("Authentication required");
+      return null;
+    }
+
+    // Auto-assign supplierId kalau user adalah SUPPLIER
+    if (user?.role === "SUPPLIER" && user.id) {
+      data.supplierId = user.id;
+    }
+
+    try {
+      const res = await productsApi.create(data, token);
+      setProduct(res);
+      return res;
+    } catch (err: any) {
+      setError(err.message || "Failed to create product");
+      return null;
+    }
   };
 
-  const getFilteredStats = () => {
-    const stats = {
-      totalProducts: filteredProducts.length,
-      averagePrice: filteredProducts.length > 0 
-        ? filteredProducts.reduce((sum, product) => sum + product.price, 0) / filteredProducts.length
-        : 0,
-      averageRating: filteredProducts.length > 0
-        ? filteredProducts.reduce((sum, product) => sum + product.rating, 0) / filteredProducts.length
-        : 0,
-      categories: {} as Record<string, number>,
-      subcategories: {} as Record<string, number>
-    };
+  const updateProduct = async (
+    id: number,
+    data: UpdateProductDto
+  ): Promise<ProductResponseDto | null> => {
+    if (!token) {
+      setError("Authentication required");
+      return null;
+    }
+    try {
+      const res = await productsApi.update(id, data, token);
+      setProduct(res);
+      return res;
+    } catch (err: any) {
+      setError(err.message || "Failed to update product");
+      return null;
+    }
+  };
 
-    filteredProducts.forEach(product => {
-      stats.categories[product.category] = (stats.categories[product.category] || 0) + 1;
-      stats.subcategories[product.subcategory] = (stats.subcategories[product.subcategory] || 0) + 1;
-    });
+  const deleteProduct = async (id: number): Promise<boolean> => {
+    if (!token) {
+      setError("Authentication required");
+      return false;
+    }
+    try {
+      await productsApi.delete(id, token);
+      setProduct(null);
+      return true;
+    } catch (err: any) {
+      setError(err.message || "Failed to delete product");
+      return false;
+    }
+  };
 
-    return stats;
+  const updateStock = async (id: number, stock: number): Promise<boolean> => {
+    return (await updateProduct(id, { stock })) !== null;
+  };
+
+  const updateStatus = async (
+    id: number,
+    status: ProductStatus
+  ): Promise<boolean> => {
+    return (await updateProduct(id, { status })) !== null;
   };
 
   return {
-    products: filteredProducts,
-    filters,
-    searchTerm,
-    sortBy,
-    setSearchTerm,
-    setSortBy,
-    updateFilter,
-    resetFilters,
-    stats: getFilteredStats()
+    product,
+    loading,
+    error,
+
+    fetchById,
+    fetchBySlug,
+    reset,
+
+    createProduct,
+    updateProduct,
+    deleteProduct,
+
+    updateStock,
+    updateStatus,
   };
-};
+}

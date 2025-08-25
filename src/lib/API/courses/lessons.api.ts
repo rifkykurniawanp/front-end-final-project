@@ -1,48 +1,55 @@
 // lessons-api.ts
+import { 
+  Lesson, 
+  CreateLessonDto, 
+  UpdateLessonDto, 
+  LessonResponseDto 
+} from "@/types/lesson";
 import { apiFetch } from "../core/api-fetch";
-import { Lesson, CreateLessonDto, UpdateLessonDto } from "@/types/course";
 
 export const lessonsApi = {
-  // ===== ADMIN / INSTRUCTOR =====
-  create: (moduleId: number, data: CreateLessonDto, token: string) =>
-    apiFetch<Lesson>(`/api/modules/${moduleId}/lessons`, {
+  // Create a new lesson
+  create: (data: CreateLessonDto, moduleId: number, token: string) =>
+    apiFetch<LessonResponseDto>("/lessons", {
       method: "POST",
-      body: data,
+      body: { ...data, moduleId },
       token,
     }),
 
+  // Get all lessons of a module
   getByModule: (moduleId: number, token: string) =>
-    apiFetch<Lesson[]>(`/api/modules/${moduleId}/lessons`, { token }),
+    apiFetch<LessonResponseDto[]>(`/lessons/module/${moduleId}`, { token }),
 
-  getById: (id: number, token?: string) =>
-    apiFetch<Lesson>(`/api/lessons/${id}`, { token }),
+  // Get lesson by ID
+  getById: (id: number, token: string) =>
+    apiFetch<LessonResponseDto>(`/lessons/${id}`, { token }),
 
-  getBySlug: (slug: string, token?: string) =>
-    apiFetch<Lesson>(`/api/lessons/slug/${slug}`, { token }),
-
+  // Update lesson by ID
   update: (id: number, data: UpdateLessonDto, token: string) =>
-    apiFetch<Lesson>(`/api/lessons/${id}`, {
+    apiFetch<LessonResponseDto>(`/lessons/${id}`, {
       method: "PATCH",
       body: data,
       token,
     }),
 
+  // Soft delete lesson
   delete: (id: number, token: string) =>
-    apiFetch<void>(`/api/lessons/${id}`, {
+    apiFetch<void>(`/lessons/${id}`, {
       method: "DELETE",
       token,
     }),
 
-  // ===== USER PROGRESS =====
-  getProgress: (lessonId: number, token: string) =>
-    apiFetch<any>(`/api/lessons/${lessonId}/progress`, { token }),
-
-  completeLesson: (lessonId: number, token: string) =>
-    apiFetch<any>(`/api/lessons/${lessonId}/complete`, {
-      method: "POST",
+  // Force delete lesson (Admin only)
+  forceDelete: (id: number, token: string) =>
+    apiFetch<void>(`/lessons/${id}/force`, {
+      method: "DELETE",
       token,
     }),
 
-  getCourseProgress: (courseId: number, token: string) =>
-    apiFetch<any>(`/api/courses/${courseId}/progress`, { token }),
+  // Restore soft deleted lesson
+  restore: (id: number, token: string) =>
+    apiFetch<LessonResponseDto>(`/lessons/${id}/restore`, {
+      method: "PATCH",
+      token,
+    }),
 };

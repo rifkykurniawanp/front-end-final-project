@@ -1,7 +1,28 @@
+// lib/API/api-fetch.ts
 import { GeneralApiError, FetchOptions, parseApiError } from "@/types/api";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://final-project-be-rifkykurniawanp-production.up.railway.app";
+// const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://final-project-be-rifkykurniawanp-production.up.railway.app";
 const API_VERSION = "/api/v1";
+const API_TIMEOUT = 30000;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
+
+
+// Utility function to get token consistently (same as your other files)
+const getAuthToken = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  
+  try {
+    const auth = localStorage.getItem("auth");
+    if (auth) {
+      const parsed = JSON.parse(auth);
+      return parsed.accessToken || null;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error parsing auth from localStorage:", error);
+    return null;
+  }
+};
 
 export async function apiFetch<T = unknown>(
   endpoint: string,
@@ -18,8 +39,8 @@ export async function apiFetch<T = unknown>(
 
   const url = `${API_BASE_URL}${API_VERSION}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
 
-  // Auto-get token from localStorage if not provided
-  const authToken = token || (typeof window !== 'undefined' ? localStorage.getItem('token') : null);
+  // ✅ FIX: Use consistent token access
+  const authToken = token || getAuthToken();
 
   const requestHeaders: Record<string, string> = {
     ...(!isBlob && { "Content-Type": "application/json" }),

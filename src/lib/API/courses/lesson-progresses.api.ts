@@ -1,18 +1,19 @@
 // lessonProgress-api.ts
+import { LessonProgressResponseDto } from "@/types/lesson-progress";
 import { apiFetch } from "../core/api-fetch";
 
 export const lessonProgressApi = {
-  // Get course progress (JWT required)
-  getByCourse: (courseId: number, token: string) =>
-    apiFetch<any>(`/api/courses/${courseId}/progress`, { token }),
+  // Get all lesson progresses for a user
+  getAllByUser: (userId: number, token: string) =>
+    apiFetch<LessonProgressResponseDto[]>(`/lesson-progresses/${userId}`, { token }),
 
-  // Get lesson progress (JWT required)
-  getByLesson: (lessonId: number, token: string) =>
-    apiFetch<any>(`/api/lessons/${lessonId}/progress`, { token }),
+  // Get specific lesson progress by user and lesson
+  getProgress: (userId: number, lessonId: number, token: string) =>
+    apiFetch<LessonProgressResponseDto>(`/lesson-progresses/${userId}/${lessonId}`, { token }),
 
-  // Mark lesson complete (JWT required)
-  markComplete: (lessonId: number, token: string) =>
-    apiFetch<any>(`/api/lessons/${lessonId}/complete`, {
+  // Mark lesson as completed
+  markComplete: (userId: number, lessonId: number, token: string) =>
+    apiFetch<LessonProgressResponseDto>(`/lesson-progresses/${userId}/${lessonId}/complete`, {
       method: "POST",
       token,
     }),

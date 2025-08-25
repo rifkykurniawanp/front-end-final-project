@@ -1,46 +1,45 @@
+// src/lib/API/certificatesApi.ts
 import { apiFetch } from "../core/api-fetch";
-import { Certificate, IssueCertificateDto } from "@/types/course";
+import type { Certificate, IssueCertificateDto } from "@/types/certificate";
+
+const getAuthToken = (): string | undefined => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('access_token') || undefined;
+  }
+  return undefined;
+};
 
 export const certificatesApi = {
-  // Get all certificates (ADMIN only)
-  getAll: (token: string) =>
-    apiFetch<Certificate[]>(`/certificates`, { token }),
+  getAll: (): Promise<Certificate[]> =>
+    apiFetch<Certificate[]>(`/certificates`, { token: getAuthToken() }),
 
-  // Get certificate by ID
-  getById: (id: number, token: string) =>
-    apiFetch<Certificate>(`/certificates/${id}`, { token }),
-   
-  // Get certificates by user ID
-  getByUser: (userId: number, token: string) =>
-    apiFetch<Certificate[]>(`/certificates/users/${userId}`, { token }),
+  getById: (id: number): Promise<Certificate> =>
+    apiFetch<Certificate>(`/certificates/${id}`, { token: getAuthToken() }),
 
-  // Get certificates by course ID  
-  getByCourse: (courseId: number, token: string) =>
-    apiFetch<Certificate[]>(`/certificates/courses/${courseId}`, { token }),
-   
-  // Generate certificate
-  generate: (data: IssueCertificateDto, token: string) =>
+  getByUser: (userId: number): Promise<Certificate[]> =>
+    apiFetch<Certificate[]>(`/certificates/users/${userId}`, { token: getAuthToken() }),
+
+  getByCourse: (courseId: number): Promise<Certificate[]> =>
+    apiFetch<Certificate[]>(`/certificates/courses/${courseId}`, { token: getAuthToken() }),
+
+  generate: (data: IssueCertificateDto): Promise<Certificate> =>
     apiFetch<Certificate>(`/certificates/generate`, {
       method: "POST",
       body: data,
-      token,
+      token: getAuthToken(),
     }),
-   
-  // Download certificate PDF
-  download: (id: number, token: string) =>
-    apiFetch<Blob>(`/certificates/${id}/download`, { token, isBlob: true }),
 
-  // Verify certificate eligibility
-  verifyEligibility: (id: number, token: string) =>
+  download: (id: number): Promise<Blob> =>
+    apiFetch<Blob>(`/certificates/${id}/download`, { token: getAuthToken(), isBlob: true }),
+
+  verifyEligibility: (id: number): Promise<Certificate> =>
     apiFetch<Certificate>(`/certificates/${id}/verify`, {
       method: "PUT",
-      token,
+      token: getAuthToken(),
     }),
 
-  // Delete certificate (ADMIN only)
-  delete: (id: number, token: string) =>
-    apiFetch<void>(`/certificates/${id}`, {
-      method: "DELETE",
-      token,
-    }),
+  delete: (id: number): Promise<void> =>
+    apiFetch<void>(`/certificates/${id}`, { method: "DELETE", token: getAuthToken() }),
 };
+
+export default certificatesApi;

@@ -1,4 +1,4 @@
-// ================= ENUMS =================
+// ================= SHARED ENUMS =================
 
 export enum RoleName {
   ADMIN = 'ADMIN',
@@ -75,6 +75,13 @@ export enum PaymentStatus {
 export enum OrderStatus {
   PENDING = 'PENDING',
   PROCESSING = 'PROCESSING',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED'
+}
+
+export enum EnrollmentStatus {
+  PENDING = 'PENDING',
+  ACTIVE = 'ACTIVE',
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED'
 }

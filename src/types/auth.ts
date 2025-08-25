@@ -1,6 +1,4 @@
-
-export type RoleName = "ADMIN" | "SUPPLIER" | "INSTRUCTOR" | "USER";
-
+import { RoleName } from "./enum";
 export interface LoginDto {
   email: string;
   password: string;

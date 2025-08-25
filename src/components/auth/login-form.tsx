@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -19,6 +19,31 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [checking, setChecking] = useState(true)
+
+  // Check for existing token on component mount
+  useEffect(() => {
+    const checkExistingToken = () => {
+      try {
+        const token = localStorage.getItem("token")
+        const user = localStorage.getItem("user")
+        
+        if (token && user) {
+          // Optional: Validate token with backend before redirecting
+          // You could add an API call here to verify the token is still valid
+          window.location.href = "/dashboard"
+          return
+        }
+      } catch (error) {
+        // Handle any localStorage errors (e.g., in incognito mode)
+        console.error("Error checking localStorage:", error)
+      }
+      
+      setChecking(false)
+    }
+
+    checkExistingToken()
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -41,6 +66,22 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
       setError(err?.message || "Login failed")
       setLoading(false)
     }
+  }
+
+  // Show loading spinner while checking for existing token
+  if (checking) {
+    return (
+      <div className={cn("flex flex-col gap-6", className)} {...props}>
+        <Card className="border border-amber-200 shadow-md">
+          <CardContent className="flex items-center justify-center py-8">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600 mx-auto mb-4"></div>
+              <p className="text-gray-500">Checking authentication...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (

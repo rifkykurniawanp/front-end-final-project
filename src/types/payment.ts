@@ -2,7 +2,7 @@ import { PayableType, PaymentStatus } from './enum';
 import type { User } from './user';
 import type { Cart } from './cart';
 import type { ProductOrder } from './order';
-import type { CourseEnrollment } from './course';
+import type { CourseEnrollment } from './course-enrollment';
 
 // ================= PAYMENT TYPES =================
 
@@ -23,76 +23,82 @@ export interface Payment {
   courseEnrollments?: CourseEnrollment[];
 }
 
-// For creating payments
 export interface CreatePaymentDto {
+  userId: number;
   cartId: number;
   amount: number;
   paymentMethod: string;
+  status?: PaymentStatus;
   payableType: PayableType;
   payableId: number;
+  paidAt?: Date;
 }
 
 export interface UpdatePaymentDto {
+  amount?: number;
+  paymentMethod?: string;
   status?: PaymentStatus;
   paidAt?: Date;
 }
 
-// Payment methods
-export interface PaymentMethod {
-  id: string;
-  name: string;
-  type: 'bank_transfer' | 'e_wallet' | 'credit_card' | 'debit_card';
-  description?: string;
-  fee?: number;
-  isActive: boolean;
+export interface CancelPaymentDto {
+  reason?: string;
 }
 
-// For payment processing
-export interface PaymentRequest {
-  paymentId: number;
-  paymentMethod: string;
-  amount: number;
-  customerInfo?: {
-    name: string;
-    email: string;
-    phone?: string;
-  };
-  returnUrl?: string;
-  callbackUrl?: string;
+export interface PaymentStatsDto {
+  totalPayments: number;
+  pendingPayments: number;
+  completedPayments: number;
+  failedPayments: number;
+  totalRevenue: number;
+  pendingAmount: number;
+  completedAmount: number;
+  successRate: number;
 }
 
-export interface PaymentResponse {
-  success: boolean;
-  paymentUrl?: string;
-  transactionId?: string;
-  message?: string;
-  error?: string;
+// ================= PAYMENT RESPONSE TYPES =================
+
+export interface UserBasicDto {
+  id: number;
+  email: string;
+  firstName?: string;
+  lastName?: string;
 }
 
-// For payment history and reports
-export interface PaymentHistory {
-  payments: Payment[];
+export interface CartBasicDto {
+  id: number;
+  totalItems: number;
   totalAmount: number;
-  totalCount: number;
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
 }
 
-export interface PaymentFilterDto {
-  userId?: number;
-  status?: PaymentStatus[];
-  paymentMethod?: string[];
-  payableType?: PayableType[];
-  minAmount?: number;
-  maxAmount?: number;
-  startDate?: Date;
-  endDate?: Date;
-  page?: number;
-  limit?: number;
-  sortBy?: 'createdAt' | 'amount' | 'paidAt';
-  sortOrder?: 'asc' | 'desc';
+export interface ProductOrderDto {
+  id: number;
+  totalPrice: number;
+  status: string;
+  itemCount: number;
+}
+
+export interface CourseEnrollmentDto {
+  id: number;
+  courseId: number;
+  courseName?: string;
+  pricePaid: number;
+  progress: number;
+}
+
+export interface PaymentResponseDto {
+  id: number;
+  userId: number;
+  cartId: number;
+  amount: number;
+  paymentMethod: string;
+  status: PaymentStatus;
+  payableType: PayableType;
+  payableId: number;
+  paidAt?: Date;
+  createdAt: Date;
+  user?: UserBasicDto;
+  cart?: CartBasicDto;
+  productOrders: ProductOrderDto[];
+  courseEnrollments: CourseEnrollmentDto[];
 }
