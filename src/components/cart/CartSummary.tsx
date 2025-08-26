@@ -1,68 +1,99 @@
 "use client";
 
-import React, { useState } from "react";
-import { useCartContext } from "@/context/CartContext";
+import React from "react";
 import { Button } from "@/components/ui/button";
+import { useCartContext } from "@/context/CartContext";
 import { formatCurrency } from "@/lib/utils";
 
 interface CartSummaryProps {
-  onCheckout: () => Promise<void>;
-  onClearCart: () => Promise<void>;
+  onCheckout: () => void;
+  onClearCart: () => void;
 }
 
-export const CartSummary: React.FC<CartSummaryProps> = ({ onCheckout, onClearCart }) => {
-  const { cart } = useCartContext();
-  const [loadingCheckout, setLoadingCheckout] = useState(false);
-  const [loadingClear, setLoadingClear] = useState(false);
-
-  const totalItems = cart?.items.reduce((acc, item) => acc + item.quantity, 0) || 0;
-  const totalAmount = cart?.items.reduce((acc, item) => {
-    const price = item.itemType === "PRODUCT" ? item.product?.price || 0 : item.course?.price || 0;
-    return acc + price * item.quantity;
-  }, 0) || 0;
-
-  const handleCheckout = async () => {
-    setLoadingCheckout(true);
-    try {
-      await onCheckout();
-    } finally {
-      setLoadingCheckout(false);
-    }
-  };
-
-  const handleClear = async () => {
-    setLoadingClear(true);
-    try {
-      await onClearCart();
-    } finally {
-      setLoadingClear(false);
-    }
-  };
+export const CartSummary: React.FC<CartSummaryProps> = ({ 
+  onCheckout, 
+  onClearCart 
+}) => {
+  const { getTotalItems, getTotalAmount, loading, getActiveCart } = useCartContext();
+  
+  // Use backend calculated values from context
+  const totalItems = getTotalItems();
+  const totalAmount = getTotalAmount();
+  const activeCart = getActiveCart();
+  
+  const isDisabled = loading || !activeCart || totalItems === 0;
 
   return (
-    <div className="space-y-4">
-      <p className="text-lg"><strong>Total Item:</strong> {totalItems}</p>
-      <p className="text-xl font-bold text-orange-800">Total: {formatCurrency(totalAmount)}</p>
-
-      <div className="flex flex-col gap-3 mt-4">
-        <Button
-          variant="default"
-          onClick={handleCheckout}
-          disabled={loadingCheckout}
-          className="bg-orange-600 hover:bg-orange-700 text-white shadow-lg transform hover:scale-105 transition-all duration-150"
+    <div className="space-y-4 p-4 bg-orange-50 rounded-lg border border-orange-200">
+      <h3 className="text-lg font-semibold text-orange-800">
+        Ringkasan Pesanan
+      </h3>
+      
+      <div className="space-y-2">
+        <div className="flex justify-between">
+          <span className="text-gray-600">Total Item:</span>
+          <span className="font-medium">{totalItems}</span>
+        </div>
+        
+        <div className="flex justify-between text-lg font-bold text-orange-800">
+          <span>Total Harga:</span>
+          <span>{formatCurrency(totalAmount)}</span>
+        </div>
+      </div>
+      
+      {/* Show breakdown by cart if multiple carts */}
+      {activeCart && activeCart.items && activeCart.items.length > 0 && (
+        <div className="space-y-1 text-sm text-gray-600 border-t pt-2">
+          <div className="font-medium">Detail Cart:</div>
+          {activeCart.items.map((item) => {
+            const itemName = item.itemType === 'PRODUCT' 
+              ? item.product?.name 
+              : item.course?.title;
+            const subtotal = item.subtotal || (item.price * item.quantity);
+            
+            return (
+              <div key={item.id} className="flex justify-between">
+                <span>{itemName} (x{item.quantity})</span>
+                <span>{formatCurrency(subtotal)}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      
+      <div className="space-y-2">
+        <Button 
+          onClick={onCheckout} 
+          disabled={isDisabled}
+          className="w-full bg-amber-600 hover:bg-amber-700 text-white disabled:opacity-50"
         >
-          {loadingCheckout ? "Memproses..." : "Checkout"}
+          {loading ? "Loading..." : `Checkout (${totalItems} items)`}
         </Button>
-
-        <Button
-          variant="destructive"
-          onClick={handleClear}
-          disabled={loadingClear}
-          className="bg-orange-100 hover:bg-orange-200 text-orange-800 shadow-md transform hover:scale-105 transition-all duration-150"
+        
+        <Button 
+          onClick={onClearCart} 
+          disabled={isDisabled}
+          variant="outline"
+          className="w-full border-orange-300 text-orange-700 hover:bg-orange-100"
         >
-          {loadingClear ? "Menghapus..." : "Hapus Semua"}
+          Kosongkan Keranjang
         </Button>
       </div>
+      
+      {totalItems === 0 && (
+        <p className="text-sm text-gray-500 text-center">
+          Keranjang masih kosong
+        </p>
+      )}
+
+      {/* Debug info (remove in production) */}
+      {process.env.NODE_ENV === 'development' && activeCart && (
+        <div className="text-xs text-gray-500 border-t pt-2">
+          <div>Cart ID: {activeCart.id}</div>
+          <div>Backend Total Items: {activeCart.totalItems || 'N/A'}</div>
+          <div>Backend Total Amount: {activeCart.totalAmount || 'N/A'}</div>
+        </div>
+      )}
     </div>
   );
 };

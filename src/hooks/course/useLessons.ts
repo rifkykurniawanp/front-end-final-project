@@ -1,38 +1,28 @@
-"use client";
-
-import { useEffect, useState, useCallback } from "react";
+// hooks/courses/useLessons.ts
+import { useQuery } from "@tanstack/react-query";
 import { lessonsApi } from "@/lib/API/courses";
 import type { LessonResponseDto } from "@/types/lesson";
 
-interface UseLessonsProps {
-  moduleId?: number;
-  token?: string | null;
-}
+export const lessonKeys = {
+  all: ['lessons'] as const,
+  module: (moduleId: number) => [...lessonKeys.all, 'module', moduleId] as const,
+  detail: (lessonId: number) => [...lessonKeys.all, 'detail', lessonId] as const,
+};
 
-export function useLessons({ moduleId, token }: UseLessonsProps) {
-  const [lessons, setLessons] = useState<LessonResponseDto[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export const useLessonsByModule = (moduleId?: number, token?: string) => {
+  return useQuery({
+    queryKey: lessonKeys.module(moduleId!),
+    queryFn: () => lessonsApi.getByModule(moduleId!, token!),
+    enabled: !!moduleId && !!token,
+    staleTime: 15 * 60 * 1000,
+  });
+};
 
-  const fetchLessons = useCallback(async () => {
-    if (!moduleId || !token) return;
-    setLoading(true);
-    setError(null);
-
-    try {
-      const resp = await lessonsApi.getByModule(moduleId, token);
-      setLessons(resp);
-    } catch (err: any) {
-      console.error("Failed to fetch lessons:", err);
-      setError(err.message || "Failed to fetch lessons");
-    } finally {
-      setLoading(false);
-    }
-  }, [moduleId, token]);
-
-  useEffect(() => {
-    fetchLessons();
-  }, [fetchLessons]);
-
-  return { lessons, loading, error, refetch: fetchLessons };
-}
+export const useLesson = (lessonId?: number, token?: string) => {
+  return useQuery({
+    queryKey: lessonKeys.detail(lessonId!),
+    queryFn: () => lessonsApi.getById(lessonId!, token!),
+    enabled: !!lessonId && !!token,
+    staleTime: 15 * 60 * 1000,
+  });
+};

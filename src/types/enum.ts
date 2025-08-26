@@ -1,5 +1,4 @@
 // ================= SHARED ENUMS =================
-
 export enum RoleName {
   ADMIN = 'ADMIN',
   SUPPLIER = 'SUPPLIER',

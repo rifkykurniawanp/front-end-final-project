@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Play, BookOpen, Clock, Users } from "lucide-react";
 import { coursesApi } from "@/lib/API/courses";
-import type { CourseWithRelations } from "@/types/course";
+import type { CourseWithRelations } from "@/types";
 
 export default function CourseDetailPage() {
   const router = useRouter();

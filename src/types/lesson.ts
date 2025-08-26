@@ -1,11 +1,10 @@
-import { LessonType } from './enum';
+import { LessonType } from "./enum";
 
 // ================= LESSON TYPES =================
-
 export interface Lesson {
   id: number;
   title: string;
-  slug?: string;
+  slug: string | null;
   description?: string;
   duration?: string;
   type: LessonType;
@@ -20,6 +19,7 @@ export interface Lesson {
 
 export interface CreateLessonDto {
   title: string;
+  slug?: string | null;
   description?: string;
   duration?: string;
   type?: LessonType;
@@ -28,10 +28,12 @@ export interface CreateLessonDto {
   quizQuestions?: any;
   passingScore?: number;
   orderNumber: number;
+  moduleId: number;
 }
 
 export interface UpdateLessonDto {
   title?: string;
+  slug?: string | null;
   description?: string;
   duration?: string;
   type?: LessonType;
@@ -42,18 +44,4 @@ export interface UpdateLessonDto {
   orderNumber?: number;
 }
 
-export interface LessonResponseDto {
-  id: number;
-  title: string;
-  description?: string;
-  duration?: string;
-  type: LessonType;
-  moduleId: number;
-  orderNumber: number;
-  createdAt: Date;
-}
-
-export interface LessonWithRelations extends Lesson {
-  module?: any;
-  progress?: any;
-}
+export interface LessonResponseDto extends Lesson {}

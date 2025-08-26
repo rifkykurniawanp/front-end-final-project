@@ -1,137 +1,129 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import { useAuthContext } from "@/context/AuthContext";
-import { useCourse } from "@/hooks/course/useCourse";
-import { useCourseModules } from "@/hooks/course/useCourseModules";
-import { useLesson } from "@/hooks/course/useLesson";
-import { useLessonProgress } from "@/hooks/course/useLessonProgress";
-import { useCheckEnrollment } from "@/hooks/course/useCheckEnrollment";
-import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { VideoPlayer } from "@/components/course/VideoPlayer";
+import { LessonTabs } from "@/components/course/LessonTabs";
+import { CreateNoteAtTime } from "@/components/course/CreateNoteAtTime";
+import { QuizRenderer } from "@/components/course/QuizRenderer";
+import { ModuleSidebar } from "@/components/course/ModuleSideBar";
 import { Button } from "@/components/ui/button";
 
+import { useAuth } from "@/hooks/useAuth";
+import { useCourseLesson } from "@/hooks/course";
+import { useMarkLessonComplete } from "@/hooks/course";
+import { LessonType } from "@/types/enum";
+
 export default function LessonPage() {
-  const params = useParams();
-  const { user, token } = useAuthContext();
+  const { courseSlug, lessonSlug } = useParams<{ courseSlug: string; lessonSlug: string }>();
+  const router = useRouter();
+  const { token, user } = useAuth();
 
-  // ======= SAFELY EXTRACT PARAMS =======
-  const courseSlug = Array.isArray(params.courseSlug)
-    ? params.courseSlug[0]
-    : params.courseSlug;
-  const lessonSlug = Array.isArray(params.lessonSlug)
-    ? params.lessonSlug[0]
-    : params.lessonSlug;
+  const { data, isLoading, error } = useCourseLesson(courseSlug, lessonSlug, user?.id, token || "");
+  const markCompleteMutation = useMarkLessonComplete();
 
-  const safeToken = token ?? undefined;
-  const userId = user?.id;
+  const [currentTime, setCurrentTime] = useState(0);
+  const [notes, setNotes] = useState<{ time: number; text: string }[]>([]);
+  const [activeTab, setActiveTab] = useState<"content" | "notes" | "quiz">("content");
 
-  // ======= FETCH COURSE =======
-  const { course, loading: courseLoading } = useCourse({
-    slug: courseSlug ?? undefined,
-    token: safeToken,
-  });
+  const notesStorageKey = `lesson-${lessonSlug}-notes`;
 
-  // ======= FETCH MODULES =======
-  const { data: modules, isLoading: modulesLoading } = useCourseModules(
-    course?.id ?? 0,
-    safeToken
-  );
+  const handleSaveNote = (note: { time: number; text: string }) => {
+    const updated = [...notes, note];
+    setNotes(updated);
+    try {
+      localStorage.setItem(notesStorageKey, JSON.stringify(updated));
+    } catch {}
+  };
 
-  // ======= FETCH ENROLLMENT =======
-  const { data: enrollment, isLoading: enrollmentLoading } = useCheckEnrollment(
-    course?.id ?? 0,
-    userId ?? 0,
-    safeToken
-  );
+  const handleCompleteAndContinue = async () => {
+    if (!data?.lesson || !user?.id || !token) return;
+    await markCompleteMutation.mutateAsync({ userId: user.id, lessonId: data.lesson.id, token });
 
-  // ======= FIND CURRENT LESSON =======
-  const currentModule = modules?.find((m) =>
-    m.lessons?.some((l) => l.slug === lessonSlug)
-  );
-  const currentLessonId = currentModule?.lessons?.find(
-    (l) => l.slug === lessonSlug
-  )?.id;
+    if (data.navigation.nextLesson?.slug) {
+      router.push(`/course/${courseSlug}/${data.navigation.nextLesson.slug}`);
+    } else {
+      router.push(`/course/${courseSlug}`);
+    }
+  };
 
-  const { lesson: currentLesson, loading: lessonLoading } = useLesson({
-    lessonId: currentLessonId,
-    token: safeToken,
-  });
+  if (isLoading) return <div>Loading lesson...</div>;
 
-  // ======= FETCH LESSON PROGRESS =======
-  const { completedLessons, markLessonComplete, loading: progressLoading } =
-    useLessonProgress(course?.id, currentLessonId, safeToken, userId);
-
-  // ======= LOADING STATE =======
-  if (
-    courseLoading ||
-    modulesLoading ||
-    lessonLoading ||
-    progressLoading ||
-    enrollmentLoading
-  ) {
+  // --- Unauthorized / Not enrolled handling ---
+  if (error?.message?.includes("Unauthorized")) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Loader2 className="animate-spin h-6 w-6" />
+      <div className="p-8 text-center">
+        <h2 className="text-xl font-bold mb-4">You are not enrolled in this course</h2>
+        <Button onClick={() => router.push(`/course/${courseSlug}`)}>Go to Course Page</Button>
       </div>
     );
   }
 
-  // ======= NOT ENROLLED =======
-  if (!enrollment) {
-    return (
-      <p className="text-center mt-10">
-        ⚠️ Anda belum mendaftar di course ini.
-      </p>
-    );
-  }
+  if (!data) return <div>Lesson not found</div>;
 
-  // ======= MAIN RENDER =======
+  const { lesson, course, progress, navigation } = data;
+  const isCompleted = progress?.completed;
+
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">{course?.title}</h1>
-      <p className="text-gray-600">{course?.description}</p>
-
-      {/* CURRENT LESSON */}
-      {currentLesson && (
-        <div className="border rounded-lg p-4">
-          <h2 className="text-lg font-semibold">{currentLesson.title}</h2>
-          <p className="text-gray-600">{currentLesson.description}</p>
-
-          {completedLessons.has(currentLesson.id) ? (
-            <span className="text-green-600 text-sm">Selesai ✅</span>
-          ) : (
-            <Button
-              size="sm"
-              onClick={() => markLessonComplete(currentLesson.id)}
-            >
-              Tandai Selesai
-            </Button>
-          )}
-        </div>
-      )}
-
-      {/* LIST ALL MODULES & LESSONS */}
-      <div className="space-y-4">
-        {modules?.map((m) => (
-          <div key={m.id} className="border rounded-lg p-4">
-            <h2 className="text-lg font-semibold">{m.title}</h2>
-            <ul className="ml-4 list-disc">
-              {m.lessons?.map((l) => (
-                <li
-                  key={l.id}
-                  className={`flex justify-between items-center py-1 ${
-                    l.slug === lessonSlug ? "font-bold text-blue-600" : ""
-                  }`}
-                >
-                  <span>{l.title}</span>
-                  {completedLessons.has(l.id) && (
-                    <span className="text-green-600 text-sm">Selesai ✅</span>
-                  )}
-                </li>
-              ))}
-            </ul>
+    <div className="min-h-screen bg-white p-6">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* Sidebar */}
+        <div className="lg:col-span-1">
+          <div className="sticky top-20">
+            <ModuleSidebar
+              course={course}
+              completedLessons={new Set()} // bisa mapping dari progress API
+              onLessonComplete={() =>
+                markCompleteMutation.mutate({ userId: user!.id, lessonId: lesson.id, token: token! })
+              }
+            />
           </div>
-        ))}
+        </div>
+
+        {/* Main */}
+        <div className="lg:col-span-3 space-y-6">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold text-gray-900">{lesson.title}</h1>
+            {isCompleted && <span className="text-green-600 text-sm font-medium">✓ Completed</span>}
+          </div>
+
+          {lesson.type === LessonType.VIDEO && (
+            <VideoPlayer videoUrl={lesson.videoUrl || ""} onTimeUpdate={setCurrentTime} />
+          )}
+
+          <LessonTabs lesson={lesson} activeTab={activeTab} onTabChange={setActiveTab} />
+
+          {activeTab === "content" && <div>{lesson.content || "No content provided"}</div>}
+
+          {activeTab === "notes" && (
+            <div>
+              <CreateNoteAtTime currentTime={currentTime} onSave={handleSaveNote} />
+              <ul>
+                {notes.map((n, i) => (
+                  <li key={i}>
+                    [{n.time.toFixed(1)}s] - {n.text}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {activeTab === "quiz" && lesson.quizQuestions && <QuizRenderer questions={lesson.quizQuestions} />}
+
+          <div className="flex justify-between mt-6">
+            {navigation.previousLesson && (
+              <Button onClick={() => router.push(`/course/${courseSlug}/${navigation.previousLesson!.slug}`)}>
+                ← {navigation.previousLesson.title}
+              </Button>
+            )}
+            <Button
+              onClick={handleCompleteAndContinue}
+              className={navigation.nextLesson ? "bg-amber-600" : "bg-green-600"}
+            >
+              {navigation.nextLesson ? "✅ Complete & Continue" : "🎉 Complete Course"}
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );

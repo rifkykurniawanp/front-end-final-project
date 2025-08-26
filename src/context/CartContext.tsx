@@ -1,35 +1,24 @@
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  ReactNode,
-} from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { cartApi } from "@/lib/API/core/carts.api";
 import { useAuthContext } from "@/context/AuthContext";
-import type {
-  CartWithItems,
-  AddToCartDto,
-  UpdateCartDto,
-  CartItemType,
-} from "@/types";
+import type { CartWithItems, AddToCartDto, UpdateCartDto, CartItemType } from "@/types";
 
 interface CartContextValue {
-  cart: CartWithItems | null;
+  carts: CartWithItems[];
   loading: boolean;
   error: string | null;
-  fetchCart: () => Promise<void>;
+  fetchCarts: () => Promise<void>;
   addItem: (data: AddToCartDto) => Promise<void>;
-  removeItem: (itemId: number) => Promise<void>;
-  updateCart: (data: UpdateCartDto) => Promise<void>;
-  updateItemQuantity: (
-    itemId: number,
-    quantity: number,
-    itemType: CartItemType
-  ) => Promise<void>;
+  removeItem: (cartId: number, cartItemId: number) => Promise<void>;
+  updateItemQuantity: (cartId: number, itemId: number, quantity: number, itemType: CartItemType) => Promise<void>;
+  updateCart: (cartId: number, data: UpdateCartDto) => Promise<void>;
+  clearError: () => void;
+  // Helper functions - use backend calculated values
+  getTotalItems: () => number;
+  getTotalAmount: () => number;
+  getActiveCart: () => CartWithItems | null;
 }
 
 const CartContext = createContext<CartContextValue | undefined>(undefined);
@@ -39,159 +28,198 @@ interface CartProviderProps {
   initialCart?: CartWithItems | null;
 }
 
-export const CartProvider = ({
-  children,
-  initialCart = null,
-}: CartProviderProps) => {
+export const CartProvider = ({ children, initialCart = null }: CartProviderProps) => {
   const { token } = useAuthContext();
-  
-  const [cart, setCart] = useState<CartWithItems | null>(initialCart);
-  const [loading, setLoading] = useState(initialCart === undefined);
+  const [carts, setCarts] = useState<CartWithItems[]>(initialCart ? [initialCart] : []);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchCart = useCallback(async () => {
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
+  const fetchCarts = useCallback(async () => {
     if (!token) {
-      setCart(null);
-      setLoading(false);
+      setCarts(initialCart ? [initialCart] : []);
       return;
     }
 
     setLoading(true);
     setError(null);
     try {
-      const carts = await cartApi.getMyCart(token);
-      setCart(carts[0] || null);
+      // Backend returns array of carts filtered by user
+      const fetchedCarts = await cartApi.getMyCart(token);
+      setCarts(fetchedCarts);
     } catch (err: any) {
-      console.error("Fetch cart error:", err);
-      setError(err.message || "Failed to fetch cart");
-      setCart(null);
+      setError(err.message || "Failed to fetch carts");
+    } finally {
+      setLoading(false);
+    }
+  }, [token, initialCart]);
+
+  const addItem = useCallback(async (data: AddToCartDto) => {
+    if (!token) return;
+
+    setLoading(true);
+    setError(null);
+    try {
+      let targetCart = carts[0];
+      
+      // Create cart if none exists
+      if (!targetCart) {
+        targetCart = await cartApi.createCart(token);
+        setCarts([targetCart]);
+      }
+
+      // Check if item already exists in cart
+      const existingItem = targetCart.items.find(
+        (i) => i.itemId === data.itemId && i.itemType === data.itemType
+      );
+
+      let updatedCart: CartWithItems;
+
+      if (existingItem) {
+        // Item exists, update quantity (backend will replace, not add)
+        updatedCart = await cartApi.addItem(
+          targetCart.id,
+          { 
+            itemType: data.itemType,
+            itemId: data.itemId,
+            quantity: existingItem.quantity + data.quantity 
+          },
+          token
+        );
+      } else {
+        // Add new item
+        updatedCart = await cartApi.addItem(targetCart.id, data, token);
+      }
+
+      setCarts((prev) =>
+        prev.map((c) => (c.id === updatedCart.id ? updatedCart : c))
+      );
+    } catch (err: any) {
+      setError(err.message || "Failed to add item to cart");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [carts, token]);
+
+  const removeItem = useCallback(async (cartId: number, cartItemId: number) => {
+    if (!token) return;
+
+    setLoading(true);
+    setError(null);
+    try {
+      // Backend expects CartItem.id, not itemId
+      await cartApi.removeItem(cartId, cartItemId, token);
+      
+      // Update local state
+      setCarts((prev) =>
+        prev.map((c) =>
+          c.id === cartId 
+            ? { 
+                ...c, 
+                items: c.items.filter((i) => i.id !== cartItemId),
+                // Recalculate totals locally (or refetch)
+                totalItems: c.items.filter((i) => i.id !== cartItemId)
+                  .reduce((sum, item) => sum + item.quantity, 0),
+                totalAmount: c.items.filter((i) => i.id !== cartItemId)
+                  .reduce((sum, item) => sum + (item.price * item.quantity), 0)
+              } 
+            : c
+        )
+      );
+    } catch (err: any) {
+      setError(err.message || "Failed to remove item");
+      throw err;
     } finally {
       setLoading(false);
     }
   }, [token]);
 
-  const addItem = useCallback(
-    async (data: AddToCartDto) => {
-      if (!token) return;
-
-      setLoading(true);
-      setError(null);
-      try {
-        let currentCart = cart ?? (await cartApi.getMyCart(token).then(c => c[0] ?? cartApi.createCart(token)));
-
-        if (!currentCart) return;
-
-        // ✅ Cek item sudah ada
-        const existingItem = currentCart.items.find(
-          (i) => i.itemId === data.itemId && i.itemType === data.itemType
-        );
-
-        if (existingItem) {
-          // update quantity jika sudah ada
-          const updatedCart = await cartApi.addItem(currentCart.id, {
-            ...data,
-            quantity: existingItem.quantity + data.quantity,
-          }, token);
-          setCart(updatedCart);
-        } else {
-          const updatedCart = await cartApi.addItem(currentCart.id, data, token);
-          setCart(updatedCart);
-        }
-      } catch (err: any) {
-        console.error("Add item error:", err);
-        setError(err.message || "Failed to add item to cart");
-      } finally {
-        setLoading(false);
-      }
-    },
-    [cart, token]
-  );
-
-  const removeItem = useCallback(
-    async (itemId: number) => {
-      if (!cart || !token) return;
-      setLoading(true);
-      try {
-        await cartApi.removeItem(cart.id, itemId, token);
-        setCart({
-          ...cart,
-          items: cart.items.filter((item) => item.id !== itemId),
-        });
-      } catch (err: any) {
-        console.error("Remove item error:", err);
-        setError(err.message || "Failed to remove item from cart");
-      } finally {
-        setLoading(false);
-      }
-    },
-    [cart, token]
-  );
-
-  const updateCart = useCallback(
-    async (data: UpdateCartDto) => {
-      if (!cart || !token) return;
-      setLoading(true);
-      try {
-        const updatedCart = await cartApi.updateCart(cart.id, data, token);
-        setCart(updatedCart);
-      } catch (err: any) {
-        console.error("Update cart error:", err);
-        setError(err.message || "Failed to update cart");
-      } finally {
-        setLoading(false);
-      }
-    },
-    [cart, token]
-  );
-
   const updateItemQuantity = useCallback(
-    async (itemId: number, quantity: number, itemType: CartItemType) => {
-      if (!cart || !token) return;
-      if (quantity < 1) return;
+    async (cartId: number, itemId: number, quantity: number, itemType: CartItemType) => {
+      if (!token || quantity < 1) return;
 
       setLoading(true);
       setError(null);
       try {
-        const cartItem = cart.items.find(i => i.itemId === itemId && i.itemType === itemType);
-        if (!cartItem) throw new Error("CartItem not found");
-
-        // ✅ langsung update quantity tanpa remove
-        const updatedCart = await cartApi.addItem(cart.id, {
-          itemId,
-          itemType,
-          quantity,
-        }, token);
-
-        setCart(updatedCart);
+        // Since backend doesn't have update endpoint, use addItem with exact quantity
+        // This will replace the existing item with new quantity
+        const updatedCart = await cartApi.updateItemQuantity(
+          cartId, 
+          { itemId, itemType, quantity }, 
+          token
+        );
+        
+        setCarts((prev) =>
+          prev.map((c) => (c.id === updatedCart.id ? updatedCart : c))
+        );
       } catch (err: any) {
-        console.error("Update item quantity error:", err);
         setError(err.message || "Failed to update item quantity");
+        throw err;
       } finally {
         setLoading(false);
       }
     },
-    [cart, token]
+    [token]
   );
 
-  useEffect(() => {
-    if (token && !cart) fetchCart();
-    else if (!token) {
-      setCart(null);
+  const updateCart = useCallback(async (cartId: number, data: UpdateCartDto) => {
+    if (!token) return;
+
+    setLoading(true);
+    setError(null);
+    try {
+      const updatedCart = await cartApi.updateCart(cartId, data, token);
+      setCarts((prev) =>
+        prev.map((c) => (c.id === cartId ? updatedCart : c))
+      );
+    } catch (err: any) {
+      setError(err.message || "Failed to update cart");
+      throw err;
+    } finally {
       setLoading(false);
     }
-  }, [token, cart, fetchCart]);
+  }, [token]);
+
+  // Helper functions - use backend calculated values when available
+  const getTotalItems = useCallback(() => {
+    return carts.reduce((total, cart) => total + (cart.totalItems || 0), 0);
+  }, [carts]);
+
+  const getTotalAmount = useCallback(() => {
+    return carts.reduce((total, cart) => total + (cart.totalAmount || 0), 0);
+  }, [carts]);
+
+  const getActiveCart = useCallback(() => {
+    return carts[0] || null;
+  }, [carts]);
+
+  useEffect(() => {
+    if (token) {
+      fetchCarts();
+    } else {
+      setCarts(initialCart ? [initialCart] : []);
+    }
+  }, [token, fetchCarts, initialCart]);
 
   return (
     <CartContext.Provider
-      value={{
-        cart,
-        loading,
-        error,
-        fetchCart,
-        addItem,
-        removeItem,
+      value={{ 
+        carts, 
+        loading, 
+        error, 
+        fetchCarts, 
+        addItem, 
+        removeItem, 
+        updateItemQuantity, 
         updateCart,
-        updateItemQuantity,
+        clearError,
+        getTotalItems,
+        getTotalAmount,
+        getActiveCart
       }}
     >
       {children}
@@ -199,9 +227,8 @@ export const CartProvider = ({
   );
 };
 
-export const useCartContext = () => {
+export const useCartContext = (): CartContextValue => {
   const context = useContext(CartContext);
-  if (!context)
-    throw new Error("useCartContext must be used within a CartProvider");
+  if (!context) throw new Error("useCartContext must be used within CartProvider");
   return context;
 };

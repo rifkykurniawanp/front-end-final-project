@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'; // utilitas untuk menggabungkan class (dari sh
 
 import type { HeaderProps } from '@/types/header';
 import { Logo } from './logo';
-import { SearchBar } from './searchbar';
+import { SearchBar } from './search/searchbar';
 import { HeaderActions } from './headeractions';
 // import { MobileMenu } from './MobileMenu'; // Jika Anda membuatnya
 
