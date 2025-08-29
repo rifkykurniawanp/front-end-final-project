@@ -120,9 +120,10 @@ export default function LessonPage() {
             <ModuleSidebar
               course={course}
               completedLessons={new Set(lessonProgresses.filter(p => p.completed).map(p => p.lessonId))}
-              onLessonComplete={() =>
-                markCompleteMutation.mutate({ userId: user!.id, lessonId: lesson.id, token: token! })
-              }
+              onLessonComplete={() => {
+                if (!user?.id || !lesson?.id || !token) return;
+                markCompleteMutation.mutate({ userId: user.id, lessonId: lesson.id, token });
+              }}
             />
           </div>
         </div>
@@ -158,9 +159,9 @@ export default function LessonPage() {
           {activeTab === "quiz" && lesson.quizQuestions && <QuizRenderer questions={lesson.quizQuestions} />}
 
           <div className="flex justify-between mt-6">
-            {navigation.previousLesson && (
+            {navigation.previousLesson?.slug && (
               <Button onClick={() => router.push(`/course/${courseSlug}/${navigation.previousLesson!.slug}`)}>
-                ← {navigation.previousLesson.title}
+                ← {navigation.previousLesson!.title}
               </Button>
             )}
             <Button

@@ -21,8 +21,16 @@ export interface ModuleWithLessons {
 }
 
 // ================= COURSE TYPES =================
+export interface Enrollment {
+  id: number;
+  userId: number;
+  courseId: number;
+  enrolledAt: Date;
+  // Add more fields as needed
+}
+
 export interface CourseWithRelationsDTO extends Course {
   modules?: ModuleWithLessons[];
-  enrollments?: any[];
+  enrollments?: Enrollment[];
   originalPrice?: number; // opsional, jika API menyediakan diskon atau harga awal
 }

@@ -3,12 +3,12 @@ export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 export interface ApiError {
   message: string;
   status: number;
-  details?: any;
+  details?: unknown;
 }
 
 export interface FetchOptions {
   method?: HttpMethod;
-  body?: any;
+  body?: Record<string, unknown>;
   token?: string;
   headers?: Record<string, string>;
   isBlob?: boolean;
@@ -19,7 +19,7 @@ export class GeneralApiError extends Error {
   constructor(
     public message: string, 
     public status: number, 
-    public details?: any,
+    public details?: unknown,
     public code?: string
   ) {
     super(message);

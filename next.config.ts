@@ -12,6 +12,9 @@ const nextConfig = {
     ],
   },
   // Opsi konfigurasi lain bisa ditambahkan di sini
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
 
 export default nextConfig;

@@ -1,4 +1,12 @@
 import { LessonType } from "./enum";
+// Define QuizQuestion type or import if exists
+export interface QuizQuestion {
+  id: string;
+  question: string;
+  options: string[];
+  correctAnswer: number; // index of correct answer
+  explanation: string;
+}
 
 // ================= LESSON TYPES =================
 export interface Lesson {
@@ -12,7 +20,7 @@ export interface Lesson {
   orderNumber: number;
   videoUrl?: string;
   content?: string;
-  quizQuestions?: any;
+  quizQuestions?: QuizQuestion[];
   passingScore?: number;
   createdAt: Date;
 }
@@ -25,7 +33,7 @@ export interface CreateLessonDto {
   type?: LessonType;
   videoUrl?: string;
   content?: string;
-  quizQuestions?: any;
+  quizQuestions?: QuizQuestion[];
   passingScore?: number;
   orderNumber: number;
   moduleId: number;
@@ -39,7 +47,7 @@ export interface UpdateLessonDto {
   type?: LessonType;
   videoUrl?: string;
   content?: string;
-  quizQuestions?: any;
+  quizQuestions?: QuizQuestion[];
   passingScore?: number;
   orderNumber?: number;
 }

@@ -1,16 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import type { QuizQuestion } from "@/types/lesson";
 
-interface QuizQuestion {
-  id: string;
-  question: string;
-  options: string[];
-  correctAnswer: number; // This is the index of the correct answer
-  explanation: string;
-}
-
-interface QuizRendererProps {
+export interface QuizRendererProps {
   questions: QuizQuestion[];
 }
 
@@ -26,18 +19,18 @@ export function QuizRenderer({ questions }: QuizRendererProps) {
     setSubmitted(true);
   };
 
-  const score = questions.reduce((total, q) => {
+  const score = questions.reduce((total: number, q: QuizQuestion) => {
     return total + (answers[q.id] === q.correctAnswer ? 1 : 0);
   }, 0);
 
   return (
     <div className="space-y-4">
-      {questions.map((q) => (
+      {questions.map((q: QuizQuestion) => (
         <div key={q.id} className="border border-slate-200 rounded-lg bg-white shadow-sm">
           <div className="p-4 space-y-2">
             <p className="font-medium text-slate-800">{q.question}</p>
             <div className="space-y-1">
-              {q.options.map((opt, index) => (
+              {q.options.map((opt: string, index: number) => (
                 <label key={index} className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="radio"

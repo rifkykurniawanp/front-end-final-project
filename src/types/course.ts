@@ -1,4 +1,5 @@
 import { CourseLevel, CourseCategory } from './enum';
+import { ModuleWithLessons, Enrollment } from './course-dto';
 
 // ================= INSTRUCTOR TYPES =================
 export interface Instructor {
@@ -55,14 +56,16 @@ export interface UpdateCourseDto {
   certificate?: boolean;
 }
 
+
 export interface CourseWithRelations extends Course {
-  modules?: Array<any>;
-  enrollments?: Array<any>;
+  modules?: ModuleWithLessons[];
+  enrollments?: Enrollment[];
 }
 
+
 export interface CourseResponseDto extends Course {
-  modules?: Array<any>;
-  enrollments?: Array<any>;
+  modules?: ModuleWithLessons[];
+  enrollments?: Enrollment[];
 }
 
 // ================= PAGINATION TYPES =================
