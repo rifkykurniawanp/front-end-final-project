@@ -86,7 +86,7 @@ export default function HomePage() {
           </h1>
           <h2 className="text-3xl lg:text-4xl font-light text-[#4B3621]">Edu-Commerce</h2>
           <p className={`text-xl md:text-2xl font-light ${textPrimary} leading-relaxed max-w-lg mx-auto lg:mx-0`}>
-            Ruang belajar & berbelanja untuk pecinta <span className="text-[#D9B382]">Teh • Kopi • Herbal</span>
+            Ruang belajar & berbelanja untuk pecinta <br/> <span className="text-[#D9B382]">Teh • Kopi • Herbal</span>
           </p>
           <Button className={`bg-[#4B3621] hover:bg-gradient-to-r ${warmGradient} ${textAccent} px-10 py-4 text-lg md:text-xl font-semibold rounded-full mt-6 transition-all transform hover:scale-105`}>
             <Link href="#courses">Mulai Eksplorasi</Link>

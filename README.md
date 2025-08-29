@@ -5,24 +5,28 @@
 ## 🌟 Demo
 - **🚀 Live Demo:** [Demo Link - Replace with your deployment URL]
 
-## 📸 Screenshots
+# 📸 Screenshots
 
 > **Note:** Place screenshots in `screenshots/` folder and update paths below
 
-![Homepage](screenshots/homepage.png)
-*Homepage with hero section and featured products*
+1. ![Homepage](screenshots/homepage-1.png)  
+   *Homepage with hero section and featured products*
 
-![Course Catalog](screenshots/course-catalog.png)
-*Course catalog with filtering and search functionality*
+2. ![Course Catalog](screenshots/coursepage.png)  
+   *Course catalog with filtering and search functionality*
 
-![Product Detail](screenshots/product-detail.png)
-*Product detail page with ratings and reviews*
+3. ![Product Detail](screenshots/productdetail.png)  
+   *Product detail page with ratings and reviews*
 
-![Shopping Cart](screenshots/cart.png)
-*Integrated shopping cart for courses and products*
+4. ![Mobile View](screenshots/mobile-view.png)  
+   *Responsive mobile interface*
 
-![Mobile View](screenshots/mobile-view.png)
-*Responsive mobile interface*
+5. ![User Profile](screenshots/userdashboard.png)  
+   *User profile page with order history and account settings*
+
+6. ![Admin Dashboard](screenshots/admindashboard.png)  
+   *Admin panel with analytics and product management*
+
 
 ## ✨ Key Features
 
@@ -291,10 +295,10 @@ This project is licensed under the [MIT License](LICENSE) - see the LICENSE file
 
 ## 👥 Development Team
 
-- **Frontend Developer:** [Your Name]
-- **Backend Developer:** [Backend Team Name]
-- **UI/UX Designer:** [Designer Name]
-- **Product Manager:** [PM Name]
+- **Frontend Developer:** Rifky Kurniawan Putra
+- **Backend Developer:** Rifky Kurniawan Putra
+- **UI/UX Designer:** Rifky Kurniawan Putra
+- **Product Manager:** Rifky Kurniawan Putra
 
 ## 🙏 Acknowledgments
 
