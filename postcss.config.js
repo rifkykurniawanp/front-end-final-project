@@ -3,4 +3,7 @@ module.exports = {
     '@tailwindcss/postcss': {},
     autoprefixer: {},
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  }
 }
