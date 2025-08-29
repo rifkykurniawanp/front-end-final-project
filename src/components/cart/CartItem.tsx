@@ -1,157 +1,141 @@
-"use client";
+import React from 'react';
+import { CartItemType } from '@/types/enum';
+import { CartItem as CartItemInterface } from '@/types/cart';
+import { Trash2, Plus, Minus, Package, BookOpen, Loader2 } from 'lucide-react';
 
-import React from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import type { CartItemWithDetails } from "@/types/cart";
-import { CartItemType } from "@/types/enum";
-import { useCartContext } from "@/context/CartContext";
-import { formatCurrency } from "@/lib/utils";
-
-interface CartItemProps { 
-  item: CartItemWithDetails;
+interface CartItemProps {
+  item: CartItemInterface;
+  onQuantityChange?: (itemId: number, quantity: number) => void;
+  onRemove?: (itemId: number) => void;
+  isUpdating?: boolean;
+  className?: string;
 }
 
-export const CartItem: React.FC<CartItemProps> = ({ item }) => {
-  const { updateItemQuantity, removeItem, loading } = useCartContext();
-  
-  const handleIncrease = async () => {
+export const CartItem: React.FC<CartItemProps> = ({
+  item,
+  onQuantityChange,
+  onRemove,
+  isUpdating = false,
+  className = ""
+}) => {
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+    }).format(price);
+  };
+
+  const getItemIcon = (itemType: CartItemType) => {
+    return itemType === CartItemType.PRODUCT ? 
+      <Package className="w-5 h-5 text-blue-600" /> : 
+      <BookOpen className="w-5 h-5 text-green-600" />;
+  };
+
+  const getItemName = (item: CartItemInterface) => {
+    return item.itemType === CartItemType.PRODUCT 
+      ? item.product?.name || 'Unknown Product'
+      : item.course?.title || 'Unknown Course';
+  };
+
+  const getItemDetails = (item: CartItemInterface) => {
     if (item.itemType === CartItemType.PRODUCT) {
-      try {
-        await updateItemQuantity(item.cartId, item.itemId, item.quantity + 1, item.itemType);
-      } catch (error) {
-        console.error("Error increasing quantity:", error);
-      }
+      return item.product ? (
+        <div className="text-sm text-gray-600">
+          <p>Stock: {item.product.stock}</p>
+        </div>
+      ) : null;
+    } else {
+      return item.course ? (
+        <div className="text-sm text-gray-600">
+          <p>Level: {item.course.level}</p>
+          <p>Category: {item.course.category}</p>
+        </div>
+      ) : null;
     }
   };
 
-  const handleDecrease = async () => {
-    if (item.itemType === CartItemType.PRODUCT && item.quantity > 1) {
-      try {
-        await updateItemQuantity(item.cartId, item.itemId, item.quantity - 1, item.itemType);
-      } catch (error) {
-        console.error("Error decreasing quantity:", error);
-      }
+  const handleQuantityChange = (newQuantity: number) => {
+    if (newQuantity >= 1 && onQuantityChange) {
+      onQuantityChange(item.id, newQuantity);
     }
   };
 
-  const handleRemove = async () => {
-    try {
-      // FIXED: Use CartItem.id (not itemId) - this is what backend expects
-      await removeItem(item.cartId, item.id);
-    } catch (error) {
-      console.error("Error removing item:", error);
+  const handleRemove = () => {
+    if (onRemove) {
+      onRemove(item.id);
     }
   };
-
-  // Get item details based on type - synced with backend response structure
-  const itemName = item.itemType === CartItemType.PRODUCT 
-    ? item.product?.name 
-    : item.course?.title;
-    
-  const itemPrice = item.itemType === CartItemType.PRODUCT 
-    ? item.product?.price 
-    : item.course?.price;
-    
-  const itemImage = item.itemType === CartItemType.PRODUCT 
-    ? item.product?.image 
-    : undefined; // Backend courses don't have image field
-    
-  const itemLink = item.itemType === CartItemType.PRODUCT 
-    ? `/product/${item.product?.slug}` 
-    : `/course/${item.course?.slug}`;
-
-  // Use backend calculated subtotal if available, fallback to calculation
-  const totalItemPrice = item.subtotal || ((itemPrice || 0) * item.quantity);
 
   return (
-    <div className="flex items-start gap-4 p-4 hover:shadow-xl transition-shadow rounded-2xl border border-orange-200 bg-orange-50">
-      {itemImage && (
-        <div className="w-24 h-24 relative rounded overflow-hidden border border-orange-300">
-          <Image 
-            src={itemImage} 
-            alt={itemName || "Product image"} 
-            fill 
-            className="object-cover"
-          />
+    <div className={`flex items-center space-x-4 p-4 border border-gray-200 rounded-lg transition-opacity ${
+      isUpdating ? 'opacity-50' : ''
+    } ${className}`}>
+      {/* Item Type Icon */}
+      <div className="flex-shrink-0">
+        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+          {getItemIcon(item.itemType)}
         </div>
-      )}
-      
-      <div className="flex-1 space-y-2">
-        <Link 
-          href={itemLink} 
-          className="text-lg font-semibold text-orange-800 hover:underline"
-        >
-          {itemName}
-        </Link>
-        
-        {itemPrice && (
-          <div className="space-y-1">
-            <p className="text-orange-700 font-bold">
-              {formatCurrency(itemPrice)} {item.quantity > 1 && "/ pcs"}
-            </p>
-            {item.quantity > 1 && (
-              <p className="text-sm text-orange-600">
-                Total: {formatCurrency(totalItemPrice)}
-              </p>
-            )}
-          </div>
-        )}
-        
-        <div className="flex items-center gap-2 mt-2">
-          {/* Quantity controls for products only */}
-          {item.itemType === CartItemType.PRODUCT && (
-            <div className="flex items-center gap-2">
-              <Button 
-                onClick={handleDecrease} 
-                disabled={item.quantity <= 1 || loading} 
-                size="sm" 
-                variant="outline"
-                className="w-8 h-8 p-0"
-              >
-                -
-              </Button>
-              <span className="min-w-[2rem] text-center font-medium">
-                {item.quantity}
-              </span>
-              <Button 
-                onClick={handleIncrease} 
-                disabled={loading}
-                size="sm" 
-                variant="outline"
-                className="w-8 h-8 p-0"
-              >
-                +
-              </Button>
-            </div>
-          )}
-          
-          {/* For courses, just show quantity (courses typically quantity = 1) */}
-          {item.itemType === CartItemType.COURSE && (
-            <span className="text-sm text-gray-600">
-              Qty: {item.quantity}
-            </span>
-          )}
-          
-          <Button 
-            onClick={handleRemove} 
-            disabled={loading}
-            size="sm" 
-            variant="destructive" 
-            className="ml-auto"
-          >
-            {loading ? "..." : "Hapus"}
-          </Button>
-        </div>
-
-        {/* Debug info (remove in production) */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="text-xs text-gray-500 border-t pt-2">
-            CartItem ID: {item.id} | Item ID: {item.itemId} | Type: {item.itemType}
-          </div>
-        )}
       </div>
+
+      {/* Item Details */}
+      <div className="flex-1 min-w-0">
+        <h3 className="text-lg font-medium text-gray-900 truncate">
+          {getItemName(item)}
+        </h3>
+        {getItemDetails(item)}
+        <div className="mt-1">
+          <span className="text-sm text-gray-600">
+            {formatPrice(item.price)} each
+          </span>
+        </div>
+      </div>
+
+      {/* Quantity Controls */}
+      <div className="flex items-center space-x-2">
+        <button
+          onClick={() => handleQuantityChange(item.quantity - 1)}
+          disabled={item.quantity <= 1 || isUpdating}
+          className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <Minus className="w-4 h-4" />
+        </button>
+        
+        <span className="w-12 text-center font-medium">
+          {isUpdating ? (
+            <Loader2 className="w-4 h-4 animate-spin mx-auto" />
+          ) : (
+            item.quantity
+          )}
+        </span>
+        
+        <button
+          onClick={() => handleQuantityChange(item.quantity + 1)}
+          disabled={isUpdating}
+          className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* Subtotal */}
+      <div className="text-right min-w-0">
+        <div className="text-lg font-medium text-gray-900">
+          {formatPrice(item.subtotal)}
+        </div>
+      </div>
+
+      {/* Remove Button */}
+      <button
+        onClick={handleRemove}
+        disabled={isUpdating}
+        className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        title="Remove item"
+      >
+        <Trash2 className="w-5 h-5" />
+      </button>
     </div>
   );
 };
+
+export default CartItem;

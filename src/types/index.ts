@@ -14,6 +14,7 @@ export * from './course';
 export * from './course-module';
 export * from './course-enrollment';
 
+
 // Lesson types
 export * from './lesson';
 export * from './lesson-progress';
@@ -34,3 +35,5 @@ export * from './payment';
 export * from './order';
 
 export * from './auth'
+
+export * from './course-dto'

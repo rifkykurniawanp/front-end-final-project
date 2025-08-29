@@ -1,55 +1,50 @@
 "use client";
-
-import * as React from "react";
-import { useState, useEffect } from "react";
-import { Modal } from "@/components/form/modal";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ProductCategory, ProductOrigin, ProductStatus } from "@/types/enum";
-import type { Product, User, CreateProductDto, UpdateProductDto } from "@/types";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import type { User, CreateUserDto } from "@/types/user";
+import { RoleName } from "@/types/enum"; // pastikan import enum
 
-interface ProductFormProps {
-  isOpen: boolean;
-  onClose: () => void;
-  product?: Product;
-  onSubmit: (data: CreateProductDto | UpdateProductDto) => void;
-  suppliers?: User[];
+export interface UserFormProps {
+  user?: Omit<User, "password">;
+  onSubmit: (data: CreateUserDto) => Promise<any>;
+  onCancel?: () => void;
+  isLoading?: boolean;
 }
 
-export const ProductForm: React.FC<ProductFormProps> = ({
-  isOpen,
-  onClose,
-  product,
-  onSubmit,
-  suppliers,
-}) => {
-  const [form, setForm] = useState<CreateProductDto | UpdateProductDto>({
-    slug: "",
-    name: "",
-    description: undefined,
-    price: 0,
-    stock: 0,
-    category: ProductCategory.COFFEE,
-    status: ProductStatus.ACTIVE,
-    origin: ProductOrigin.INDONESIA,
+export const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel, isLoading }) => {
+  const [form, setForm] = useState<CreateUserDto>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
+    role: RoleName.USER, // ✅ pakai enum, bukan string literal
+    isBuyer: false,
+    isStudent: false,
+    password: "",
   });
 
   useEffect(() => {
-    if (product) {
+    if (user) {
       setForm({
-        slug: product.slug,
-        name: product.name,
-        description: product.description ?? undefined,
-        price: product.price,
-        stock: product.stock,
-        category: product.category,
-        status: product.status,
-        origin: product.origin,
+        firstName: user.firstName ?? "",
+        lastName: user.lastName ?? "",
+        email: user.email ?? "",
+        phone: user.phone ?? "",     // ✅ fix null → ""
+        address: user.address ?? "", // ✅ fix null → ""
+        role: user.role,
+        isBuyer: user.isBuyer,
+        isStudent: user.isStudent,
+        password: "",
       });
     }
-  }, [product]);
+  }, [user]);
 
-  const handleChange = (field: keyof CreateProductDto | keyof UpdateProductDto, value: any) => {
+  const handleChange = (field: keyof CreateUserDto, value: any) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -59,94 +54,116 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={product ? "Edit Product" : "Create Product"}>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label>Name</label>
-          <Input value={form.name} onChange={(e) => handleChange("name", e.target.value)} required />
-        </div>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* First Name */}
+      <div className="space-y-1">
+        <Label>First Name</Label>
+        <Input
+          value={form.firstName}
+          onChange={(e) => handleChange("firstName", e.target.value)}
+          required
+        />
+      </div>
 
-        <div>
-          <label>Slug</label>
-          <Input value={form.slug} onChange={(e) => handleChange("slug", e.target.value)} required />
-        </div>
+      {/* Last Name */}
+      <div className="space-y-1">
+        <Label>Last Name</Label>
+        <Input
+          value={form.lastName}
+          onChange={(e) => handleChange("lastName", e.target.value)}
+        />
+      </div>
 
-        <div>
-          <label>Description</label>
+      {/* Email */}
+      <div className="space-y-1">
+        <Label>Email</Label>
+        <Input
+          type="email"
+          value={form.email}
+          onChange={(e) => handleChange("email", e.target.value)}
+          required
+        />
+      </div>
+
+      {/* Phone */}
+      <div className="space-y-1">
+        <Label>Phone</Label>
+        <Input
+          value={form.phone}
+          onChange={(e) => handleChange("phone", e.target.value)}
+        />
+      </div>
+
+      {/* Address */}
+      <div className="space-y-1">
+        <Label>Address</Label>
+        <Input
+          value={form.address}
+          onChange={(e) => handleChange("address", e.target.value)}
+        />
+      </div>
+
+      {/* Role */}
+      <div className="space-y-1">
+        <Label>Role</Label>
+        <Select
+          value={form.role}
+          onValueChange={(val) => handleChange("role", val as RoleName)} // ✅ cast ke RoleName
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select role" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={RoleName.USER}>User</SelectItem>
+            <SelectItem value={RoleName.ADMIN}>Admin</SelectItem>
+            <SelectItem value={RoleName.INSTRUCTOR}>Instructor</SelectItem>
+            <SelectItem value={RoleName.SUPPLIER}>Supplier</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Buyer & Student Switch */}
+      <div className="flex items-center justify-between">
+        <Label htmlFor="buyer">Buyer</Label>
+        <Switch
+          id="buyer"
+          checked={form.isBuyer}
+          onCheckedChange={(val) => handleChange("isBuyer", val)}
+        />
+      </div>
+      <div className="flex items-center justify-between">
+        <Label htmlFor="student">Student</Label>
+        <Switch
+          id="student"
+          checked={form.isStudent}
+          onCheckedChange={(val) => handleChange("isStudent", val)}
+        />
+      </div>
+
+      {/* Password hanya untuk create */}
+      {!user && (
+        <div className="space-y-1">
+          <Label>Password</Label>
           <Input
-            value={form.description ?? ""}
-            onChange={(e) => handleChange("description", e.target.value)}
-          />
-        </div>
-
-        <div>
-          <label>Price</label>
-          <Input
-            type="number"
-            value={form.price}
-            onChange={(e) => handleChange("price", parseFloat(e.target.value))}
+            type="password"
+            value={form.password}
+            onChange={(e) => handleChange("password", e.target.value)}
             required
           />
         </div>
+      )}
 
-        <div>
-          <label>Stock</label>
-          <Input
-            type="number"
-            value={form.stock}
-            onChange={(e) => handleChange("stock", parseInt(e.target.value))}
-          />
-        </div>
-
-        <div>
-          <label>Category</label>
-          <select
-            value={form.category}
-            onChange={(e) => handleChange("category", e.target.value as ProductCategory)}
-          >
-            {Object.values(ProductCategory).map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label>Status</label>
-          <select
-            value={form.status}
-            onChange={(e) => handleChange("status", e.target.value as ProductStatus)}
-          >
-            {Object.values(ProductStatus).map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label>Origin</label>
-          <select
-            value={form.origin}
-            onChange={(e) => handleChange("origin", e.target.value as ProductOrigin)}
-          >
-            {Object.values(ProductOrigin).map((o) => (
-              <option key={o} value={o}>
-                {o}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button type="button" variant="secondary" onClick={onClose}>
+      {/* Actions */}
+      <div className="flex justify-end gap-2 pt-4">
+        {onCancel && (
+          <Button type="button" variant="secondary" onClick={onCancel}>
             Cancel
           </Button>
-          <Button type="submit">{product ? "Update" : "Create"}</Button>
-        </div>
-      </form>
-    </Modal>
+        )}
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? "Saving..." : "Save"}
+        </Button>
+      </div>
+    </form>
   );
 };

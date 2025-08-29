@@ -16,21 +16,14 @@ const useAuth = () => {
       try {
         const parsedUser: Omit<User, "password"> = JSON.parse(storedUser);
         setUser(parsedUser);
-      } catch (e) {
-        console.error("Failed to parse user", e);
+      } catch {
         localStorage.removeItem("user");
       }
     }
     setLoading(false);
   }, []);
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    window.location.href = "/login";
-  };
-
-  return { user, loading, logout };
+  return { user, loading };
 };
 
 export default function DashboardLayout({
@@ -38,7 +31,7 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, loading, logout } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -55,7 +48,6 @@ export default function DashboardLayout({
     return null;
   }
 
-  // Tabs menu berdasarkan role
   const getMenu = (role: RoleName) => {
     switch (role) {
       case RoleName.ADMIN:
@@ -91,47 +83,42 @@ export default function DashboardLayout({
   const menu = getMenu(user.role);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
-      <header className="w-full border-b bg-white py-4 shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold capitalize">
-              {user.role.toLowerCase()} Dashboard
-            </h1>
-            <p className="text-gray-500">
-              Welcome back, {user.firstName || user.email}
-            </p>
-          </div>
-          <button
-            onClick={logout}
-            className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm"
-          >
-            Logout
-          </button>
-        </div>
-      </header>
+    <div className="min-h-screen flex flex-col bg-[#F9F7F4]">
 
-      {/* Tabs Nav */}
-      <div className="max-w-5xl mx-auto w-full px-4 mt-6">
-        <Tabs value={pathname}>
-          <TabsList className="grid grid-cols-3 md:grid-cols-4 w-full">
-            {menu.map((item) => (
-              <TabsTrigger
-                key={item.href}
-                value={item.href}
-                onClick={() => router.push(item.href)}
-              >
-                {item.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+      {/* Dashboard Nav */}
+      <div className="border-b bg-white shadow-sm">
+        <div className="max-w-6xl mx-auto px-6 py-4">
+          <h1 className="text-2xl font-bold capitalize text-[#4B3621]">
+            {user.role.toLowerCase()} Dashboard
+          </h1>
+          <p className="text-sm text-gray-500">
+            Welcome back, {user.firstName || user.email}
+          </p>
+
+          <Tabs value={pathname} className="mt-4">
+            <TabsList className="flex flex-wrap gap-2 bg-transparent p-0">
+              {menu.map((item) => (
+                <TabsTrigger
+                  key={item.href}
+                  value={item.href}
+                  onClick={() => router.push(item.href)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    pathname === item.href
+                      ? "bg-[#6F4E37] text-white shadow"
+                      : "bg-[#F5F5DC] text-[#4B3621] hover:bg-[#E5D3B3]"
+                  }`}
+                >
+                  {item.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        </div>
       </div>
 
-      {/* Main Content */}
-      <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-6">
-        <div className="bg-white p-6 rounded-lg shadow">{children}</div>
+      {/* Main */}
+      <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-8">
+        <div className="bg-white p-6 rounded-xl shadow-md">{children}</div>
       </main>
     </div>
   );

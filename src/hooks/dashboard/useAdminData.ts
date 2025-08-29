@@ -1,16 +1,18 @@
-// /hooks/useAdminData.ts (fixed version)
+// /hooks/dashboard/useAdminData.ts (refactored version)
 import { useState, useEffect } from "react";
 import { usersApi } from "@/lib/API/auth";
 import { coursesApi, courseEnrollmentsApi } from "@/lib/API/courses";
 import { productsApi, productOrdersApi } from "@/lib/API/products";
-import type { User } from "@/types/user";
+import type { User, CreateUserDto, UpdateUserDto } from "@/types/user";
 import type { CourseResponseDto } from "@/types/course";
 import type { ProductResponseDto } from "@/types/product";
 import type { ProductOrderResponseDto } from "@/types/order";
 import type { CourseEnrollment } from "@/types/course-enrollment";
+import { GeneralApiError } from "@/types/api";
 
 export interface AdminData {
   users: Omit<User, "password">[];
+  deletedUsers: Omit<User, "password">[];
   courses: CourseResponseDto[];
   products: ProductResponseDto[];
   orders: ProductOrderResponseDto[];
@@ -20,6 +22,7 @@ export interface AdminData {
 export const useAdminData = () => {
   const [data, setData] = useState<AdminData>({
     users: [],
+    deletedUsers: [],
     courses: [],
     products: [],
     orders: [],
@@ -27,11 +30,13 @@ export const useAdminData = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showDeleted, setShowDeleted] = useState(false);
 
+  // ✅ Use the exact same token getter as useAuth hook
   const getToken = (): string | null => {
     if (typeof window === "undefined") return null;
     
-    // Try multiple possible localStorage keys
+    // Try multiple possible localStorage keys (same as useAuth)
     const possibleKeys = ['auth', 'token', 'authToken', 'accessToken'];
     
     for (const key of possibleKeys) {
@@ -64,16 +69,21 @@ export const useAdminData = () => {
     try {
       const token = getToken();
       if (!token) {
-        // More descriptive error message
-        console.error("Available localStorage keys:", Object.keys(localStorage));
+        // Enhanced debugging for token issues
+        console.error("Token debugging info:", {
+          localStorageKeys: typeof window !== "undefined" ? Object.keys(localStorage) : [],
+          authData: typeof window !== "undefined" ? localStorage.getItem('auth') : null,
+          accessTokenData: typeof window !== "undefined" ? localStorage.getItem('accessToken') : null,
+        });
         throw new Error("No authentication token found. Please login first.");
       }
 
-      console.log("Using token:", token.substring(0, 20) + "..."); // Log partial token for debugging
+      console.log("Fetching admin data with token:", token.substring(0, 20) + "...");
 
-      const [usersRes, coursesRes, productsRes, ordersRes, enrollmentsRes] =
+      const [usersRes, deletedUsersRes, coursesRes, productsRes, ordersRes, enrollmentsRes] =
         await Promise.allSettled([
           usersApi.getAll(1, 100, token),
+          usersApi.getDeleted(1, 100, token),
           coursesApi.getAll({}, token),
           productsApi.getAll({}),
           productOrdersApi.getAll(token),
@@ -81,20 +91,22 @@ export const useAdminData = () => {
         ]);
 
       setData({
-        users:
-          usersRes.status === "fulfilled"
-            ? usersRes.value.map(({ password, ...rest }) => rest)
-            : [],
+        users: usersRes.status === "fulfilled"
+          ? usersRes.value.map(({ password, ...rest }) => rest)
+          : [],
+        deletedUsers: deletedUsersRes.status === "fulfilled"
+          ? deletedUsersRes.value.map(({ password, ...rest }) => rest)
+          : [],
         courses: coursesRes.status === "fulfilled" ? coursesRes.value : [],
         products: productsRes.status === "fulfilled" ? productsRes.value : [],
         orders: ordersRes.status === "fulfilled" ? ordersRes.value : [],
-        enrollments:
-          enrollmentsRes.status === "fulfilled" ? enrollmentsRes.value : [],
+        enrollments: enrollmentsRes.status === "fulfilled" ? enrollmentsRes.value : [],
       });
 
-      // Log errors with more details
+      // Log errors for debugging
       [
         { key: "users", res: usersRes },
+        { key: "deletedUsers", res: deletedUsersRes },
         { key: "courses", res: coursesRes },
         { key: "products", res: productsRes },
         { key: "orders", res: ordersRes },
@@ -107,14 +119,88 @@ export const useAdminData = () => {
 
     } catch (err: any) {
       console.error("Admin data fetch error:", err);
-      setError(err.message || "Failed to fetch admin data");
+      setError(err instanceof GeneralApiError ? err.message : err.message || "Failed to fetch admin data");
     } finally {
       setLoading(false);
     }
   };
 
+  const createUser = async (userData: CreateUserDto) => {
+    try {
+      const token = getToken();
+      if (!token) throw new Error("No authentication token found");
+      
+      await usersApi.create(userData, token);
+      await fetchData(); // Refresh data
+      return { success: true };
+    } catch (err: any) {
+      console.error("Create user error:", err);
+      const message = err instanceof GeneralApiError ? err.message : err.message || "Failed to create user";
+      return { success: false, error: message };
+    }
+  };
+  
+  const updateUser = async (id: number, userData: UpdateUserDto) => {
+    try {
+      const token = getToken();
+      if (!token) throw new Error("No authentication token found");
+      
+      await usersApi.update(id, userData, token);
+      await fetchData(); // Refresh data
+      return { success: true };
+    } catch (err: any) {
+      console.error("Update user error:", err);
+      const message = err instanceof GeneralApiError ? err.message : err.message || "Failed to update user";
+      return { success: false, error: message };
+    }
+  };
+  
+  const deleteUser = async (id: number) => {
+    try {
+      const token = getToken();
+      if (!token) throw new Error("No authentication token found");
+      
+      await usersApi.remove(id, token); // Soft delete
+      await fetchData(); // Refresh data
+      return { success: true };
+    } catch (err: any) {
+      console.error("Delete user error:", err);
+      const message = err instanceof GeneralApiError ? err.message : err.message || "Failed to delete user";
+      return { success: false, error: message };
+    }
+  };
+
+  const restoreUser = async (id: number) => {
+    try {
+      const token = getToken();
+      if (!token) throw new Error("No authentication token found");
+      
+      await usersApi.restore(id, token);
+      await fetchData(); // Refresh data
+      return { success: true };
+    } catch (err: any) {
+      console.error("Restore user error:", err);
+      const message = err instanceof GeneralApiError ? err.message : err.message || "Failed to restore user";
+      return { success: false, error: message };
+    }
+  };
+
+  const forceDeleteUser = async (id: number) => {
+    try {
+      const token = getToken();
+      if (!token) throw new Error("No authentication token found");
+      
+      await usersApi.forceDelete(id, token);
+      await fetchData(); // Refresh data
+      return { success: true };
+    } catch (err: any) {
+      console.error("Force delete user error:", err);
+      const message = err instanceof GeneralApiError ? err.message : err.message || "Failed to permanently delete user";
+      return { success: false, error: message };
+    }
+  };
+
   useEffect(() => {
-    // Add a small delay to ensure localStorage is ready
     const timer = setTimeout(() => {
       fetchData();
     }, 100);
@@ -122,5 +208,17 @@ export const useAdminData = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  return { data, loading, error, refetch: fetchData };
+  return { 
+    data, 
+    loading, 
+    error, 
+    showDeleted,
+    setShowDeleted,
+    refetch: fetchData,
+    createUser,
+    updateUser,
+    deleteUser,
+    restoreUser,
+    forceDeleteUser
+  };
 };

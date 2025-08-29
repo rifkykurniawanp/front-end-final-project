@@ -18,6 +18,7 @@ export default function CourseDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [completedLessons, setCompletedLessons] = useState<Set<number>>(new Set());
 
+  // Fetch course
   useEffect(() => {
     if (!courseSlug) return;
 
@@ -26,26 +27,22 @@ export default function CourseDetailPage() {
       setError(null);
       
       try {
-        // First, get all courses to find the one with matching slug
         const allCourses = await coursesApi.getAll();
-        const foundCourse = allCourses.find(course => course.slug === courseSlug);
-        
-        if (!foundCourse) {
-          throw new Error('Course not found');
-        }
+        const foundCourse = allCourses.find((c) => c.slug === courseSlug);
 
-        // Then get the full course details with relations
+        if (!foundCourse) throw new Error("Course not found");
+
         const courseDetails = await coursesApi.getById(foundCourse.id);
         setCourse(courseDetails);
 
-        // Load saved progress from localStorage
+        // Load progress
         const savedCompleted = localStorage.getItem(`course-${courseSlug}-completed`);
         if (savedCompleted) {
           setCompletedLessons(new Set(JSON.parse(savedCompleted)));
         }
       } catch (error) {
-        console.error('Error fetching course:', error);
-        setError('Course not found');
+        console.error("Error fetching course:", error);
+        setError("Course not found");
         router.push("/");
       } finally {
         setLoading(false);
@@ -55,6 +52,7 @@ export default function CourseDetailPage() {
     fetchCourseBySlug();
   }, [courseSlug, router]);
 
+  // Handlers
   const handleLessonComplete = (lessonId: number) => {
     setCompletedLessons((prev) => {
       const newSet = new Set(prev);
@@ -73,23 +71,27 @@ export default function CourseDetailPage() {
     }
   };
 
+  // Loading
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-amber-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading course...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[var(--accent)] mx-auto mb-4"></div>
+          <p className="text-[var(--muted-foreground)]">Loading course...</p>
         </div>
       </div>
     );
   }
 
+  // Error
   if (error || !course) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-slate-800 mb-4">Course Not Found</h2>
-          <p className="text-slate-600 mb-6">The course you're looking for doesn't exist.</p>
+          <h2 className="text-2xl font-bold text-[var(--foreground)] mb-4">Course Not Found</h2>
+          <p className="text-[var(--muted-foreground)] mb-6">
+            The course you're looking for doesn't exist.
+          </p>
           <Button onClick={() => router.push("/")} variant="outline">
             Go Back Home
           </Button>
@@ -98,31 +100,43 @@ export default function CourseDetailPage() {
     );
   }
 
-  const totalLessons = course.modules?.reduce(
-    (sum, m) => sum + (m.lessons?.length ?? 0),
-    0
-  ) ?? 0;
-
-  const progress = totalLessons > 0 ? Math.round((completedLessons.size / totalLessons) * 100) : 0;
+  // Stats
+  const totalLessons =
+    course.modules?.reduce((sum, m) => sum + (m.lessons?.length ?? 0), 0) ?? 0;
+  const progress =
+    totalLessons > 0
+      ? Math.round((completedLessons.size / totalLessons) * 100)
+      : 0;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[var(--background)]">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white">
+      <div className="bg-gradient-to-r from-[var(--footer-accent)] to-[var(--accent)] text-white">
         <div className="max-w-7xl mx-auto px-6 py-12 grid lg:grid-cols-3 gap-8">
+          {/* Left Hero */}
           <div className="lg:col-span-2">
             <h1 className="text-4xl font-bold mb-4">{course.title}</h1>
-            <p className="text-xl mb-6 text-amber-100">{course.description ?? ""}</p>
-            <div className="flex flex-wrap gap-4 mb-6 text-sm">
-              <div className="flex items-center gap-2"><Users className="w-5 h-5" />By {course.instructor?.firstName ?? "Unknown"}</div>
-              <div className="flex items-center gap-2"><Clock className="w-5 h-5" />{course.duration ?? "-"}</div>
-              <div className="flex items-center gap-2"><BookOpen className="w-5 h-5" />{course.modules?.length ?? 0} Modules</div>
+            <p className="text-lg mb-6 opacity-90">{course.description ?? ""}</p>
+            <div className="flex flex-wrap gap-4 mb-6 text-sm opacity-90">
+              <div className="flex items-center gap-2">
+                <Users className="w-5 h-5" /> By {course.instructor?.firstName ?? "Unknown"}
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock className="w-5 h-5" /> {course.duration ?? "-"}
+              </div>
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-5 h-5" /> {course.modules?.length ?? 0} Modules
+              </div>
             </div>
-            <Button onClick={handleStartCourse} className="bg-white text-amber-600 hover:bg-amber-100 text-lg px-6 py-3">
-              <Play className="w-5 h-5 mr-2" />Start Course
+            <Button
+              onClick={handleStartCourse}
+              className="bg-white text-[var(--accent)] hover:bg-amber-100 text-lg px-6 py-3"
+            >
+              <Play className="w-5 h-5 mr-2" /> Start Course
             </Button>
           </div>
 
+          {/* Right Hero / Stats */}
           <div className="lg:col-span-1">
             <div className="bg-white/10 p-6 border border-white/20 rounded-lg backdrop-blur-sm">
               <h3 className="font-semibold text-lg mb-4">Course Stats</h3>
@@ -137,7 +151,10 @@ export default function CourseDetailPage() {
                   <span>Completed</span><span>{completedLessons.size}/{totalLessons}</span>
                 </div>
                 <div className="w-full bg-white/20 h-2 rounded-full">
-                  <div className="bg-white h-2 rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+                  <div
+                    className="bg-white h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${progress}%` }}
+                  />
                 </div>
               </div>
             </div>
@@ -147,6 +164,7 @@ export default function CourseDetailPage() {
 
       {/* Course Body */}
       <div className="max-w-7xl mx-auto px-6 py-12 grid lg:grid-cols-4 gap-8">
+        {/* Sidebar */}
         <div className="lg:col-span-1">
           <ModuleSidebar
             course={course}
@@ -155,12 +173,13 @@ export default function CourseDetailPage() {
           />
         </div>
 
+        {/* Main */}
         <div className="lg:col-span-3 space-y-8">
-          {/* Instructor Section */}
+          {/* Instructor */}
           <section className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
             <h2 className="text-2xl font-semibold mb-4">About the Instructor</h2>
             <div className="flex items-start gap-4">
-              <div className="w-16 h-16 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold text-xl">
+              <div className="w-16 h-16 bg-[var(--accent)] text-white rounded-full flex items-center justify-center font-bold text-xl">
                 {course.instructor?.firstName?.charAt(0) ?? "?"}
               </div>
               <div>
@@ -170,14 +189,14 @@ export default function CourseDetailPage() {
             </div>
           </section>
 
-          {/* What You'll Learn */}
+          {/* What You’ll Learn */}
           <section className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
             <h2 className="text-2xl font-semibold mb-4">What You Will Learn</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {Array.isArray((course as any).whatYouWillLearn) &&
                 (course as any).whatYouWillLearn.map((item: string, i: number) => (
                   <div key={i} className="flex gap-3 items-start">
-                    <div className="w-2 h-2 mt-2 rounded-full bg-amber-600" />
+                    <div className="w-2 h-2 mt-2 rounded-full bg-[var(--accent)]" />
                     <span className="text-slate-600">{item}</span>
                   </div>
                 ))}
@@ -192,7 +211,7 @@ export default function CourseDetailPage() {
                 {Array.isArray((course as any).requirements) &&
                   (course as any).requirements.map((item: string, i: number) => (
                     <li key={i} className="flex gap-3 items-start">
-                      <div className="w-2 h-2 mt-2 bg-amber-600 rounded-full" />
+                      <div className="w-2 h-2 mt-2 bg-[var(--accent)] rounded-full" />
                       <span className="text-slate-600">{item}</span>
                     </li>
                   ))}
@@ -205,7 +224,7 @@ export default function CourseDetailPage() {
                 {Array.isArray((course as any).targetAudience) &&
                   (course as any).targetAudience.map((item: string, i: number) => (
                     <li key={i} className="flex gap-3 items-start">
-                      <div className="w-2 h-2 mt-2 bg-amber-600 rounded-full" />
+                      <div className="w-2 h-2 mt-2 bg-[var(--accent)] rounded-full" />
                       <span className="text-slate-600">{item}</span>
                     </li>
                   ))}
@@ -222,7 +241,7 @@ export default function CourseDetailPage() {
                   <Badge
                     key={i}
                     variant="secondary"
-                    className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
+                    className="bg-[var(--accent)]/10 text-[var(--accent)] border-[var(--accent)]/20 hover:bg-[var(--accent)]/20"
                   >
                     {tag}
                   </Badge>

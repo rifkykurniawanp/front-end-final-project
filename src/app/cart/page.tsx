@@ -1,57 +1,57 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { useCartContext } from "@/context/CartContext";
-import { CartItem } from "@/components/cart/CartItem";
-import { CartSummary } from "@/components/cart/CartSummary";
-import { cartApi } from "@/lib/API/core/carts.api";
+import CartSummary from "@/components/cart/CartSummary";
 import { useAuthContext } from "@/context/AuthContext";
+import { ShoppingCart, ShoppingBag } from "lucide-react";
 
 const CartPage = () => {
-  const { carts, loading, error, fetchCarts, getActiveCart, getTotalItems, getTotalAmount } = useCartContext();
-  const { token } = useAuthContext();
-  
-  const activeCart = getActiveCart();
-  const totalItems = getTotalItems();
-  const totalAmount = getTotalAmount();
+  const router = useRouter();
+  const { cart, items, loading, error, refreshCart } = useCartContext();
+  const { token, user } = useAuthContext();
 
   const handleCheckout = () => {
-    if (!activeCart || !token) {
-      alert("Tidak ada cart atau belum login");
+    if (!cart || items.length === 0) {
+      alert("Your cart is empty");
       return;
     }
     
-    // Use backend calculated values
-    alert(`Checkout: ${activeCart.totalItems || totalItems} items, total Rp ${(activeCart.totalAmount || totalAmount).toLocaleString()}`);
-  };
-
-  const handleClearCart = async () => {
-    if (!activeCart || !token) {
-      alert("Tidak ada cart untuk dihapus");
+    if (!token || !user) {
+      router.push("/auth/login?returnUrl=/cart");
       return;
     }
+    
+    router.push("/checkout");
+  };
 
-    const confirm = window.confirm("Yakin ingin mengosongkan keranjang?");
-    if (!confirm) return;
+  const handleContinueShopping = () => {
+    router.push("/products");
+  };
 
+  const handleClearCart = () => {
+    console.log("Cart cleared successfully");
+  };
+
+  const handleRetry = async () => {
     try {
-      // Delete the entire cart (backend will handle cascade delete of items)
-      await cartApi.removeCart(activeCart.id, token);
-      // Refresh carts
-      await fetchCarts();
-      alert("Keranjang berhasil dikosongkan");
-    } catch (error: any) {
-      console.error("Error clearing cart:", error);
-      alert("Gagal mengosongkan keranjang: " + error.message);
+      await refreshCart();
+    } catch (err) {
+      console.error("Failed to refresh cart:", err);
     }
   };
 
-  if (loading && !carts.length) {
+  if (loading && !items.length) {
     return (
-      <div className="p-4 flex justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto mb-2"></div>
-          <p>Loading cart...</p>
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="flex items-center justify-center py-16">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600 font-medium">Loading your cart...</p>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -59,86 +59,94 @@ const CartPage = () => {
 
   if (error) {
     return (
-      <div className="p-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">Error: {error}</p>
-          <button 
-            onClick={fetchCarts}
-            className="mt-2 text-red-600 hover:text-red-800 underline"
-          >
-            Coba lagi
-          </button>
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <div className="flex items-center space-x-3">
+              <div className="flex-shrink-0">
+                <svg className="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-red-800 font-medium">Error loading cart</h3>
+                <p className="text-red-700 text-sm mt-1">{error}</p>
+              </div>
+            </div>
+            <div className="mt-4">
+              <button 
+                onClick={handleRetry}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
-  if (!activeCart || !activeCart.items || activeCart.items.length === 0) {
+  if (!cart || items.length === 0) {
     return (
-      <div className="p-4 text-center">
-        <div className="max-w-md mx-auto">
-          <div className="text-gray-400 mb-4">
-            <svg className="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 2L3 7v11a2 2 0 002 2h10a2 2 0 002-2V7l-7-5zM8 15a1 1 0 001-1v-3a1 1 0 00-2 0v3a1 1 0 001 1zm4 0a1 1 0 001-1v-3a1 1 0 00-2 0v3a1 1 0 001 1z" clipRule="evenodd" />
-            </svg>
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="text-center py-16">
+            <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+              <ShoppingCart className="w-12 h-12 text-gray-400" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Your cart is empty</h1>
+            <p className="text-gray-600 mb-8 max-w-md mx-auto">
+              Looks like you haven't added any items to your cart yet. Start exploring our products and courses!
+            </p>
+            <div className="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
+              <button 
+                onClick={handleContinueShopping}
+                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+              >
+                <ShoppingBag className="w-5 h-5" />
+                <span>Shop Products</span>
+              </button>
+              <button 
+                onClick={() => router.push("/courses")}
+                className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-medium transition-colors"
+              >
+                Browse Courses
+              </button>
+            </div>
           </div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">Keranjang Kosong</h2>
-          <p className="text-gray-600 mb-4">Belum ada item di keranjang Anda</p>
-          <button 
-            onClick={() => window.location.href = '/products'}
-            className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg"
-          >
-            Mulai Belanja
-          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-4 max-w-4xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-orange-800">Keranjang Belanja</h1>
-        <p className="text-gray-600">
-          {activeCart.totalItems || totalItems} item dalam keranjang
-        </p>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Cart Items */}
-        <div className="lg:col-span-2 space-y-4">
-          {activeCart.items.map(item => (
-            <CartItem key={`${item.id}-${item.itemType}-${item.itemId}`} item={item} />
-          ))}
-        </div>
-        
-        {/* Cart Summary */}
-        <div className="lg:col-span-1">
-          <div className="sticky top-4">
-            <CartSummary 
-              onCheckout={handleCheckout} 
-              onClearCart={handleClearCart} 
-            />
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Shopping Cart</h1>
+            <p className="text-gray-600 mt-1">Review your items and proceed to checkout</p>
+          </div>
+          <div className="text-right">
+            <p className="text-sm text-gray-500">Total Items</p>
+            <p className="text-2xl font-bold text-blue-600">{cart.totalItems}</p>
           </div>
         </div>
-      </div>
 
-      {/* Debug info (remove in production) */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="mt-8 p-4 bg-gray-100 rounded text-xs">
-          <h3 className="font-bold">Debug Info:</h3>
-          <pre>{JSON.stringify({ 
-            cartCount: carts.length, 
-            activeCartId: activeCart?.id,
-            backendTotalItems: activeCart?.totalItems,
-            backendTotalAmount: activeCart?.totalAmount,
-            calculatedTotalItems: totalItems,
-            calculatedTotalAmount: totalAmount
-          }, null, 2)}</pre>
-        </div>
-      )}
+        <CartSummary
+          showTitle={false}
+          showItemsList={true}
+          onCheckout={handleCheckout}
+          onContinueShopping={handleContinueShopping}
+          onClearCart={handleClearCart}
+          checkoutLabel={`Checkout (${cart.totalItems} items)`}
+          continueShoppingLabel="Continue Shopping"
+          className="w-full"
+        />
+      </div>
     </div>
   );
 };
 
-export default CartPage
+export default CartPage;

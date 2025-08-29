@@ -1,16 +1,17 @@
 "use client";
-import React, { useState, useEffect, FC } from "react";
+
+import { FC, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { productsApi } from "@/lib/API/products/products.api";
+import { Product, FilterState, ProductFilterDto } from "@/types/product";
 import { FilterSidebar } from "@/components/product/FilterSideBar";
 import { ProductGrid } from "@/components/product/ProductGrid";
-import { useCart } from "@/hooks/useCart";
-import { FilterState, Product } from "@/types/product";
-import { productsApi } from "@/lib/API/products/products.api";
+import { useCartContext } from "@/context/CartContext";
 
 const ProductPage: FC = () => {
   const router = useRouter();
-  const { addToCart } = useCart();
-  
+  const { addItem } = useCartContext();
+
   const [filters, setFilters] = useState<FilterState>({
     category: [],
     origin: [],
@@ -19,19 +20,13 @@ const ProductPage: FC = () => {
     status: [],
     minRating: 0,
   });
-  
-  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Type-safe update filter function
-  const updateFilter = (key: keyof FilterState, value: FilterState[keyof FilterState]) => {
-    setFilters((prev: FilterState) => ({ 
-      ...prev, 
-      [key]: value 
-    }));
-  };
+  const updateFilter = (key: keyof FilterState, value: FilterState[keyof FilterState]) =>
+    setFilters(prev => ({ ...prev, [key]: value }));
 
   const resetFilters = () => {
     setFilters({
@@ -45,43 +40,40 @@ const ProductPage: FC = () => {
     setSearchTerm("");
   };
 
-  // Fetch products whenever filters or searchTerm change
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
       setError(null);
       try {
-        const params = {
+        const params: ProductFilterDto = {
           search: searchTerm || undefined,
-          category: filters.category.length > 0 ? filters.category : undefined,
-          origin: filters.origin.length > 0 ? filters.origin : undefined,
-          tags: filters.tags.length > 0 ? filters.tags : undefined,
-          status: filters.status.length > 0 ? filters.status : undefined,
+          category: filters.category.length ? filters.category : undefined,
+          origin: filters.origin.length ? filters.origin : undefined,
+          tags: filters.tags.length ? filters.tags : undefined,
+          status: filters.status.length ? filters.status : undefined,
           minPrice: filters.priceRange[0],
           maxPrice: filters.priceRange[1],
-          minRating: filters.minRating > 0 ? filters.minRating : undefined,
+          page: 1,
+          limit: 50,
         };
-        
         const data = await productsApi.getAll(params);
         setProducts(data);
       } catch (err: any) {
-        setError(err.message || "Gagal mengambil produk");
+        setError(err.message || "Failed to fetch products");
       } finally {
         setLoading(false);
       }
     };
-
     fetchProducts();
   }, [filters, searchTerm]);
 
   const handleBuyNow = (product: Product, quantity: number) => {
-    console.log(`Membeli ${quantity} ${product.name}`);
     router.push(`/checkout?productId=${product.id}&quantity=${quantity}`);
   };
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">Produk Kami</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-800">Produk Kami</h1>
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="lg:w-64 sticky top-20 self-start">
           <FilterSidebar
@@ -93,12 +85,12 @@ const ProductPage: FC = () => {
           />
         </div>
         <div className="flex-1">
-          {loading && <p>Loading...</p>}
-          {error && <p className="text-red-500">{error}</p>}
+          {loading && <p className="text-center py-10 text-gray-500">Loading...</p>}
+          {error && <p className="text-center py-10 text-red-500">{error}</p>}
           {!loading && !error && (
             <ProductGrid
               products={products}
-              addToCart={addToCart}
+              addToCart={addItem}
               buyNow={handleBuyNow}
             />
           )}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -8,21 +8,20 @@ import { ProductWithRelations } from "@/types/product";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { formatCurrency, cn } from "@/lib/utils";
-import { Minus, Plus, ArrowLeft, Star } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
+import { ArrowLeft, Star } from "lucide-react";
 import { CartItemType } from "@/types/enum";
-import { AddToCartButton } from "@/components/cart/AddToCartButton";
+import AddToCart from "@/components/cart/AddToCartButton";
 
 interface ProductDetailClientProps {
   product: ProductWithRelations;
 }
 
 export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product }) => {
-  const [quantity, setQuantity] = useState(1);
   const router = useRouter();
 
   const handleBuyNowClick = () => {
-    router.push(`/checkout?productId=${product.id}&quantity=${quantity}`);
+    router.push(`/checkout?productId=${product.id}`);
   };
 
   const safeImage = product.image || "/placeholder.png";
@@ -60,15 +59,13 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                 {product.category}
               </Badge>
             )}
-            {safeTags.length > 0 ? (
-              safeTags.map((tag) => (
-                <Badge key={tag} variant="secondary">
-                  {tag}
-                </Badge>
-              ))
-            ) : (
-              <Badge variant="secondary">General</Badge>
-            )}
+            {safeTags.length > 0
+              ? safeTags.map((tag) => (
+                  <Badge key={tag} variant="secondary">
+                    {tag}
+                  </Badge>
+                ))
+              : <Badge variant="secondary">General</Badge>}
           </div>
 
           {/* Title */}
@@ -132,51 +129,27 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
           </div>
 
           {/* Actions */}
-          <div className="mt-auto pt-8">
-            {/* Quantity Control */}
-            <div className="flex items-center gap-4 mb-4">
-              <h3 className="text-sm font-medium">Kuantitas:</h3>
-              <div className="flex items-center gap-2">
-                <Button
-                  size="icon"
-                  variant="outline"
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  disabled={product.stock === 0}
-                >
-                  <Minus className="w-4 h-4" />
-                </Button>
-                <span className="font-bold text-lg w-10 text-center">
-                  {quantity}
-                </span>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  onClick={() => setQuantity((q) => q + 1)}
-                  disabled={product.stock === 0}
-                >
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
+          <div className="mt-auto pt-8 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <AddToCart
+              itemType={CartItemType.PRODUCT}
+              itemId={product.id}
+              price={product.price}
+              itemName={product.name}
+              stock={product.stock}
+            />
 
-            {/* Buttons */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <AddToCartButton
-                itemId={product.id}
-                itemType={CartItemType.PRODUCT}
-                quantity={quantity}
-              />
-              <Button
-                onClick={handleBuyNowClick}
-                size="lg"
-                disabled={product.stock === 0}
-              >
-                Buy Now
-              </Button>
-            </div>
+            <Button
+              onClick={handleBuyNowClick}
+              size="lg"
+              disabled={product.stock === 0}
+            >
+              Buy Now
+            </Button>
           </div>
         </div>
       </div>
     </div>
   );
 };
+
+export default ProductDetailClient;

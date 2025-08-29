@@ -12,25 +12,25 @@ export const lessonsApi = {
 
   // Get lessons by module ID
   getByModule: (moduleId: number, token?: string) =>
-    apiFetch<Lesson[]>(`/lessons/module/${moduleId}`, { token }),
+    apiFetch<Lesson[]>(`/lessons/module/${moduleId.toString()}`, { token }),
 
   // Get lesson by ID
   getById: (id: number, token?: string) =>
-    apiFetch<Lesson>(`/lessons/${id}`, { token }),
+    apiFetch<Lesson>(`/lessons/${id.toString()}`, { token }),
 
   // Update lesson
   update: (id: number, data: UpdateLessonDto, token: string) =>
-    apiFetch<Lesson>(`/lessons/${id}`, { method: "PATCH", body: data, token }),
+    apiFetch<Lesson>(`/lessons/${id.toString()}`, { method: "PATCH", body: data, token }),
 
   // Soft delete lesson
   delete: (id: number, token: string) =>
-    apiFetch<void>(`/lessons/${id}`, { method: "DELETE", token }),
+    apiFetch<void>(`/lessons/${id.toString()}`, { method: "DELETE", token }),
 
   // Restore lesson
   restore: (id: number, token: string) =>
-    apiFetch<Lesson>(`/lessons/${id}/restore`, { method: "PATCH", token }),
+    apiFetch<Lesson>(`/lessons/${id.toString()}/restore`, { method: "PATCH", token }),
 
   // Force delete lesson (admin only)
   forceDelete: (id: number, token: string) =>
-    apiFetch<void>(`/lessons/${id}/force`, { method: "DELETE", token }),
+    apiFetch<void>(`/lessons/${id.toString()}/force`, { method: "DELETE", token }),
 };

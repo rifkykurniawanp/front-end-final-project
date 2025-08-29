@@ -10,22 +10,26 @@ import { apiFetch } from "../core/api-fetch";
 export const coursesApi = {
   // Get all courses with pagination + optional filters
   getAll: (params?: CoursePaginationParams & CourseFilterParams, token?: string) => {
-    let query = params ? `?page=${params.page || 1}&limit=${params.limit || 10}` : "?page=1&limit=10";
-
-    if (params) {
-      if (params.level) query += `&level=${params.level}`;
-      if (params.category) query += `&category=${params.category}`;
-      if (params.priceMin !== undefined) query += `&priceMin=${params.priceMin}`;
-      if (params.priceMax !== undefined) query += `&priceMax=${params.priceMax}`;
-      if (params.language) query += `&language=${params.language}`;
-    }
-
-    return apiFetch<CourseResponseDto[]>(`/courses${query}`, { token });
+    const searchParams = new URLSearchParams();
+   
+    // Set default values
+    searchParams.append('page', (params?.page || 1).toString());
+    searchParams.append('limit', (params?.limit || 10).toString());
+   
+    // Add other params if they exist
+    if (params?.level) searchParams.append('level', params.level);
+    if (params?.category) searchParams.append('category', params.category);
+    if (params?.priceMin !== undefined) searchParams.append('priceMin', params.priceMin.toString());
+    if (params?.priceMax !== undefined) searchParams.append('priceMax', params.priceMax.toString());
+    if (params?.language) searchParams.append('language', params.language);
+   
+    const query = searchParams.toString();
+    return apiFetch<CourseResponseDto[]>(`/courses?${query}`, { token });
   },
 
   // Get course by ID
   getById: (id: number, token?: string) =>
-    apiFetch<CourseResponseDto>(`/courses/${id}`, { token }),
+    apiFetch<CourseResponseDto>(`/courses/${id.toString()}`, { token }),
 
   // Get course by slug
   getBySlug: (slug: string, token?: string) =>
@@ -33,7 +37,7 @@ export const coursesApi = {
 
   // Get courses by instructor ID
   getByInstructorId: (instructorId: number, token?: string) =>
-    apiFetch<CourseResponseDto[]>(`/courses/instructor/${instructorId}`, { token }),
+    apiFetch<CourseResponseDto[]>(`/courses/instructor/${instructorId.toString()}`, { token }),
 
   // Create new course
   create: (data: CreateCourseDto, token: string) =>
@@ -45,7 +49,7 @@ export const coursesApi = {
 
   // Update course
   update: (id: number, data: UpdateCourseDto, token: string) =>
-    apiFetch<CourseResponseDto>(`/courses/${id}`, {
+    apiFetch<CourseResponseDto>(`/courses/${id.toString()}`, {
       method: "PATCH",
       body: data,
       token,
@@ -53,21 +57,21 @@ export const coursesApi = {
 
   // Soft delete course
   delete: (id: number, token: string) =>
-    apiFetch<void>(`/courses/${id}`, {
+    apiFetch<void>(`/courses/${id.toString()}`, {
       method: "DELETE",
       token,
     }),
 
   // Force delete course (Admin only)
   forceDelete: (id: number, token: string) =>
-    apiFetch<void>(`/courses/${id}/force`, {
+    apiFetch<void>(`/courses/${id.toString()}/force`, {
       method: "DELETE",
       token,
     }),
 
   // Restore soft deleted course (Admin only)
   restore: (id: number, token: string) =>
-    apiFetch<CourseResponseDto>(`/courses/${id}/restore`, {
+    apiFetch<CourseResponseDto>(`/courses/${id.toString()}/restore`, {
       method: "PATCH",
       token,
     }),

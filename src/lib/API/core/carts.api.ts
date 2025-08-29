@@ -1,67 +1,38 @@
-// =================== cart-api.ts - SYNCED WITH BACKEND ===================
-
-import { apiFetch } from "./api-fetch";
-import {
-  CartWithItems,
-  AddToCartDto,
+// lib/API/core/carts.api.ts
+'use client';
+import { apiFetch } from './api-fetch';
+import type {
+  CartResponse,
+  CreateCartDto,
   UpdateCartDto,
-} from "@/types";
+  AddItemToCartDto,
+  UpdateCartItemDto,
+} from '@/types/cart';
 
-export const cartApi = {
-  // GET /carts - Get user's carts (backend returns array, filtered by user)
-  getMyCart: (token: string) =>
-    apiFetch<CartWithItems[]>("/carts", { token }),
+const BASE_URL = '/carts';
 
-  // GET /carts/:id - Get specific cart by ID
-  getCartById: (cartId: number, token: string) =>
-    apiFetch<CartWithItems>(`/carts/${cartId}`, { token }),
+export const cartsApi = {
+  create: (data: CreateCartDto, token: string) =>
+    apiFetch<CartResponse>(`${BASE_URL}`, { method: 'POST', body: data, token }),
 
-  // POST /carts - Create new cart
-  createCart: (token: string) =>
-    apiFetch<CartWithItems>("/carts", {
-      method: "POST",
-      body: {}, // Backend expects CreateCartDto (empty object is fine)
-      token,
-    }),
+  findAll: (page = 1, limit = 10, token: string) =>
+    apiFetch<CartResponse[]>(`${BASE_URL}?page=${page}&limit=${limit}`, { token }),
 
-  // PUT /carts/:id - Update cart
-  updateCart: (cartId: number, data: UpdateCartDto, token: string) =>
-    apiFetch<CartWithItems>(`/carts/${cartId}`, {
-      method: "PUT",
-      body: data,
-      token,
-    }),
+  findOne: (id: number, token: string) =>
+    apiFetch<CartResponse>(`${BASE_URL}/${id}`, { token }),
 
-  // DELETE /carts/:id - Remove entire cart
-  removeCart: (cartId: number, token: string) =>
-    apiFetch<void>(`/carts/${cartId}`, { method: "DELETE", token }),
+  update: (id: number, data: UpdateCartDto, token: string) =>
+    apiFetch<CartResponse>(`${BASE_URL}/${id}`, { method: 'PUT', body: data, token }),
 
-  // POST /carts/:id/items - Add item to cart
-  // Backend expects: { itemType: 'PRODUCT' | 'COURSE'; itemId: number; quantity: number }
-  addItem: (cartId: number, data: AddToCartDto, token: string) =>
-    apiFetch<CartWithItems>(`/carts/${cartId}/items`, {
-      method: "POST",
-      body: {
-        itemType: data.itemType,
-        itemId: data.itemId,
-        quantity: data.quantity,
-      },
-      token,
-    }),
+  remove: (id: number, token: string) =>
+    apiFetch<void>(`${BASE_URL}/${id}`, { method: 'DELETE', token }),
 
-  // DELETE /carts/:id/items/:itemId - Remove item from cart
-  // NOTE: Backend's :itemId refers to CartItem.id, NOT the itemId field
-  removeItem: (cartId: number, cartItemId: number, token: string) =>
-    apiFetch<void>(`/carts/${cartId}/items/${cartItemId}`, {
-      method: "DELETE",
-      token,
-    }),
+  addItem: (cartId: number, data: AddItemToCartDto, token: string) =>
+    apiFetch<CartResponse>(`${BASE_URL}/${cartId}/items`, { method: 'POST', body: data, token }),
 
-  // NOTE: Backend doesn't have update item endpoint yet
-  // This would need to be added to backend as PUT /carts/:id/items/:itemId
-  // For now, we'll use addItem to "update" by replacing
-  updateItemQuantity: async (cartId: number, data: AddToCartDto, token: string) => {
-    // Since backend doesn't have update endpoint, we'll re-add with new quantity
-    return cartApi.addItem(cartId, data, token);
-  },
+  removeItem: (cartId: number, itemId: number, token: string) =>
+    apiFetch<CartResponse>(`${BASE_URL}/${cartId}/items/${itemId}`, { method: 'DELETE', token }),
+
+  updateItem: (cartId: number, itemId: number, data: UpdateCartItemDto, token: string) =>
+    apiFetch<CartResponse>(`${BASE_URL}/${cartId}/items/${itemId}`, { method: 'PUT', body: data, token }),
 };

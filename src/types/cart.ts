@@ -1,27 +1,8 @@
-// =================== cart.types.ts - SYNCED WITH BACKEND ===================
+// ================= FRONTEND CART TYPES =================
+import { CartItemType } from './enum'; // your shared frontend enums
+import { RoleName } from './enum';
 
-import { CartItemType } from './enum';
-import type { User } from './user';
-import type { Product } from './product';
-import type { Course } from './course';
-import type { Payment } from './payment';
-
-// ================= CART TYPES (synced with backend) =================
-
-export interface Cart {
-  id: number;
-  userId: number;
-  createdAt: Date;
-  updatedAt: Date;
-  user?: UserBasic;
-  items?: CartItemWithDetails[];
-  payments?: Payment[];
-  // Backend calculates these
-  totalItems?: number;
-  totalAmount?: number;
-}
-
-// Backend response structure
+// ----- User -----
 export interface UserBasic {
   id: number;
   email: string;
@@ -29,6 +10,7 @@ export interface UserBasic {
   lastName?: string;
 }
 
+// ----- Product -----
 export interface ProductBasic {
   id: number;
   name: string;
@@ -38,72 +20,62 @@ export interface ProductBasic {
   stock: number;
 }
 
+// ----- Course -----
 export interface CourseBasic {
   id: number;
   title: string;
   slug: string;
   price: number;
-  level?: string;
-  category?: string;
+  level: string;
+  category: string;
 }
 
+// ----- Cart Item -----
 export interface CartItem {
-  id: number; // CartItem ID (used for deletion)
+  id: number;
   cartId: number;
   itemType: CartItemType;
-  itemId: number; // Product/Course ID
+  itemId: number;
   quantity: number;
-  price: number; // Price at time of adding
-  // Backend calculates subtotal
-  subtotal?: number; // price * quantity
-  cart?: Cart;
+  price: number;
+  subtotal: number;
+  product?: ProductBasic;
+  course?: CourseBasic;
 }
 
-export interface CartItemWithDetails extends CartItem {
-  product?: ProductBasic | null;
-  course?: CourseBasic | null;
+// ----- Cart -----
+export interface CartResponse {
+  id: number;
+  userId: number;
+  user?: UserBasic;
+  items: CartItem[];
+  totalItems: number;
+  totalAmount: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
-// ================= REQUEST DTOs =================
-
-export interface AddToCartDto {
-  itemType: CartItemType;
-  itemId: number; // Product or Course ID
-  quantity: number;
+// ----- Requests -----
+// Create Cart
+export interface CreateCartDto {
+  userId: number;
 }
 
+// Update Cart (partial)
 export interface UpdateCartDto {
-  userId?: number;
+  // can add optional fields in future, currently empty
 }
 
+// Add Item to Cart
+export interface AddItemToCartDto {
+  itemType: CartItemType;
+  itemId: number;
+  quantity: number;
+  price: number;
+}
+
+// Update Cart Item
 export interface UpdateCartItemDto {
   quantity?: number;
   price?: number;
-}
-
-// ================= RESPONSE TYPES =================
-
-// Main cart response (what backend returns)
-export interface CartWithItems extends Cart {
-  items: CartItemWithDetails[];
-  totalItems: number; // Backend calculated
-  totalAmount: number; // Backend calculated
-}
-
-// For summary components
-export interface CartSummary {
-  totalItems: number;
-  totalAmount: number;
-  items: CartItemSummary[];
-}
-
-export interface CartItemSummary {
-  id: number;
-  itemType: CartItemType;
-  itemId: number;
-  itemName: string;
-  itemImage?: string;
-  quantity: number;
-  unitPrice: number;
-  totalPrice: number;
 }

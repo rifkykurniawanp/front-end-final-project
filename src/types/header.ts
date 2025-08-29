@@ -1,10 +1,15 @@
-
 export interface User {
-  id: string;
-  name: string;
+  id: string | number;
   email: string;
+  name?: string;
   avatar?: string;
-  role: 'student' | 'suplier' | 'buyer' | 'instructor' | 'admin';
+}
+
+export interface HeaderUser {
+  id: string | number;
+  email: string;
+  name?: string;
+  avatar?: string;
 }
 
 export interface CartItem {
@@ -20,7 +25,7 @@ export interface Notification {
   message: string;
   time: string;
   read: boolean;
-  type: 'info' | 'success' | 'warning' | 'error';
+  type: "info" | "success" | "warning" | "error";
 }
 
 export interface HeaderProps {
@@ -34,4 +39,11 @@ export interface HeaderProps {
   onLogout?: () => void;
   onNotificationRead?: (notificationId: string) => void;
   className?: string;
+}
+
+export interface UserPayload {
+  id: string;
+  email: string;
+  name?: string;
+  avatar?: string;
 }

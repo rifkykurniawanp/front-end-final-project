@@ -1,113 +1,145 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { CartItemType } from "@/types/enum";
-import type { AddToCartDto } from "@/types/cart";
-import { useCartContext } from "@/context/CartContext";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
-import { useState } from "react";
+import React, { useState, useEffect } from 'react';
+import { useCartContext } from '@/context/CartContext';
+import { CartItemType } from '@/types/enum';
+import { Plus, Minus, Loader2, ShoppingBag } from 'lucide-react';
 
-interface AddToCartButtonProps {
-  itemId: number;
+interface AddToCartProps {
   itemType: CartItemType;
-  quantity?: number;
+  itemId: number;
+  price: number;
+  itemName: string;
+  stock?: number;
+  maxQuantity?: number;
   disabled?: boolean;
   className?: string;
-  size?: "sm" | "default" | "lg";
-  variant?: "default" | "outline" | "secondary";
 }
 
-export const AddToCartButton = ({
-  itemId,
+export const AddToCart: React.FC<AddToCartProps> = ({
   itemType,
-  quantity = 1,
+  itemId,
+  price,
+  itemName,
+  stock,
+  maxQuantity,
   disabled = false,
-  className = "",
-  size = "sm",
-  variant = "default",
-}: AddToCartButtonProps) => {
-  const { addItem, loading: cartLoading, error, clearError } = useCartContext();
-  const router = useRouter();
-  const { token, isInitialized } = useAuth();
-  const [localLoading, setLocalLoading] = useState(false);
+  className = ""
+}) => {
+  const { addItem, loading } = useCartContext();
+  const [quantity, setQuantity] = useState(1);
+  const [isAdding, setIsAdding] = useState(false);
+  const [animateQty, setAnimateQty] = useState(false);
 
-  const isDisabled = disabled || !isInitialized || !token || cartLoading || localLoading;
+  const maxAllowed = maxQuantity || stock || 99;
+  const isOutOfStock = stock !== undefined && stock <= 0;
+  const isDisabled = disabled || isOutOfStock || loading;
 
-  const handleAdd = async () => {
-    // Clear any previous errors
-    clearError();
-
-    if (!token) {
-      router.push("/login");
-      return;
-    }
-
-    const data: AddToCartDto = { 
-      itemId, 
-      itemType, 
-      quantity 
-    };
-
-    setLocalLoading(true);
+  const handleAddToCart = async () => {
+    setIsAdding(true);
     try {
-      await addItem(data);
-      
-      // Success feedback
-      const itemTypeName = itemType === CartItemType.PRODUCT ? 'produk' : 'kursus';
-      alert(`Berhasil menambahkan ${itemTypeName} ke keranjang!`);
-      
-    } catch (error: any) {
-      console.error("Error adding item to cart:", error);
-      
-      // Handle specific error cases
-      if (error.status === 401) {
-        router.push("/login");
-      } else if (error.status === 404) {
-        alert("Item tidak ditemukan");
-      } else if (error.status === 400) {
-        alert(error.message || "Data tidak valid");
-      } else {
-        alert(error.message || "Gagal menambah item ke keranjang");
-      }
+      await addItem({ itemType, itemId, quantity, price });
+      setQuantity(1);
     } finally {
-      setLocalLoading(false);
+      setIsAdding(false);
     }
   };
 
-  const getButtonText = () => {
-    if (localLoading || cartLoading) return "...";
-    if (!token) return "Login untuk Add to Cart";
-    return "Add to Cart";
+  const incrementQuantity = () => {
+    if (quantity < maxAllowed) {
+      setQuantity(prev => prev + 1);
+      setAnimateQty(true);
+    }
   };
 
-  const getButtonTitle = () => {
-    if (!token) return "Login terlebih dahulu untuk menambah ke keranjang";
-    if (disabled) return "Item tidak tersedia";
-    return `Tambah ${itemType === CartItemType.PRODUCT ? 'produk' : 'kursus'} ke keranjang`;
+  const decrementQuantity = () => {
+    if (quantity > 1) {
+      setQuantity(prev => prev - 1);
+      setAnimateQty(true);
+    }
   };
+
+  useEffect(() => {
+    if (animateQty) {
+      const timeout = setTimeout(() => setAnimateQty(false), 150);
+      return () => clearTimeout(timeout);
+    }
+  }, [animateQty]);
+
+  const formatPrice = (price: number) => new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+  }).format(price);
 
   return (
-    <div className="flex flex-col gap-1">
-      <Button
-        size={size}
-        variant={variant}
-        onClick={handleAdd}
-        disabled={isDisabled}
-        title={getButtonTitle()}
-        className={`
-          ${variant === "default" ? "bg-amber-600 hover:bg-amber-700 text-white" : ""}
-          ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}
-          ${className}
-        `}
-      >
-        {getButtonText()}
-      </Button>
-      
-      {/* Show error if any */}
-      {error && (
-        <p className="text-xs text-red-600">{error}</p>
+    <div className={`space-y-4 ${className}`}>
+      {/* Quantity Selector */}
+      <div className="flex items-center space-x-4">
+        <span className="text-sm font-medium text-[color:var(--foreground)]">Quantity:</span>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={decrementQuantity}
+            disabled={quantity <= 1 || isDisabled}
+            className="w-8 h-8 flex items-center justify-center border rounded-full 
+                       border-[color:var(--border)] text-[color:var(--foreground)] hover:bg-[color:var(--secondary)]
+                       disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150"
+          >
+            <Minus className="w-4 h-4" />
+          </button>
+
+          <span className={`w-12 text-center font-bold text-lg text-[color:var(--foreground)]
+                           transition-transform ${animateQty ? 'scale-110' : 'scale-100'}`}>
+            {quantity}
+          </span>
+
+          <button
+            onClick={incrementQuantity}
+            disabled={quantity >= maxAllowed || isDisabled}
+            className="w-8 h-8 flex items-center justify-center border rounded-full 
+                       border-[color:var(--border)] text-[color:var(--foreground)] hover:bg-[color:var(--secondary)]
+                       disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Stock Info */}
+      {stock !== undefined && (
+        <div className={`text-sm ${isOutOfStock ? 'text-[color:var(--destructive)] font-medium' : 'text-[color:var(--muted-foreground)]'}`}>
+          {isOutOfStock ? 'Out of Stock' : `${stock} items available`}
+        </div>
       )}
+
+      {/* Price Display */}
+      <div className="text-lg font-bold text-[color:var(--primary)] drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]">
+        {formatPrice(price * quantity)}
+      </div>
+
+      {/* Add to Cart Button */}
+      <button
+        onClick={handleAddToCart}
+        disabled={isDisabled || isAdding}
+        className="w-full py-3 px-6 rounded-lg font-semibold flex items-center justify-center space-x-2
+                   bg-gradient-to-r from-[color:var(--primary)] to-[color:var(--accent)]
+                   text-[color:var(--primary-foreground)] shadow-lg hover:shadow-xl transform hover:-translate-y-0.5
+                   disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+      >
+        {isAdding ? (
+          <>
+            <Loader2 className="w-5 h-5 animate-spin" />
+            <span>Adding...</span>
+          </>
+        ) : (
+          <>
+            <ShoppingBag className="w-5 h-5" />
+            <span>Add to Cart</span>
+          </>
+        )}
+      </button>
     </div>
   );
 };
+
+export default AddToCart;
