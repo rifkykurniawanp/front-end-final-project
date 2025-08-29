@@ -9,7 +9,7 @@
 
 > **Note:** Place screenshots in `screenshots/` folder and update paths below
 
-1. ![Homepage](screenshots/homepage-1.png)  
+1. ![Homepage](screenshots/homepage-1.png) (screenshots/homepage-2.png) (screenshots/homepage-3.png)    
    *Homepage with hero section and featured products*
 
 2. ![Course Catalog](screenshots/coursepage.png)  
