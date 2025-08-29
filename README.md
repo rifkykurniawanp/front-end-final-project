@@ -3,13 +3,11 @@
 **Integrated Coffee, Tea & Herbal Learning and Commerce Platform** - Where baristas, entrepreneurs, and coffee enthusiasts learn while shopping for premium products.
 
 ## 🌟 Demo
-- **🚀 Live Demo:** [Demo Link - Replace with your deployment URL]
+- **🚀 Live Demo:** .....
 
 # 📸 Screenshots
 
-> **Note:** Place screenshots in `screenshots/` folder and update paths below
-
-1. ![Homepage](screenshots/homepage-1.png) (screenshots/homepage-2.png) (screenshots/homepage-3.png)    
+1. ![Homepage](screenshots/homepage-1.png)  
    *Homepage with hero section and featured products*
 
 2. ![Course Catalog](screenshots/coursepage.png)  
@@ -24,7 +22,7 @@
 5. ![User Profile](screenshots/userdashboard.png)  
    *User profile page with order history and account settings*
 
-6. ![Admin Dashboard](screenshots/admindashboard.png)  
+6. ![Admin Dashboard](screenshots/overviewadmin.png)  
    *Admin panel with analytics and product management*
 
 
