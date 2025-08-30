@@ -65,8 +65,14 @@ export default function CourseDetailPage() {
   };
 
   const handleStartCourse = () => {
-    const firstLesson = course?.modules?.[0]?.lessons?.[0];
-    if (firstLesson?.slug && course?.slug) {
+    const firstModule = course?.modules?.[0];
+    const firstLessonProgress = firstModule?.lessons?.[0];
+    // Find the actual lesson object by id if needed
+    const firstLesson = firstModule?.lessons && Array.isArray(firstModule.lessons)
+      ? (firstModule.lessons[0] as any)
+      : undefined;
+    // If you have a lessons array with lesson objects, use their slug
+    if (firstLesson && 'slug' in firstLesson && firstLesson.slug && course?.slug) {
       router.push(`/course/${course.slug}/${firstLesson.slug}`);
     }
   };
