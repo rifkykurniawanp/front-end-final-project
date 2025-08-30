@@ -3,7 +3,7 @@
 **Integrated Coffee, Tea & Herbal Learning and Commerce Platform** - Where baristas, entrepreneurs, and coffee enthusiasts learn while shopping for premium products.
 
 ## 🌟 Demo
-- **🚀 Live Demo:** .....
+- **🚀 Live Demo:** [RUIND-EDU-COMMERCE]https://final-project-fe-rifkykurniawanp-3w739adr6.vercel.app/
 
 # 📸 Screenshots
 
@@ -16,7 +16,7 @@
 3. ![Product Detail](screenshots/productdetail.png)  
    *Product detail page with ratings and reviews*
 
-4. ![Mobile View](screenshots/mobile-view.png)  
+4. ![Mobile View](screenshots/mobileview.png)  
    *Responsive mobile interface*
 
 5. ![User Profile](screenshots/userdashboard.png)  
