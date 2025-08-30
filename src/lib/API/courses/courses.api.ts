@@ -43,7 +43,7 @@ export const coursesApi = {
   create: (data: CreateCourseDto, token: string) =>
     apiFetch<CourseResponseDto>("/courses", {
       method: "POST",
-      body: data,
+      body: { ...data },
       token,
     }),
 
@@ -51,7 +51,7 @@ export const coursesApi = {
   update: (id: number, data: UpdateCourseDto, token: string) =>
     apiFetch<CourseResponseDto>(`/courses/${id.toString()}`, {
       method: "PATCH",
-      body: data,
+      body: { ...data },
       token,
     }),
 

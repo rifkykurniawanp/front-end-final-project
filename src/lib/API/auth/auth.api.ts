@@ -5,13 +5,13 @@ export const authApi = {
   login: (data: LoginDto) =>
     apiFetch<AuthResponse>("/auth/login", {
       method: "POST",
-      body: data, // langsung objek
+      body: { ...data },
     }),
 
   // Register user baru
   register: (data: RegisterDto) =>
     apiFetch<AuthResponse>("/auth/register", {
       method: "POST",
-      body: data, // langsung objek
+      body: { ...data },
     }),
 };

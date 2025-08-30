@@ -12,19 +12,11 @@ export const productOrdersApi = {
 
   // Create new order
   create: (data: CreateProductOrderDto, token: string) =>
-    apiFetch<ProductOrderResponseDto>("/product-orders", {
-      method: "POST",
-      body: data,
-      token,
-    }),
+    apiFetch<ProductOrderResponseDto>("/product-orders", { method: "POST", body: { ...data }, token }),
 
   // Update order (ADMIN only)
   update: (id: number, data: UpdateProductOrderDto, token: string) =>
-    apiFetch<ProductOrderResponseDto>(`/product-orders/${id}`, {
-      method: "PUT",
-      body: data,
-      token,
-    }),
+    apiFetch<ProductOrderResponseDto>(`/product-orders/${id}`, { method: "PATCH", body: { ...data }, token }),
 
   // Delete order (ADMIN only)  
   delete: (id: number, token: string) =>

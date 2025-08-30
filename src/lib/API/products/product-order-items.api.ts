@@ -22,7 +22,7 @@ export const productOrdersApi = {
   updateStatus: (id: number, data: UpdateProductOrderDto, token: string) =>
     apiFetch<ProductOrderResponseDto>(`/orders/${id}`, {
       method: "PUT",
-      body: data,
+      body: { ...data },
       token,
     }),
 
@@ -81,4 +81,7 @@ export const productOrdersApi = {
    
     return apiFetch<ProductOrderResponseDto[]>(endpoint, { token });
   },
+
+  update: (id: number, data: UpdateProductOrderDto, token: string) =>
+    apiFetch<ProductOrderResponseDto>(`/product-order-items/${id}`, { method: "PATCH", body: { ...data }, token }),
 };

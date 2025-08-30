@@ -17,12 +17,12 @@ export const usersApi = {
     apiFetch<User>(`/users/${id}`, { token }),
 
   // Create new user — public or ADMIN
-  create: (data: CreateUserDto, token?: string) =>
-    apiFetch<User>("/users", { method: "POST", body: data, token }),
+  create: (data: CreateUserDto, token: string) =>
+    apiFetch<User>("/users", { method: "POST", body: { ...data }, token }),
 
   // Update user — any authenticated role (RBAC enforced)
-  update: (id: number, data: UpdateUserDto, token?: string) =>
-    apiFetch<User>(`/users/${id}`, { method: "PATCH", body: data, token }),
+  update: (id: number, data: UpdateUserDto, token: string) =>
+    apiFetch<User>(`/users/${id}`, { method: "PATCH", body: { ...data }, token }),
 
   // Soft delete user — authenticated roles
   remove: (id: number, token?: string) =>

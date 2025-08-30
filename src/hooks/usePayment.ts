@@ -1,10 +1,14 @@
 "use client";
 import { useState } from "react";
 import { paymentsApi } from "@/lib/API/core/payments.api";
-import { Payment } from "@/types/payment";
+import type {
+  PaymentResponseDto,
+  CreatePaymentDto,
+  CancelPaymentDto,
+} from "@/types/payment";
 
 export function usePayment(token: string) {
-  const [payments, setPayments] = useState<Payment[]>([]);
+  const [payments, setPayments] = useState<PaymentResponseDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,7 +24,7 @@ export function usePayment(token: string) {
     }
   };
 
-  const createPayment = async (data: Partial<Payment>) => {
+  const createPayment = async (data: CreatePaymentDto) => {
     try {
       setLoading(true);
       const payment = await paymentsApi.create(data, token);
@@ -34,7 +38,11 @@ export function usePayment(token: string) {
   const cancelPayment = async (id: number, reason?: string) => {
     try {
       setLoading(true);
-      const updated = await paymentsApi.cancel(id, { reason }, token);
+      const updated = await paymentsApi.cancel(
+        id,
+        { reason } as CancelPaymentDto,
+        token
+      );
       setPayments((prev) =>
         prev.map((p) => (p.id === id ? updated : p))
       );

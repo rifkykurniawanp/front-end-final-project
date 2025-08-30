@@ -83,7 +83,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children, initialCar
         setCart(activeCart);
       }
 
-      const updatedCart = await cartsApi.addItem(activeCart.id, data, token);
+      // Ensure addItem uses correct API signature
+      const updatedCart = await cartsApi.addItem(data, token);
       const safeCart = mapCart(updatedCart);
       setCart(safeCart);
       setItems(safeCart.items);
@@ -117,7 +118,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children, initialCar
     if (!cart || !token) return;
     setLoading(true);
     try {
-      const updatedCart = await cartsApi.updateItem(cart.id, itemId, data, token);
+      const updatedCart = await cartsApi.updateItem(itemId, data, token);
       const safeCart = mapCart(updatedCart);
       setCart(safeCart);
       setItems(safeCart.items);

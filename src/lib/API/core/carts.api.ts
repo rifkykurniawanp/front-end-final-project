@@ -13,7 +13,7 @@ const BASE_URL = '/carts';
 
 export const cartsApi = {
   create: (data: CreateCartDto, token: string) =>
-    apiFetch<CartResponse>(`${BASE_URL}`, { method: 'POST', body: data, token }),
+    apiFetch<CartResponse>('/carts', { method: 'POST', body: { ...data }, token }),
 
   findAll: (page = 1, limit = 10, token: string) =>
     apiFetch<CartResponse[]>(`${BASE_URL}?page=${page}&limit=${limit}`, { token }),
@@ -22,17 +22,17 @@ export const cartsApi = {
     apiFetch<CartResponse>(`${BASE_URL}/${id}`, { token }),
 
   update: (id: number, data: UpdateCartDto, token: string) =>
-    apiFetch<CartResponse>(`${BASE_URL}/${id}`, { method: 'PUT', body: data, token }),
+    apiFetch<CartResponse>(`/carts/${id}`, { method: 'PATCH', body: { ...data }, token }),
 
   remove: (id: number, token: string) =>
     apiFetch<void>(`${BASE_URL}/${id}`, { method: 'DELETE', token }),
 
-  addItem: (cartId: number, data: AddItemToCartDto, token: string) =>
-    apiFetch<CartResponse>(`${BASE_URL}/${cartId}/items`, { method: 'POST', body: data, token }),
+  addItem: (data: AddItemToCartDto, token: string) =>
+    apiFetch<CartResponse>('/carts/items', { method: 'POST', body: { ...data }, token }),
 
   removeItem: (cartId: number, itemId: number, token: string) =>
     apiFetch<CartResponse>(`${BASE_URL}/${cartId}/items/${itemId}`, { method: 'DELETE', token }),
 
-  updateItem: (cartId: number, itemId: number, data: UpdateCartItemDto, token: string) =>
-    apiFetch<CartResponse>(`${BASE_URL}/${cartId}/items/${itemId}`, { method: 'PUT', body: data, token }),
+  updateItem: (id: number, data: UpdateCartItemDto, token: string) =>
+    apiFetch<CartResponse>(`/carts/items/${id}`, { method: 'PATCH', body: { ...data }, token }),
 };

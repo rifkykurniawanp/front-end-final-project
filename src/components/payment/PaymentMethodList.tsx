@@ -2,11 +2,11 @@
 import React from "react";
 import type { PaymentMethod } from "@/types/payment";
 
-type Props = {
+interface Props {
   methods: PaymentMethod[];
   selected: string | null;
   onSelect: (id: string) => void;
-};
+}
 
 export default function PaymentMethodList({ methods, selected, onSelect }: Props) {
   return (

@@ -11,7 +11,7 @@ import type {
 export const paymentsApi = {
   // Create a new payment
   create: (data: CreatePaymentDto, token: string) =>
-    apiFetch<PaymentResponseDto>('/payments', { method: 'POST', body: data, token }),
+    apiFetch<PaymentResponseDto>('/payments', { method: 'POST', body: { ...data }, token }),
 
   // Get all payments (admin only)
   getAll: (page?: number, limit?: number, token?: string) =>
@@ -46,11 +46,11 @@ export const paymentsApi = {
 
   // Update payment
   update: (id: number, data: UpdatePaymentDto, token: string) =>
-    apiFetch<PaymentResponseDto>(`/payments/${id}`, { method: 'PATCH', body: data, token }),
+    apiFetch<PaymentResponseDto>(`/payments/${id}`, { method: 'PATCH', body: { ...data }, token }),
 
   // Cancel payment
   cancel: (id: number, data: CancelPaymentDto, token: string) =>
-    apiFetch<PaymentResponseDto>(`/payments/${id}/cancel`, { method: 'POST', body: data, token }),
+    apiFetch<PaymentResponseDto>(`/payments/${id}/cancel`, { method: 'POST', body: { ...data }, token }),
 
   // Verify payment
   verify: (id: number, token: string) =>

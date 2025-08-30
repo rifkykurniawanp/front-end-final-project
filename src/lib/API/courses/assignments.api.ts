@@ -29,14 +29,14 @@ export const assignmentApi = {
   create: (data: CreateAssignmentDto): Promise<Assignment> =>
     apiFetch<Assignment>('/assignments', {
       method: 'POST',
-      body: data,
+      body: { ...data },
       token: getAuthToken(),
     }),
 
   update: (id: number, data: UpdateAssignmentDto): Promise<Assignment> =>
     apiFetch<Assignment>(`/assignments/${id}`, {
       method: 'PUT',
-      body: data,
+      body: { ...data },
       token: getAuthToken(),
     }),
 
@@ -82,14 +82,14 @@ export const assignmentSubmissionApi = {
   create: (data: CreateAssignmentSubmissionDto): Promise<AssignmentSubmission> =>
     apiFetch<AssignmentSubmission>('/assignments/submissions', {
       method: 'POST',
-      body: data,
+      body: { ...data },
       token: getAuthToken(),
     }),
 
   update: (id: number, data: UpdateAssignmentSubmissionDto): Promise<AssignmentSubmission> =>
     apiFetch<AssignmentSubmission>(`/submissions/${id}`, {
       method: 'PATCH',
-      body: data,
+      body: { ...data },
       token: getAuthToken(),
     }),
 
@@ -102,7 +102,7 @@ export const assignmentSubmissionApi = {
   grade: (id: number, data: GradeAssignmentSubmissionDto): Promise<AssignmentSubmission> =>
     apiFetch<AssignmentSubmission>(`/submissions/${id}/grade`, {
       method: 'PUT',
-      body: data,
+      body: { ...data },
       token: getAuthToken(),
     }),
 

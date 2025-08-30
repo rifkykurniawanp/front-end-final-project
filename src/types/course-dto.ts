@@ -4,6 +4,7 @@ import { Course, CourseModule, Lesson, CourseLevel, CourseCategory, LessonType }
 export interface LessonWithProgress {
   id: number;
   title: string;
+  slug?: string | null;
   type: LessonType;
   duration?: string; // Sesuai Prisma, string? (misal "10m", "1h")
   completed: boolean;

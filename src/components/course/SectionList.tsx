@@ -1,6 +1,6 @@
 "use client";
 
-import { CourseWithRelations, CourseModule, Lesson } from "@/types";
+import { CourseWithRelations, ModuleWithLessons, LessonWithProgress } from "@/types";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Play, FileText, HelpCircle, Clock, ClipboardList } from "lucide-react";
@@ -11,9 +11,9 @@ interface SectionListProps {
 
 // ==================== LessonItem ====================
 interface LessonItemProps {
-  lesson: Lesson;
+  lesson: LessonWithProgress;
   index: number;
-  onStart: (lesson: Lesson) => void;
+  onStart: (lesson: LessonWithProgress) => void;
 }
 
 function LessonItem({ lesson, index, onStart }: LessonItemProps) {
@@ -71,9 +71,9 @@ function LessonItem({ lesson, index, onStart }: LessonItemProps) {
 
 // ==================== ModuleItem ====================
 interface ModuleItemProps {
-  module: CourseModule;
+  module: ModuleWithLessons;
   index: number;
-  onStartLesson: (lesson: Lesson) => void;
+  onStartLesson: (lesson: LessonWithProgress) => void;
 }
 
 function ModuleItem({ module, index, onStartLesson }: ModuleItemProps) {
@@ -102,7 +102,7 @@ function ModuleItem({ module, index, onStartLesson }: ModuleItemProps) {
 export function SectionList({ course }: SectionListProps) {
   const router = useRouter();
 
-  const handleLessonClick = (lesson: Lesson) => {
+  const handleLessonClick = (lesson: LessonWithProgress) => {
     if (!course?.slug || !lesson?.slug) return;
     router.push(`/course/${course.slug}/${lesson.slug}`);
   };
@@ -115,7 +115,7 @@ export function SectionList({ course }: SectionListProps) {
     );
   }
 
-  const totalLessons = course.modules?.reduce((total: number, module: CourseModule) => total + (module.lessons?.length || 0), 0) || 0;
+  const totalLessons = course.modules?.reduce((total: number, module: ModuleWithLessons) => total + (module.lessons?.length || 0), 0) || 0;
 
   return (
     <section className="bg-beige rounded-lg shadow-sm border border-beige-dark">

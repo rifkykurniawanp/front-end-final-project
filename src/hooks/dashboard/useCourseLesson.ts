@@ -2,10 +2,14 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { coursesApi, lessonsApi,lessonProgressApi } from "@/lib/API/courses";
-
-import { CourseResponseDto, Lesson, LessonWithRelations } from "@/types";
+import { coursesApi, lessonsApi, lessonProgressApi } from "@/lib/API/courses";
+import { CourseResponseDto, Lesson } from "@/types";
 import { LessonProgressResponseDto } from "@/types/lesson-progress";
+
+// Locally define LessonWithRelations type
+interface LessonWithRelations extends Lesson {
+  // Add any additional fields if needed
+}
 
 interface UseCourseLessonProps {
   courseSlug: string;

@@ -10,7 +10,7 @@ export const courseEnrollmentsApi = {
   enroll: (data: EnrollCourseDto, token: string) =>
     apiFetch<CourseEnrollment>('/enrollments', {
       method: 'POST',
-      body: data,
+      body: { ...data },
       token,
     }),
 
@@ -38,7 +38,7 @@ export const courseEnrollmentsApi = {
   update: (id: number, data: UpdateEnrollmentDto, token: string) =>
     apiFetch<CourseEnrollment>(`/enrollments/${id}`, {
       method: 'PUT',
-      body: data,
+      body: { ...data },
       token,
     }),
 

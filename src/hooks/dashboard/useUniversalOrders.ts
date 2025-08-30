@@ -125,7 +125,7 @@ export function useUniversalOrders(options: UseUniversalOrdersOptions = {}): Use
           setUserProfile(null);
         }
       } else {
-        setUserProfile(user ?? null);
+        setUserProfile(user ? { ...user } as UserWithRelations : null);
       }
     } catch (err: any) {
       setError(err.message || "Failed to fetch orders");

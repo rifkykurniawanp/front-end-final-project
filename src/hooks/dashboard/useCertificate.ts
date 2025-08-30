@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { certificatesApi } from "@/lib/API/courses";
-import { Certificate } from "@/types";
+import type { Certificate } from "@/types/certificate";
 
 export function useCertificate(enrollmentId: number, token: string) {
   const [data, setData] = useState<Certificate | null>(null);
@@ -10,8 +10,9 @@ export function useCertificate(enrollmentId: number, token: string) {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const res = await certificatesApi.getByEnrollment(enrollmentId, token);
-      setData(res); // <- sudah Certificate penuh
+      const allCertificates = await certificatesApi.getAll();
+      const res = allCertificates.find((c) => c.enrollmentId === enrollmentId) || null;
+      setData(res);
       setError(null);
     } catch (err: any) {
       setError(err.message || "Failed to fetch certificate");

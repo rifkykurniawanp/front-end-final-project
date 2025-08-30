@@ -94,18 +94,10 @@ export const productsApi = {
   },
 
   create: (data: CreateProductDto, token: string) =>
-    apiFetch<ProductResponseDto>("/products", {
-      method: "POST",
-      body: data,
-      token,
-    }),
+    apiFetch<ProductResponseDto>("/products", { method: "POST", body: { ...data }, token }),
 
   update: (id: number, data: UpdateProductDto, token: string) =>
-    apiFetch<ProductResponseDto>(`/products/${id.toString()}`, {
-      method: "PATCH",
-      body: data,
-      token,
-    }),
+    apiFetch<ProductResponseDto>(`/products/${id.toString()}`, { method: "PATCH", body: { ...data }, token }),
 
   delete: (id: number, token: string) =>
     apiFetch<void>(`/products/${id.toString()}`, {

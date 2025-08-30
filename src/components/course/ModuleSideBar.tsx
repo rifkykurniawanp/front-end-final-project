@@ -1,14 +1,13 @@
 "use client";
 
-import { CourseWithRelations, CourseModule, Lesson } from "@/types";
+import { CourseWithRelationsDTO, ModuleWithLessons, LessonWithProgress, LessonType } from "@/types";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, ChevronDown, Play, FileText, HelpCircle, Check } from "lucide-react";
 import { useState } from "react";
-import { LessonType } from "@/types/enum";
 
 interface ModuleSidebarProps {
-  course: CourseWithRelations;
+  course: CourseWithRelationsDTO;
   completedLessons?: Set<number>;
   onLessonComplete?: (lessonId: number) => void;
 }
@@ -28,7 +27,7 @@ export function ModuleSidebar({
     setExpandedModules(newSet);
   };
 
-  const handleLessonClick = (lesson: Lesson) => {
+  const handleLessonClick = (lesson: LessonWithProgress) => {
     if (!lesson.slug) return;
     router.push(`/course/${course.slug}/${lesson.slug}`);
   };
@@ -38,8 +37,8 @@ export function ModuleSidebar({
     onLessonComplete?.(lessonId);
   };
 
-  const getModuleProgress = (module: CourseModule) => {
-    const lessons = module.lessons ?? [];
+  const getModuleProgress = (module: ModuleWithLessons) => {
+    const lessons: LessonWithProgress[] = Array.isArray(module.lessons) ? module.lessons : [];
     const completedCount = lessons.filter(l => completedLessons.has(l.id)).length;
     return {
       completed: completedCount,
@@ -58,7 +57,7 @@ export function ModuleSidebar({
     }
   };
 
-  const totalLessons = course.modules?.reduce((sum: number, m: CourseModule) => sum + (m.lessons?.length ?? 0), 0) ?? 0;
+  const totalLessons = course.modules?.reduce((sum, m) => sum + (Array.isArray(m.lessons) ? m.lessons.length : 0), 0) ?? 0;
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-slate-200 hover:border-amber-200 transition-colors">
@@ -75,7 +74,7 @@ export function ModuleSidebar({
       </div>
 
       <div className="p-2 space-y-2">
-        {course.modules?.map((module: CourseModule) => {
+        {course.modules?.map((module: ModuleWithLessons) => {
           const isExpanded = expandedModules.has(module.id);
           const progress = getModuleProgress(module);
 
@@ -109,7 +108,7 @@ export function ModuleSidebar({
 
               {isExpanded && (
                 <ul className="py-2 border-t border-slate-200">
-                  {module.lessons?.map((lesson: Lesson) => {
+                  {module.lessons?.map((lesson: LessonWithProgress) => {
                     const isCompleted = completedLessons.has(lesson.id);
                     return (
                       <li key={lesson.id} className="flex items-center gap-1 px-2">

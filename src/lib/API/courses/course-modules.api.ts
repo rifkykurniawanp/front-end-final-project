@@ -8,7 +8,7 @@ import {
 export const courseModulesApi = {
   // Create module
   create: (data: CreateCourseModuleDto, token: string) =>
-    apiFetch<CourseModule>(`/course-modules`, { method: "POST", body: data, token }),
+    apiFetch<CourseModule>(`/course-modules`, { method: "POST", body: { ...data }, token }),
 
   // Get all modules of a course
   getByCourse: (courseId: number, token?: string) =>
@@ -20,7 +20,7 @@ export const courseModulesApi = {
 
   // Update module by ID
   update: (id: number, data: UpdateCourseModuleDto, token: string) =>
-    apiFetch<CourseModule>(`/course-modules/${id.toString()}`, { method: "PATCH", body: data, token }),
+    apiFetch<CourseModule>(`/course-modules/${id.toString()}`, { method: "PATCH", body: { ...data }, token }),
 
   // Soft delete module
   delete: (id: number, token: string) =>

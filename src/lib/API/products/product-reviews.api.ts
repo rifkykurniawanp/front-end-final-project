@@ -1,5 +1,5 @@
 import { apiFetch } from "../core/api-fetch";
-import { ProductReviewsStats, CreateProductReviewDto, UpdateProductReviewDto, ProductReviewResponseDto } from "@/types/product-reviews.api";
+import { ProductReviewsStats, CreateProductReviewDto, UpdateProductReviewDto, ProductReviewResponseDto } from "@/types";
 
 export const productReviewsApi = {
  
@@ -18,7 +18,7 @@ export const productReviewsApi = {
   create: (userId: number, data: CreateProductReviewDto, token: string) =>
     apiFetch<ProductReviewResponseDto>(`/product-reviews?userId=${userId}`, {
       method: "POST",
-      body: data,
+      body: { ...data },
       token,
     }),
 
@@ -31,7 +31,7 @@ export const productReviewsApi = {
   update: (reviewId: number, data: UpdateProductReviewDto, token: string) =>
     apiFetch<ProductReviewResponseDto>(`/product-reviews/${reviewId}`, {
       method: "PATCH",
-      body: data,
+      body: { ...data },
       token,
     }),
 

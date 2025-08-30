@@ -33,14 +33,14 @@ export const assignmentSubmissionsApi = {
   submit: (assignmentId: number, data: CreateAssignmentSubmissionDto, token: string) =>
     apiFetch<AssignmentSubmission>(`/assignments/${assignmentId}/submit`, {
       method: "POST",
-      body: data,
+      body: { ...data },
       token,
     }),
    
   update: (id: number, data: UpdateAssignmentSubmissionDto, token: string) =>
     apiFetch<AssignmentSubmission>(`/submissions/${id}`, {
       method: "PUT",
-      body: data,
+      body: { ...data },
       token,
     }),
    
@@ -53,7 +53,7 @@ export const assignmentSubmissionsApi = {
   grade: (id: number, data: GradeAssignmentSubmissionDto, token: string) =>
     apiFetch<AssignmentSubmission>(`/submissions/${id}/grade`, {
       method: "PUT",
-      body: data,
+      body: { ...data },
       token,
     }),
 

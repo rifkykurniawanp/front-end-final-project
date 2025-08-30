@@ -8,7 +8,7 @@ import {
 export const lessonsApi = {
   // Create new lesson
   create: (data: CreateLessonDto, token: string) =>
-    apiFetch<Lesson>(`/lessons`, { method: "POST", body: data, token }),
+    apiFetch<Lesson>(`/lessons`, { method: "POST", body: { ...data }, token }),
 
   // Get lessons by module ID
   getByModule: (moduleId: number, token?: string) =>
@@ -20,7 +20,7 @@ export const lessonsApi = {
 
   // Update lesson
   update: (id: number, data: UpdateLessonDto, token: string) =>
-    apiFetch<Lesson>(`/lessons/${id.toString()}`, { method: "PATCH", body: data, token }),
+    apiFetch<Lesson>(`/lessons/${id.toString()}`, { method: "PATCH", body: { ...data }, token }),
 
   // Soft delete lesson
   delete: (id: number, token: string) =>

@@ -1,6 +1,6 @@
 import { PayableType, PaymentStatus } from './enum';
 import type { User } from './user';
-import type { Cart } from './cart';
+import type { CartItem } from './cart';
 import type { ProductOrder } from './order';
 import type { CourseEnrollment } from './course-enrollment';
 
@@ -18,7 +18,7 @@ export interface Payment {
   paidAt?: Date | null;
   createdAt: Date;
   user?: User;
-  cart?: Cart;
+  cart?: CartItem;
   productOrders?: ProductOrder[];
   courseEnrollments?: CourseEnrollment[];
 }
@@ -101,4 +101,11 @@ export interface PaymentResponseDto {
   cart?: CartBasicDto;
   productOrders: ProductOrderDto[];
   courseEnrollments: CourseEnrollmentDto[];
+}
+
+// ================= PAYMENT METHOD TYPE =================
+export interface PaymentMethod {
+  id: string;
+  name: string;
+  description: string;
 }

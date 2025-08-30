@@ -25,7 +25,7 @@ export const certificatesApi = {
   generate: (data: IssueCertificateDto): Promise<Certificate> =>
     apiFetch<Certificate>(`/certificates/generate`, {
       method: "POST",
-      body: data,
+      body: { ...data },
       token: getAuthToken(),
     }),
 

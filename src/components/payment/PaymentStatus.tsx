@@ -1,12 +1,19 @@
-import type { PaymentResponse } from "@/types/payment";
+import type { PaymentResponseDto } from "@/types/payment";
+
+interface PaymentStatusViewProps {
+  response: {
+    success: boolean;
+    message?: string;
+    error?: string;
+    transactionId?: string;
+  };
+  paymentUrl?: string;
+}
 
 export default function PaymentStatusView({
   response,
   paymentUrl,
-}: {
-  response: PaymentResponse;
-  paymentUrl?: string;
-}) {
+}: PaymentStatusViewProps) {
   const isSuccess = response.success;
   const msg = response.message ?? (isSuccess ? "Pembayaran berhasil" : "Pembayaran gagal");
 
