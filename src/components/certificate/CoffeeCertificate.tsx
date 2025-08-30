@@ -1,9 +1,17 @@
 import React from "react";
 import { Coffee } from "lucide-react";
-import { Certificate } from "@/types/course";
+import { Certificate } from "@/types/certificate";
+
+// Extend Certificate type to include enrollment relation for UI
+interface CertificateWithRelations extends Certificate {
+  enrollment?: {
+    student?: { firstName?: string };
+    course?: { title?: string };
+  };
+}
 
 interface Props {
-  certificate: Certificate;
+  certificate: CertificateWithRelations;
 }
 
 export function CoffeeCertificate({ certificate }: Props) {

@@ -2,21 +2,22 @@
 
 import { useRef } from "react";
 import { useReactToPrint } from "react-to-print";
-import { Certificate } from "@/types/course";
+import { Certificate } from "@/types/certificate";
 import { Button } from "@/components/ui/button";
 
 interface CertificateCardProps {
   certificate: Certificate;
+  student?: { firstName?: string };
+  course?: { title?: string; category?: string };
 }
 
-export function CertificateCard({ certificate }: CertificateCardProps) {
+export function CertificateCard({ certificate, student, course }: CertificateCardProps) {
   const printRef = useRef<HTMLDivElement>(null);
 
-  // ✅ Hook-based approach with proper typing
+  // Use correct react-to-print API
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: "Course Certificate",
-    // optional: you can add pageStyle or onAfterPrint here
   });
 
   return (
@@ -28,11 +29,11 @@ export function CertificateCard({ certificate }: CertificateCardProps) {
         <h1 className="text-4xl font-extrabold mb-4">Certificate of Completion</h1>
         <p className="text-lg italic mb-6">This is proudly presented to</p>
         <h2 className="text-3xl font-bold text-blue-700 mb-6">
-          {certificate.enrollment?.student?.firstName ?? "Student Name"}
+          {student?.firstName ?? "Student Name"}
         </h2>
         <p className="text-lg mb-4">For successfully completing the course:</p>
         <h3 className="text-2xl font-semibold mb-6">
-          {certificate.enrollment?.course?.title ?? "Course Title"}
+          {course?.title ?? "Course Title"}
         </h3>
         <p className="text-md mb-2">
           Issued on:{" "}
@@ -41,7 +42,7 @@ export function CertificateCard({ certificate }: CertificateCardProps) {
             : "Not Issued"}
         </p>
         <p className="text-md">
-          Category: {certificate.enrollment?.course?.category ?? "N/A"}
+          Category: {course?.category ?? "N/A"}
         </p>
 
         <div className="mt-12 w-full flex justify-between px-12">

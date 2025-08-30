@@ -1,9 +1,17 @@
 import React from "react";
 import { Sprout } from "lucide-react";
-import { Certificate } from "@/types/course";
+import { Certificate } from "@/types/certificate";
+
+// Extend Certificate type locally for UI relations
+interface CertificateWithRelations extends Certificate {
+  enrollment?: {
+    student?: { firstName?: string };
+    course?: { title?: string };
+  };
+}
 
 interface Props {
-  certificate: Certificate;
+  certificate: CertificateWithRelations;
 }
 
 export function HerbalCertificate({ certificate }: Props) {

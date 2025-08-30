@@ -13,11 +13,13 @@ interface Props {
 }
 
 export function CertificateLayout({ certificateId, title, token, children }: Props) {
+  // Use window.print for print, but recommend using react-to-print for more control in future
   const handlePrint = () => window.print();
 
   const handleDownload = async () => {
     try {
-      const blob = await certificatesApi.download(certificateId, token);
+      // certificatesApi.download only takes id, token is handled internally
+      const blob = await certificatesApi.download(certificateId);
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -26,21 +28,28 @@ export function CertificateLayout({ certificateId, title, token, children }: Pro
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-    } catch {
+    } catch (err) {
+      // eslint-disable-next-line no-alert
       alert("Failed to download certificate PDF.");
     }
   };
 
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: `${title} Certificate`,
-        text: "Check out my certificate!",
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert("Certificate link copied to clipboard!");
+  const handleShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `${title} Certificate`,
+          text: "Check out my certificate!",
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        // eslint-disable-next-line no-alert
+        alert("Certificate link copied to clipboard!");
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-alert
+      alert("Failed to share certificate link.");
     }
   };
 
