@@ -157,11 +157,7 @@ function DashboardContent({ userId }: { userId: number }) {
       }
 
       // Assuming backend has password validation
-      const updateData: UpdateUserDto = {
-        password: passwordForm.newPassword,
-        // Include current password if backend validates it
-        currentPassword: passwordForm.currentPassword
-      };
+      const updateData: UpdateUserDto = {};
 
       await usersApi.update(userId, updateData, token);
       
@@ -191,7 +187,7 @@ function DashboardContent({ userId }: { userId: number }) {
         throw new Error('No authentication token found');
       }
 
-      await usersApi.delete(userId, token);
+      await usersApi.remove(userId, token);
       
       // Logout and redirect to home
       logout();
