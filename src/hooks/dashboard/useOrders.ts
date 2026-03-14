@@ -1,4 +1,3 @@
-// hooks/useUserOrders.ts
 import { useState, useEffect, useCallback } from 'react';
 import { productOrdersApi } from '@/lib/API/products';
 import { useAuth } from '../useAuth';
@@ -15,7 +14,6 @@ export function useUserOrders() {
     if (!token || !user?.id) return;
     setLoading(true);
     setError(null);
-
     try {
       const data = await productOrdersApi.getByUserId(user.id, token);
       setOrders(data);
