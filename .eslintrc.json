@@ -1,0 +1,32 @@
+{
+  "root": true,
+  "extends": [
+    "next",
+    "next/core-web-vitals",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:react/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2023,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "plugins": ["@typescript-eslint", "react"],
+  "rules": {
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "react/no-unescaped-entities": "off",
+    // Aturan tambahan yang masih dijaga
+    "react/prop-types": "off",
+    "react/react-in-jsx-scope": "off",
+    "no-console": "warn"
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    ".next/",
+    "dist/"
+  ]
+}
